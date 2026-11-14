@@ -151,8 +151,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # Windows PowerShell turns a native command's stderr into a terminating
+          # error under 'Stop'; check exit codes explicitly instead.
+          $ErrorActionPreference = 'Continue'
           $tag = "v" + (Get-Content package.json -Raw | ConvertFrom-Json).version
-          gh release view $tag 2>$null
+          gh release view $tag *> $null
           if ($LASTEXITCODE -eq 0) { "Release $tag already exists; skipping."; exit 0 }
           $installer = Get-ChildItem -LiteralPath release -Filter 'Vibe-Crypto-*-x64.exe' |
             Sort-Object LastWriteTime -Descending | Select-Object -First 1
