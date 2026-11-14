@@ -34,9 +34,20 @@ def _loader_with_rows(n: int):
     return _L
 
 
+def _load(raw):
+    out = json.loads(raw)
+    # Results over TOOL_RESULT_LIMIT are spooled to a file and replaced by a
+    # receipt; read the full payload back so the cap logic is still checked.
+    if "_result_file" in out:
+        with open(out["_result_file"]["path"], encoding="utf-8") as fh:
+            out = json.load(fh)
+        out.pop("_result_file", None)
+    return out
+
+
 def _call(monkeypatch, n, **kw):
     monkeypatch.setattr(mcp_server, "_get_loader", lambda src: _loader_with_rows(n))
-    return json.loads(_gmd(codes=["X.US"], start_date="2025-01-01", end_date="2026-01-01", source="yfinance", **kw))
+    return _load(_gmd(codes=["X.US"], start_date="2025-01-01", end_date="2026-01-01", source="yfinance", **kw))
 
 
 def test_oversized_symbol_is_capped_with_metadata(monkeypatch):
@@ -108,7 +119,7 @@ def test_multi_symbol_capped_independently(monkeypatch):
             return {"BIG.US": _frame(big), "SMALL.US": _frame(small)}
 
     monkeypatch.setattr(mcp_server, "_get_loader", lambda src: _Multi)
-    out = json.loads(
+    out = _load(
         _gmd(
             codes=["BIG.US", "SMALL.US"],
             start_date="2025-01-01",

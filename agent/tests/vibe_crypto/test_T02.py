@@ -168,6 +168,11 @@ def test_no_route_lives_under_auth_prefix() -> None:
 @pytest.mark.parametrize("method", ["GET", "POST", "PUT", "DELETE"])
 def test_sse_ticket_endpoint_is_gone(method: str) -> None:
     response = local_client().request(method, "/auth/sse-ticket")
+    if method == "GET" and response.status_code == 200:
+        # Another test may have mounted the built SPA at "/", which answers
+        # unknown GETs with index.html. That is not an auth endpoint.
+        assert response.headers["content-type"].startswith("text/html")
+        return
     assert response.status_code in {404, 405}
 
 

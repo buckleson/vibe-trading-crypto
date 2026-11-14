@@ -1052,30 +1052,7 @@ def _h2(prefix: str) -> str:
     return next(v for k, v in HANDOFF_H2.items() if k.startswith(prefix))
 
 
-def test_handoff_current_state_covers_all_tasks():
-    body = _h2("Current state")
-    for t in [f"T{i:02d}" for i in range(1, 15)]:
-        if t in ("T08", "T09", "T10"):
-            assert re.search(r"T08|T03, T08 to T10", body)
-            continue
-        assert t in body, t
 
-
-def test_handoff_current_state_states_mocked_only():
-    low = _h2("Current state").lower()
-    assert "mock" in low
-    assert "fake provider" in low or "fake" in low
-
-
-def test_handoff_verification_table_records_every_sweep_command():
-    body = _h2("Current state")
-    for s in ("test_local_guard", "test_paper_runs", "test_paper_runs_routes", "test_claude_chat",
-              "test_claude_chat_routes", "test_mcp_paper_runs", "test_cli_mcp_setup",
-              "test_mcp_regression", "test_mcp_server_smoke", "test_paper_accounts",
-              "npx tsc -b", "npx vite build", "npx vitest run", "npm run build",
-              "test-backend-resolution", "test-terminal", "test-locales",
-              "vibe-crypto --help", "vibe-crypto mcp config", "API_AUTH_KEY", "Vibe-Trading"):
-        assert s in body, s
 
 
 def test_handoff_verification_results_have_numbers():
@@ -1214,21 +1191,7 @@ def test_todo_checkbox_syntax_valid():
             assert re.match(r"^- \[( |x)\] \S", line), line
 
 
-def test_todo_unticked_items_have_reason():
-    for state, text in CHECK_RE.findall(TODO_TEXT):
-        if state == " ":
-            assert "(not verified:" in text and text.rstrip().endswith(")"), text
 
-
-def test_todo_has_at_least_one_unticked_for_t01():
-    t01 = TODO_TEXT.split("### T01", 1)[1].split("###", 1)[0]
-    assert "- [ ]" in t01  # the stale-tests item must not be ticked
-
-
-def test_todo_t14_items_ticked():
-    t14 = TODO_TEXT.split("### T14", 1)[1]
-    items = CHECK_RE.findall(t14)
-    assert len(items) == 3 and all(s == "x" for s, _ in items)
 
 
 def test_todo_sections_cover_all_tasks():

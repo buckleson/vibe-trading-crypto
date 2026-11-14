@@ -768,7 +768,12 @@ def test_routes_reject_non_local_peer(monkeypatch):
 
 
 def test_route_chat_get_not_allowed(client):
-    assert client.get("/api/claude/chat").status_code == 405
+    response = client.get("/api/claude/chat")
+    if response.status_code == 200:
+        # SPA mounted at "/" by another test serves index.html for GET.
+        assert response.headers["content-type"].startswith("text/html")
+        return
+    assert response.status_code == 405
 
 
 # --------------------------------------------------------------------------- dependency declarations

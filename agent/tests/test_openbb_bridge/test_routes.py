@@ -121,44 +121,13 @@ def test_query_reports_when_runtime_unavailable(
     assert "not enabled" in response.text
 
 
-def test_remote_query_requires_api_key_when_key_unset(fake_adapter: None):
-    """Keyless dev mode must not expose the agent registry to the network."""
+def test_remote_query_is_rejected(fake_adapter: None):
+    """App auth was removed (local single-user app); the local guard must still
+    keep the agent registry off the network."""
     response = _remote_client().post("/v1/query", json=_query_body())
 
     assert response.status_code == 403
-    assert "API_AUTH_KEY" in response.json()["detail"]
-
-
-def test_query_rejects_missing_or_wrong_bearer_when_key_configured(
-    monkeypatch: pytest.MonkeyPatch, fake_adapter: None
-):
-    monkeypatch.setenv("API_AUTH_KEY", "secret")
-    monkeypatch.setattr(api_server, "_API_KEY", "secret")
-
-    for client in (_local_client(), _remote_client()):
-        assert client.post("/v1/query", json=_query_body()).status_code == 401
-        wrong = client.post(
-            "/v1/query",
-            json=_query_body(),
-            headers={"Authorization": "Bearer nope"},
-        )
-        assert wrong.status_code == 401
-
-
-def test_query_accepts_valid_bearer_when_key_configured(
-    monkeypatch: pytest.MonkeyPatch, fake_adapter: None
-):
-    monkeypatch.setenv("API_AUTH_KEY", "secret")
-    monkeypatch.setattr(api_server, "_API_KEY", "secret")
-
-    response = _remote_client().post(
-        "/v1/query",
-        json=_query_body(),
-        headers={"Authorization": "Bearer secret"},
-    )
-
-    assert response.status_code == 200
-    assert "hello from vibe" in response.text
+    assert "this computer" in response.json()["detail"]
 
 
 def test_query_rejects_cross_site_browser_post(fake_adapter: None):
