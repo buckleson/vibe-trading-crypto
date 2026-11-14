@@ -18,9 +18,7 @@ import inspect
 import os
 import re
 import stat
-import sys
 from pathlib import Path
-from types import SimpleNamespace
 from unittest import mock
 
 import pytest
@@ -552,11 +550,16 @@ def _serve(argv: list[str]) -> None:
     def fake_run(*args, **kwargs):
         raise SystemExit(0)
 
+    # serve_main mounts the built SPA on the shared app; undo it so later tests
+    # (e.g. 405 checks on POST-only routes) see the plain API routes.
+    routes = list(api_server.app.router.routes)
     with mock.patch("uvicorn.run", fake_run):
         try:
             api_server.serve_main(argv)
         except SystemExit:
             pass
+        finally:
+            api_server.app.router.routes[:] = routes
 
 
 EXPECTED_WARN = (

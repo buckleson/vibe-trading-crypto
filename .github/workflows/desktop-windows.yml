@@ -1,84 +1,25 @@
-name: Desktop
+name: Desktop (Windows)
 
+# The only build workflow. It builds the unsigned Windows NSIS installer for
+# Vibe Crypto and uploads it, with SHA256SUMS.txt and a zip of win-unpacked,
+# as a downloadable workflow artifact. Tests live in test.yml.
 on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - ".github/workflows/desktop.yml"
-      - "agent/**"
-      - "desktop/electron/**"
-      - "frontend/**"
-      - "pyproject.toml"
-  pull_request:
-    paths:
-      - ".github/workflows/desktop.yml"
-      - "agent/**"
-      - "desktop/electron/**"
-      - "frontend/**"
-      - "pyproject.toml"
 
 permissions:
   contents: read
 
-# `npm ci` runs a security audit after installing and blocks on the response.
-# npmjs.com's advisory endpoint is currently answering 503 (it prints "This
-# endpoint is being retired"), so npm retries it: on 2026-09-04 that turned a
-# 4s install into a 6m one and timed the CI job out mid-install. Measured on one
-# machine, one lock file, one warm cache:
-#
-#   npm ci                                    61s
-#   npm ci --no-audit --no-fund                4s
-#   NPM_CONFIG_AUDIT=false NPM_CONFIG_FUND=false npm ci    4s
-#
-# Nothing is lost. `npm ci` exits 0 whatever the audit says (verified directly),
-# the endpoint returns no advisories at all right now, and Dependabot already
-# watches this same tree — it is what reported the 7 open npm alerts. This is CI
-# only; a developer's `npm ci` still audits when the endpoint recovers.
+# `npm ci` runs a security audit after installing and can block for minutes
+# when the npm advisory endpoint is slow. CI only; local installs still audit.
 env:
   NPM_CONFIG_AUDIT: "false"
   NPM_CONFIG_FUND: "false"
 
 jobs:
-  checks:
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    env:
-      ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: "22"
-          cache: npm
-          cache-dependency-path: desktop/electron/package-lock.json
-
-      - name: Install desktop dependencies
-        working-directory: desktop/electron
-        run: npm ci
-
-      - name: Build desktop shell
-        working-directory: desktop/electron
-        run: npm run build
-
-      - name: Backend resolution tests
-        working-directory: desktop/electron
-        run: node scripts/test-backend-resolution.mjs
-
-      - name: Locale tests
-        working-directory: desktop/electron
-        run: node scripts/test-locales.mjs
-
-      - name: Terminal tests
-        working-directory: desktop/electron
-        run: node scripts/test-terminal.mjs
-
   package:
+    name: Windows installer
     # GTK is extracted as a checksum-pinned archive rather than executed as a
     # legacy NSIS installer, so packaging can run on the current Windows image.
     runs-on: windows-2025
@@ -90,6 +31,7 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
+          architecture: x64
           cache: pip
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -109,6 +51,20 @@ jobs:
       - name: Install desktop dependencies
         working-directory: desktop/electron
         run: npm ci
+
+      - name: Rebuild node-pty for Electron
+        # The embedded terminal uses node-pty, a native module. Rebuild it
+        # against the Electron ABI so the packaged app can load it.
+        working-directory: desktop/electron
+        run: npm run rebuild:native
+
+      - name: Platform-neutral desktop tests
+        working-directory: desktop/electron
+        run: |
+          npm run build
+          node scripts/test-backend-resolution.mjs
+          node scripts/test-locales.mjs
+          node scripts/test-terminal.mjs
 
       - name: Verify dormant update rejection and recovery policy
         working-directory: desktop/electron
@@ -141,6 +97,7 @@ jobs:
         # runtime:win starts Windows PowerShell. Keep its parent in the same
         # edition: inheriting pwsh's module path through npm hid Get-FileHash
         # on windows-2025 even though the direct runtime build above succeeded.
+        # build-review-installer.mjs writes release\SHA256SUMS.txt.
         shell: powershell
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
@@ -155,7 +112,7 @@ jobs:
           ).Path
           node scripts/smoke-parent-death.mjs
 
-      - name: Verify installer and record checksum
+      - name: Verify installer, record checksum and zip win-unpacked
         working-directory: desktop/electron
         shell: powershell
         run: |
@@ -165,9 +122,21 @@ jobs:
           if (-not $installer) { throw 'Installer not found' }
           $hash = (Get-FileHash -LiteralPath $installer.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
           "$hash  $($installer.Name)" | Set-Content -LiteralPath release\SHA256SUMS.txt -Encoding ascii
-          "### Unsigned Windows packaging check" | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+          Compress-Archive -Path 'release\win-unpacked\*' -DestinationPath 'release\Vibe-Crypto-win-unpacked-x64.zip' -Force
+          "### Unsigned Windows build" | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
           "" | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
           "- File: ``$($installer.Name)``" | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
           "- SHA-256: ``$hash``" | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
-          "- Status: built for review only; not uploaded or published" |
+          "- Download it from this run's Artifacts section (vibe-crypto-windows)." |
             Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+
+      - name: Upload installer
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: vibe-crypto-windows
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            desktop/electron/release/Vibe-Crypto-*-x64.exe
+            desktop/electron/release/SHA256SUMS.txt
+            desktop/electron/release/Vibe-Crypto-win-unpacked-x64.zip

@@ -7,11 +7,11 @@ from __future__ import annotations
 
 import importlib.metadata
 import importlib.util
-import os
 import sys
 from pathlib import Path
 from typing import Any, AsyncIterator
 
+from src.config.accessor import get_env_value
 from src.config.paths import get_runtime_root
 
 SERVER_NAME = "vibe-crypto"
@@ -62,7 +62,7 @@ def build_options(session_id: str | None, model: str | None):
         include_partial_messages=True,
         resume=session_id or None,
         max_turns=30,
-        model=model or os.environ.get("VIBE_CRYPTO_CLAUDE_MODEL") or None,
+        model=model or get_env_value("VIBE_CRYPTO_CLAUDE_MODEL") or None,
         cwd=str(cwd),
     )
 
@@ -79,7 +79,7 @@ def claude_status() -> dict:
             version = None
     else:
         error = _NOT_AVAILABLE
-    if os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"):
+    if get_env_value("ANTHROPIC_API_KEY") or get_env_value("ANTHROPIC_AUTH_TOKEN"):
         auth = "api_key"
     elif (Path.home() / ".claude").exists():
         auth = "claude_login"
@@ -89,7 +89,7 @@ def claude_status() -> dict:
         "available": available,
         "sdk_version": version,
         "auth": auth,
-        "model": os.environ.get("VIBE_CRYPTO_CLAUDE_MODEL") or None,
+        "model": get_env_value("VIBE_CRYPTO_CLAUDE_MODEL") or None,
         "error": error,
     }
 

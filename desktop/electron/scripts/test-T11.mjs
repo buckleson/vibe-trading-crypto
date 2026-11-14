@@ -780,16 +780,22 @@ try {
 
   // ------------------------------------------------------------ CI / docs
   await check("ci.desktop-workflow", async () => {
-    const wf = await readFile(path.join(repoRoot, ".github", "workflows", "desktop.yml"), "utf8");
-    assert.ok(!existsSync(path.join(repoRoot, ".github", "workflows", "desktop-windows.yml")), "old workflow removed");
-    assert.match(wf, /os: \[ubuntu-latest, macos-latest, windows-latest\]/u);
+    // Windows is the only build target in CI; platform-neutral checks run on Linux in test.yml.
+    const wf = await readFile(path.join(repoRoot, ".github", "workflows", "desktop-windows.yml"), "utf8");
+    assert.ok(!existsSync(path.join(repoRoot, ".github", "workflows", "desktop.yml")), "matrix workflow removed");
     assert.match(wf, /node-version: "22"/u);
-    for (const cmd of ["npm ci", "npm run build", "node scripts/test-backend-resolution.mjs", "node scripts/test-locales.mjs", "node scripts/test-terminal.mjs"]) {
+    for (const cmd of ["npm ci", "npm run build", "npm run rebuild:native", "node scripts/test-backend-resolution.mjs", "node scripts/test-locales.mjs", "node scripts/test-terminal.mjs"]) {
       assert.ok(wf.includes(cmd), cmd);
     }
-    assert.match(wf, /\n {2}package:\n/u, "separate Windows packaging job");
+    assert.match(wf, /\n {2}package:\n/u, "Windows packaging job");
     assert.match(wf, /runs-on: windows-/u);
+    assert.doesNotMatch(wf, /runs-on: (ubuntu|macos)-/u);
     assert.match(wf, /installer:win:review/u);
+    assert.match(wf, /actions\/upload-artifact@[0-9a-f]{40}/u);
+    const tests = await readFile(path.join(repoRoot, ".github", "workflows", "test.yml"), "utf8");
+    for (const cmd of ["node scripts/test-backend-resolution.mjs", "node scripts/test-locales.mjs", "node scripts/test-terminal.mjs"]) {
+      assert.ok(tests.includes(cmd), `test.yml runs ${cmd}`);
+    }
   });
   await check("docs.readme", async () => {
     const r = await readFile(path.join(electronRoot, "README.md"), "utf8");

@@ -184,8 +184,8 @@ export function PaperRunDetail({ runId, onRun, onDeleted }: {
       )}
 
       <Card>
-        <CardBody className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
-          <Stat label={t("paper.equity", { defaultValue: "Equity" })} value={<span className="text-[32px] font-semibold tabular-nums">{s ? formatNumber(s.equity) : "n/a"}</span>} />
+        <CardBody className="grid grid-cols-2 gap-4 md:grid-cols-3">
+          <Stat className="col-span-2 md:col-span-1" label={t("paper.equity", { defaultValue: "Equity" })} value={<span className="text-[32px] font-semibold tabular-nums">{s ? formatNumber(s.equity) : "n/a"}</span>} />
           <Stat label={t("paper.pnl", { defaultValue: "P&L" })} value={s ? formatSigned(s.pnl) : "n/a"} tone={tone(s?.pnl)} />
           <Stat label={t("paper.return", { defaultValue: "Return" })} value={s ? formatPercent(s.total_return, true) : "n/a"} tone={tone(s?.total_return)} />
           <Stat label={t("paper.maxDrawdown", { defaultValue: "Max drawdown" })} value={s ? formatPercent(s.max_drawdown) : "n/a"} />
@@ -205,8 +205,8 @@ export function PaperRunDetail({ runId, onRun, onDeleted }: {
         </CardBody>
       </Card>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(220px,1fr)_2fr]">
-        <Card>
+      <div className="grid gap-4 xl:grid-cols-[minmax(220px,1fr)_minmax(0,2fr)]">
+        <Card className="min-w-0">
           <CardHeader title={t("paper.positions", { defaultValue: "Positions" })} />
           <CardBody>
             {positions.length === 0 ? (
@@ -231,7 +231,7 @@ export function PaperRunDetail({ runId, onRun, onDeleted }: {
             )}
           </CardBody>
         </Card>
-        <Card>
+        <Card className="min-w-0">
           <CardHeader title={t("paper.tradeHistory", { defaultValue: "Trade history" })} />
           <CardBody className="space-y-3">
             {trades.length === 0 ? (

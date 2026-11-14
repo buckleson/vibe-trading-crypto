@@ -218,6 +218,7 @@ def test_old_mcp_command_only_as_legacy_alias():
         and h[0] not in {
             "desktop/electron/src/backend-manager.ts",
             "desktop/electron/scripts/test-backend-resolution.mjs",
+            "desktop/electron/scripts/test-T11.mjs",
         }
     ]
     assert not bad, _fmt(bad)
@@ -266,7 +267,13 @@ def test_no_internal_identifier_was_renamed_to_a_crypto_variant():
         r"VIBE_CRYPTO_|vibe_crypto_api_auth_key|\.vibe-crypto\b|X-Vibe-Crypto-|"
         r"vibe-crypto-analysis|[\"'`]vibe-crypto:[a-z]|\bvibe_crypto\b(?!\.egg)"
     )
-    bad = _hits(pattern)
+    bad = [
+        h for h in _hits(pattern)
+        # New in T06 (not a rename): the Claude chat model override.
+        if "VIBE_CRYPTO_CLAUDE_MODEL" not in h[2]
+        # T11 test check id, not an identifier.
+        and not (h[0] == "desktop/electron/scripts/test-T11.mjs" and "names.vibe-crypto-first" in h[2])
+    ]
     assert not bad, _fmt(bad)
 
 
@@ -384,7 +391,9 @@ def test_pyproject_version_unchanged(pyproject):
 
 def test_pyproject_dependencies_untouched_by_rebrand(pyproject):
     base = tomllib.loads(_baseline("pyproject.toml"))
-    assert pyproject["project"]["dependencies"] == base["project"]["dependencies"]
+    # T06 adds claude-agent-sdk (ADR 0003); everything else is unchanged.
+    deps = [d for d in pyproject["project"]["dependencies"] if not d.startswith("claude-agent-sdk")]
+    assert deps == base["project"]["dependencies"]
     assert pyproject["project"].get("optional-dependencies") == base["project"].get("optional-dependencies")
 
 
@@ -536,7 +545,9 @@ def test_mcp_tool_names_unchanged_from_baseline():
     now = _decorated_tool_names((AGENT / "mcp_server.py").read_text(encoding="utf-8"))
     base = _decorated_tool_names(_baseline("agent/mcp_server.py"))
     assert base, "baseline parse found no tools"
-    assert now == base, {"removed": sorted(base - now), "added": sorted(now - base)}
+    # T07 adds the paper run tools; nothing upstream is renamed or removed.
+    added = {"paper_run_list", "paper_run_start", "paper_run_status", "paper_run_stop"}
+    assert now == base | added, {"removed": sorted(base - now), "added": sorted(now - base)}
 
 
 def test_fastapi_title_is_branded():
@@ -651,6 +662,13 @@ def _baseline_matches(regex: str, scopes=_ID_SCOPES) -> dict[str, set[str]]:
     return result
 
 
+# Identifiers deleted on purpose by T02 (app auth removed, ADR 0002), not renamed.
+_REMOVED_BY_T02 = {
+    "VIBE_TRADING_API_KEY", "vibe_trading_api_key", "vibe_trading_api_key_only",
+    "vibe_trading_api_auth_key",
+}
+
+
 @pytest.mark.parametrize(
     "regex",
     [
@@ -668,7 +686,7 @@ def test_internal_identifiers_survive_in_every_file(regex):
     pat = re.compile(regex)
     for rel, base_ids in _baseline_matches(regex).items():
         now = set(pat.findall((REPO / rel).read_text(encoding="utf-8", errors="replace")))
-        lost = base_ids - now
+        lost = base_ids - now - _REMOVED_BY_T02
         if lost:
             missing.append(f"{rel}: {sorted(lost)}")
     assert not missing, "internal identifiers renamed or dropped:\n" + "\n".join(missing[:40])
@@ -681,15 +699,16 @@ def test_frontend_storage_keys_unchanged():
     for rel, _ in _baseline_matches(regex, scopes=("frontend/src",)).items():
         base = {a or b for a, b in pat.findall(_git("show", f"{BASELINE_REF}:{rel}") or "")}
         now = {a or b for a, b in pat.findall((REPO / rel).read_text(encoding="utf-8"))}
-        if base - now:
-            lost.append(f"{rel}: {sorted(base - now)}")
+        if base - now - _REMOVED_BY_T02:
+            lost.append(f"{rel}: {sorted(base - now - _REMOVED_BY_T02)}")
     assert not lost, lost
 
 
-def test_api_auth_storage_key_value_unchanged():
-    hits = _hits(re.compile(r"[\"']vibe_trading_api_auth_key[\"']"),
+def test_api_auth_storage_key_not_renamed():
+    # T02 removed app auth; the old key may survive only in tests, never renamed.
+    hits = _hits(re.compile(r"[\"']vibe_crypto_api_auth_key[\"']"),
                  files=[f for f in _repo_text_files() if f.startswith("frontend/src/")])
-    assert hits, "auth key storage name vanished or was renamed"
+    assert not hits, _fmt(hits)
 
 
 # --------------------------------------------------------------------------- #
@@ -819,13 +838,13 @@ def test_eleven_frontend_locales_present():
 def test_locale_keys_unchanged_and_values_rebranded(name):
     now = _flatten(json.loads((LOCALE_DIR / name).read_text(encoding="utf-8")))
     base = _flatten(json.loads(_baseline(f"frontend/src/i18n/locales/{name}")))
-    assert set(now) == set(base), "rebrand must never touch keys"
+    # Keys changed with the T03 to T13 redesigns; only values are checked here.
     for key, value in now.items():
         if not isinstance(value, str):
             continue
         assert not OLD_BRAND.search(value.replace("X-Vibe-Trading-Auth", "")), (key, value)
         assert "vibetrading.wiki" not in value, key
-        if isinstance(base[key], str) and OLD_BRAND.search(base[key].replace("X-Vibe-Trading-Auth", "")):
+        if isinstance(base.get(key), str) and OLD_BRAND.search(base[key].replace("X-Vibe-Trading-Auth", "")):
             assert "Vibe Crypto" in value, f"{key}: brand dropped instead of renamed"
     assert "Vibe Crypto" in now["layout.sidebar"]
 
@@ -902,7 +921,7 @@ def test_electron_artifact_name_matches_installer_filters(electron_pkg):
         js_re = m.group(1)
         assert re.fullmatch(js_re, art), (script, js_re, art)
         assert not re.fullmatch(js_re, art.replace("Vibe-Crypto", "Vibe-Trading"))
-    wf = (REPO / ".github" / "workflows" / "desktop.yml").read_text(encoding="utf-8")
+    wf = (REPO / ".github" / "workflows" / "desktop-windows.yml").read_text(encoding="utf-8")
     filt = re.search(r"-Filter '([^']+)'", wf)
     assert filt
     import fnmatch

@@ -366,8 +366,8 @@ matrix row records a declaration; attach separate evidence for runtime claims.
 
 ### Public-source health lane
 
-The **Public loader health** workflow runs weekly (Monday 04:17 UTC) and can
-be dispatched manually. It is separate from offline PR tests. To reproduce:
+The public loader health check is a manual lane (there is no scheduled
+workflow in this fork). It is separate from offline PR tests. To run it:
 
 ```bash
 python3.11 -m venv /tmp/vibe-loader-health-venv
@@ -385,8 +385,7 @@ local-file loader and retired mootdx source are explicitly excluded with a
 reason; mootdx remains available through explicit source selection. Adding a public loader requires updating the
 canary catalog, enforced by the offline test suite. Probes bypass the loader
 cache and run with a temporary home and no inherited credentials. Each source
-has a 120-second total subprocess deadline, including two attempts, and the
-workflow has its own job deadline. Reports contain only source identifiers and
+has a 120-second total subprocess deadline, including two attempts. Reports contain only source identifiers and
 validation metadata, never returned bars, raw exceptions, or account settings.
 
 Missing dependencies, unavailable endpoints, connection failures, malformed

@@ -133,7 +133,7 @@ Comprehensive knowledge base covering:
 
 Use `load_skill(name)` to access full methodology docs with code templates.
 
-## Available MCP Tools (83)
+## Available MCP Tools (87)
 
 | Tool | Description | API Key |
 |------|-------------|---------|
@@ -185,6 +185,10 @@ Use `load_skill(name)` to access full methodology docs with code templates.
 | `read_file` | Read file contents | None |
 | `read_run_artifact` | Structured run-artifact reads (rows / downsample / meta) | None |
 | `list_backtest_runs` | Discover earlier backtest runs (paged, per session or all) and their `run_dir`s | None |
+| `paper_run_list` | List forward paper runs of backtested strategies (no real orders) | None |
+| `paper_run_start` | Start a paper run from a finished backtest run; counts only from the next bar | None* |
+| `paper_run_status` | Paper run summary, positions, recent trades and equity curve | None* |
+| `paper_run_stop` | Stop a paper run and freeze its results | None |
 | `list_strategies` | Browse discoverable strategies (Alpha Zoo + SDM store) | None |
 | `query_strategies` | Evidence-gated query: regime / Sharpe / quality / cost filters | None |
 | `get_strategy_evidence` | Per-regime evidence rows for one strategy | None |

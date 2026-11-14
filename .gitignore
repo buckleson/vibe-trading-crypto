@@ -121,7 +121,8 @@ data/parquet/
 data/backup/
 
 # Internal docs (plans, specs)
-docs/
+/docs/*
+!docs/vibe-crypto/
 docs/screenshots/agent-run.png
 docs/screenshots/boot.png
 data/minutes/
@@ -177,6 +178,8 @@ agent/tests/artifacts/
 
 # Local simulated account ledgers
 /paper-trading/
+/paper-runs/
+/claude-chat/
 
 # Runtime background command previews and restart outcomes
 /background-tasks/

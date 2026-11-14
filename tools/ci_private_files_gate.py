@@ -24,6 +24,9 @@ PRIVATE_DOCUMENT_NAMES = frozenset({
     "notes.md",
 })
 
+# Fork documentation that is meant to be public (decisions, handoff, screenshots).
+PUBLIC_DOCS_PREFIX = ("docs", "vibe-crypto")
+
 
 def main(repo_root: Path | None = None) -> int:
     """Check the Git index for internal document paths.
@@ -52,6 +55,8 @@ def main(repo_root: Path | None = None) -> int:
             continue
         name = os.fsdecode(raw_path)
         path = PurePosixPath(name)
+        if path.parts[:2] == PUBLIC_DOCS_PREFIX and path.name.casefold() not in PRIVATE_DOCUMENT_NAMES:
+            continue
         if path.parts[0].casefold() == "docs" or path.name.casefold() in PRIVATE_DOCUMENT_NAMES:
             forbidden.append(name)
 

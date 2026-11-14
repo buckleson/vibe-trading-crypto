@@ -75,6 +75,13 @@ export function Layout() {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
+  // Other pages (e.g. Settings "Open chat") ask for the dock with a vc:open-dock event.
+  useEffect(() => {
+    const onOpen = () => setDockOpen(true);
+    window.addEventListener("vc:open-dock", onOpen);
+    return () => window.removeEventListener("vc:open-dock", onOpen);
+  }, []);
+
   useEffect(() => {
     safeSet("qa-sidebar", collapsed ? "collapsed" : "expanded");
   }, [collapsed]);

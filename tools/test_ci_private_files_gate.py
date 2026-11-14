@@ -90,3 +90,19 @@ def test_untracking_keeps_local_content_and_clears_failure(repo: Path) -> None:
 def test_missing_git_repository_fails_closed(tmp_path: Path, capsys) -> None:
     assert main(tmp_path) == 2
     assert "check did not run" in capsys.readouterr().out
+
+
+def test_public_fork_docs_are_allowed(repo: Path) -> None:
+    path = repo / "docs/vibe-crypto/HANDOFF.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("public handoff", encoding="utf-8")
+    _git(repo, "add", "-f", "--", "docs/vibe-crypto/HANDOFF.md")
+    assert main(repo) == 0
+
+
+def test_private_names_inside_fork_docs_still_fail(repo: Path) -> None:
+    path = repo / "docs/vibe-crypto/NOTES.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("private", encoding="utf-8")
+    _git(repo, "add", "-f", "--", "docs/vibe-crypto/NOTES.md")
+    assert main(repo) == 1

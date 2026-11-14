@@ -47,6 +47,15 @@ export function AssistantDock({ open, onClose }: { open: boolean; onClose: () =>
     safeSet("vc-dock-tab", next);
   };
 
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      const want = (e as CustomEvent<{ tab?: string }>).detail?.tab;
+      if (want === "chat" || want === "terminal") selectTab(want);
+    };
+    window.addEventListener("vc:open-dock", onOpen);
+    return () => window.removeEventListener("vc:open-dock", onOpen);
+  }, []);
+
   if (!mounted) return null;
 
   const tabs = [

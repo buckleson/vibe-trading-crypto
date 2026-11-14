@@ -465,6 +465,14 @@ describe("T03 assistant dock in the layout", () => {
     expect(claudeToggle()).toHaveAttribute("aria-pressed", "false");
   });
 
+  it("opens on a vc:open-dock event (Settings Open chat)", async () => {
+    renderLayout();
+    expect(claudeToggle()).toHaveAttribute("aria-pressed", "false");
+    act(() => { window.dispatchEvent(new CustomEvent("vc:open-dock", { detail: { tab: "chat" } })); });
+    expect(claudeToggle()).toHaveAttribute("aria-pressed", "true");
+    expect(await screen.findByTestId("chat-body")).toBeInTheDocument();
+  });
+
   it("button toggles and persists 1/0", async () => {
     renderLayout();
     fireEvent.click(claudeToggle());

@@ -136,7 +136,7 @@ To use with OpenSpace, add both MCP servers to your agent config:
       "command": "openspace-mcp",
       "toolTimeout": 600,
       "env": {
-        "OPENSPACE_HOST_SKILL_DIRS": "/path/to/vibe-trading/agent/src/skills",
+        "OPENSPACE_HOST_SKILL_DIRS": "/path/to/vibe-trading-crypto/agent/src/skills",
         "OPENSPACE_WORKSPACE": "/path/to/OpenSpace"
       }
     },
