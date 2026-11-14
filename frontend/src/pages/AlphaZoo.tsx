@@ -14,7 +14,6 @@ import i18n from '@/i18n';
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import {
-  Layers,
   Search,
   Play,
   ArrowLeft,

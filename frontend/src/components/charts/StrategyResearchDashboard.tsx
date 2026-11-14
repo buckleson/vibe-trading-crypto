@@ -231,7 +231,7 @@ export function StrategyResearchDashboard({ run }: { run: RunData }) {
         <CardBody className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-xl font-semibold tracking-tight">{identity.title}</h2>
+              <h2 className="text-xl font-semibold">{identity.title}</h2>
               {identity.strategyInferred && <Badge tone="warning">{t("runDashboard.strategyInferred")}</Badge>}
             </div>
             <Badge>Run {run.run_id.slice(-8)}</Badge>

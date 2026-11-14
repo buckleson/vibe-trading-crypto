@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui";
 import {
   shannon, parseHoldings, finite, percent, styleFactors,
   type ShannonDiagnosis, type ShannonSnapshot, type StyleFactor,
@@ -96,11 +97,11 @@ export function ShannonPortfolio() {
         {text && !holdings && <p role="alert" className="mt-2 text-sm text-warning">{t("shannon.holdingsInvalid")}</p>}</div>
       <div className="flex flex-col items-start gap-3"><label htmlFor="shannon-date" className="text-sm font-medium">{t("shannon.dateLabel")}</label><input id="shannon-date" type="date" max={latest || undefined} value={date} onChange={e => { invalidate(); setDate(e.target.value); }} className="w-full rounded-lg border bg-background px-3 py-2 text-sm" />
         <p className="text-xs leading-relaxed text-muted-foreground">{date ? t("shannon.dateHint") : t("shannon.dateLatestHint")}{latest && <span className="block mt-1">{t("shannon.publishedThrough", { date: latest })}</span>}</p>
-        {latest && date !== latest && <button className="text-xs underline underline-offset-4" onClick={() => { invalidate(); setDate(latest); }}>{t("shannon.useLatest")}</button>}
-        <button onClick={diagnose} disabled={loading || !holdings || !configured} className="mt-auto inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50">{loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}{loading ? t("shannon.analyzing") : t("shannon.analyze")}</button>
+        {latest && date !== latest && <Button variant="ghost" size="sm" className="h-auto px-0 py-0 text-xs underline underline-offset-4 hover:bg-transparent" onClick={() => { invalidate(); setDate(latest); }}>{t("shannon.useLatest")}</Button>}
+        <Button variant="primary" onClick={diagnose} disabled={loading || !holdings || !configured} className="mt-auto">{loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}{loading ? t("shannon.analyzing") : t("shannon.analyze")}</Button>
       </div>
     </div>}
-    {catalogError && <p role="alert" className="text-sm text-warning">{catalogError} <button onClick={() => void loadCatalog()} className="underline">{t("shannon.retry")}</button></p>}
+    {catalogError && <p role="alert" className="text-sm text-warning">{catalogError} <Button variant="ghost" size="sm" className="h-auto px-0 py-0 align-baseline text-sm underline underline-offset-4 hover:bg-transparent" onClick={() => void loadCatalog()}>{t("shannon.retry")}</Button></p>}
     {error && <p role="alert" className="rounded-lg border border-danger/30 p-4 text-sm text-danger">{error}</p>}
     {analysis && <>
       <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground" role="status"><span>{t("shannon.analysisDate", { date: effective })}</span><span>{t("shannon.included", { included, requested })}</span><span>{analysis.weight_assumption === "equal" ? t("shannon.equalWeight") : t("shannon.enteredWeights")}</span>{analysis.meta?.risk_as_of && <span>{t("shannon.riskDate", { date: analysis.meta.risk_as_of })}</span>}</div>

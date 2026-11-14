@@ -14,6 +14,53 @@ journal, and a strict backend shutdown result. They do not check a feed,
 download an artifact, launch an installer, or enable updates. See
 [UPDATE_SAFETY.md](UPDATE_SAFETY.md).
 
+## Platform support
+
+| Platform | Run (`npm start`) | Package | Backend |
+| --- | --- | --- | --- |
+| Windows x64 | yes | `npm run pack:win`, installer scripts | bundled Python runtime |
+| macOS (x64, arm64) | yes | `npm run pack:mac`, `npm run dist:mac` (dmg, zip) | `vibe-crypto` from PATH, source `.venv`, or `VIBE_TRADING_EXECUTABLE` |
+| Linux x64 | yes | `npm run pack:linux`, `npm run dist:linux` (AppImage, deb) | same as macOS |
+
+### Run from source on any OS
+
+Install the Python package once from the repository root (`pip install -e .`
+or `uv pip install -e .`, ideally in `.venv`), then:
+
+```
+cd desktop/electron
+npm install
+npm start
+```
+
+`npm start` builds the TypeScript and runs the Electron binary from
+`node_modules/electron`. `npm run prepare:electron` (download and verify the
+Electron archive for the current platform and architecture) is only needed for
+packaging. If the backend cannot be found, the loading screen explains how to
+install it.
+
+### Native module
+
+The terminal uses `node-pty`, a native module. Prebuilt binaries cover macOS
+and Windows. On Linux, or after changing the Electron version, run
+`npm run rebuild:native`; it needs Python 3, make and a C++ compiler
+(Xcode command line tools on macOS, Visual Studio Build Tools on Windows,
+`build-essential` on Debian and Ubuntu). If `node-pty` cannot load, the app
+still starts and the terminal tab reports the error.
+
+### Embedded Claude terminal
+
+The Terminal tab of the assistant dock runs your local `claude` CLI in a PTY
+(`npm install -g @anthropic-ai/claude-code` if it is missing). On start the app
+writes `<userData>/claude-mcp.json` with the Vibe Crypto MCP server and runs
+`claude --mcp-config <that file>` in your home directory. Your own Claude
+configuration is not modified. Check it with `npm run test:terminal`.
+
+### macOS builds are unsigned
+
+Unsigned builds are blocked by Gatekeeper on first launch: right-click the app
+and choose Open. Signing and notarization are not set up yet.
+
 ## What the shell does
 
 - Enforces a single desktop application instance.

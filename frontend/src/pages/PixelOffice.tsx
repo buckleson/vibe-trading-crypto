@@ -58,7 +58,7 @@ export function PixelOffice() {
               className={cn("pixel-desk rounded-lg border p-4 text-start", agentId === agent.id ? "border-primary ring-2 ring-primary/30" : "border-border")}>
               <div className="flex items-start justify-between gap-3">
                 <div className="pixel-character" style={{ "--pixel-color": agent.color } as CSSProperties} aria-hidden="true">
-                  <div className="pixel-character__shadow" /><div className="pixel-character__body">
+                  <div className="pixel-character__shadow" />{agent.load > 0 && <span className="pixel-character__typing">...</span>}<div className="pixel-character__body">
                     <span className="pixel-character__head" /><span className="pixel-character__torso" />
                     <span className="pixel-character__arm pixel-character__arm--left" /><span className="pixel-character__arm pixel-character__arm--right" />
                     <span className="pixel-character__leg pixel-character__leg--left" /><span className="pixel-character__leg pixel-character__leg--right" />

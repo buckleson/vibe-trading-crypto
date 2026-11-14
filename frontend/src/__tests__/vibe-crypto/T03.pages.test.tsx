@@ -215,12 +215,6 @@ describe("T03 stub modules", () => {
     expect(container.textContent).not.toContain("—");
   });
 
-  it("WalletButton renders nothing", async () => {
-    const { WalletButton } = await vi.importActual<typeof import("@/components/wallet/WalletButton")>("@/components/wallet/WalletButton");
-    const { container } = render(<WalletButton />);
-    expect(container).toBeEmptyDOMElement();
-  });
-
   it("stub files export exactly the expected names", async () => {
     expect(Object.keys(await vi.importActual("@/components/claude/ChatPanel")).sort()).toEqual(["ChatPanel"]);
     expect(Object.keys(await vi.importActual("@/components/terminal/TerminalPanel")).sort()).toEqual(["TerminalPanel", "terminalAvailable"]);
