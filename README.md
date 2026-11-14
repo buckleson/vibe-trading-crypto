@@ -66,7 +66,16 @@ There are three ways. All three reach the app through the same MCP server, so a 
    `vibe-crypto mcp install` does the same with absolute paths, so no active virtualenv is needed. `vibe-crypto mcp config` prints JSON for `claude --mcp-config`. Details: [docs/vibe-crypto/CLAUDE_CODE.md](docs/vibe-crypto/CLAUDE_CODE.md).
 3. **Desktop terminal.** In the desktop app, the Terminal tab of the assistant panel runs your local `claude` CLI with the MCP server already wired. Install the CLI with `npm install -g @anthropic-ai/claude-code` if it is missing.
 
-Claude can research, backtest and paper trade. It cannot place live orders.
+Claude can research, backtest and paper trade. By default Claude cannot place live orders; see Share with friends for the opt-in order tools.
+
+## Share with friends
+
+- Claude Code: `/plugin marketplace add buckleson/vibe-trading-crypto`, then `/plugin install vibe-crypto@vibe-crypto`. It adds `/vibe-crypto:connect-broker`, `:portfolio`, `:paper-run` and `:status`.
+- Claude Desktop: install the [Vibe Crypto extension](https://github.com/buckleson/vibe-trading-crypto/releases/latest/download/vibe-crypto-claude-desktop.mcpb).
+- Any stdio client, no clone: `uvx --python 3.12 --with keyring --from git+https://github.com/buckleson/vibe-trading-crypto vibe-crypto-mcp`.
+- ChatGPT: host your own server through an HTTPS tunnel or on Google Cloud Run, protected by `VIBE_CRYPTO_MCP_TOKEN`.
+- One copy per person: a server holds that person's broker keys, so nobody shares one.
+- Setup for every app, the broker list and the safety rules: [guides/share-with-friends.md](guides/share-with-friends.md).
 
 ## Paper trading
 
@@ -79,7 +88,7 @@ Claude can research, backtest and paper trade. It cannot place live orders.
 
 ## Broker connectors
 
-Live connectors are read-only by default for portfolio and account views. Placing live orders is gated by per-connection limits, a kill switch and an audit ledger, and is never available to Claude. See [guides/portfolio-and-brokers.md](guides/portfolio-and-brokers.md).
+Live connectors are read-only by default for portfolio and account views. Placing live orders is gated by per-connection limits, a kill switch and an audit ledger, and is off for Claude and MCP unless you opt in to the order tools. See [guides/portfolio-and-brokers.md](guides/portfolio-and-brokers.md).
 
 <!-- BEGIN GENERATED broker-capability-matrix -->
 
@@ -131,12 +140,13 @@ Yes indicates a declared capability. A dash means no matching profile is declare
 
 ## Security model
 
-- Vibe Crypto is a local, single-user app. There is no login, API key or token.
+- Vibe Crypto is a local, single-user app. There is no login or API key for the app. The only secret is the optional MCP server token below.
 - The API accepts requests only from this computer. Requests from other machines get a 403.
 - Cross-site browser requests and foreign Host headers are blocked, so a website you visit cannot drive the local API.
-- Live order placement is never exposed to Claude or the MCP server. Live connectors keep their own limits and confirmations.
+- Live order placement is off for Claude and the MCP server by default. The opt-in order tools (`--enable-order-tools` or `VIBE_CRYPTO_MCP_ENABLE_ORDERS=1`) still go through the mandate and the kill switch, and live connectors keep their own limits and confirmations.
+- The network MCP transports (`http` and `sse`) require `VIBE_CRYPTO_MCP_TOKEN` when they listen beyond loopback.
 - Shell tools are off unless you set `VIBE_TRADING_ENABLE_SHELL_TOOLS=1`.
-- Remote access (another computer, a phone, a LAN) is not supported. In Docker, publish the port on `127.0.0.1` and set `VIBE_TRADING_TRUST_DOCKER_LOOPBACK=1`.
+- Remote access to the app itself (another computer, a phone, a LAN) is not supported. Hosting the MCP server for ChatGPT is a separate, token-protected setup. In Docker, publish the port on `127.0.0.1` and set `VIBE_TRADING_TRUST_DOCKER_LOOPBACK=1`.
 
 The reasoning is in [docs/vibe-crypto/ADR/0002-remove-auth.md](docs/vibe-crypto/ADR/0002-remove-auth.md). To report a vulnerability, see [SECURITY.md](SECURITY.md).
 

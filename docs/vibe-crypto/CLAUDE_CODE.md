@@ -2,7 +2,24 @@
 
 ## What you get
 
-Claude Code drives Vibe Crypto through its MCP server: research, backtests, forward paper runs, and read-only portfolio and live account views. Claude can start a paper run from a backtest and check how it is doing. No live order placement is exposed.
+Claude Code drives Vibe Crypto through its MCP server: research, backtests, forward paper runs, and read-only portfolio and live account views. Claude can start a paper run from a backtest and check how it is doing. Order placement is off by default and opt-in (see Safety).
+
+## Install without cloning (plugin or uvx)
+
+Friends do not need a clone. Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then either use the plugin:
+
+```
+/plugin marketplace add buckleson/vibe-trading-crypto
+/plugin install vibe-crypto@vibe-crypto
+```
+
+or register the server directly:
+
+```
+claude mcp add vibe-crypto -- uvx --python 3.12 --with keyring --from git+https://github.com/buckleson/vibe-trading-crypto vibe-crypto-mcp
+```
+
+The plugin adds the commands `/vibe-crypto:connect-broker`, `:portfolio`, `:paper-run` and `:status`, and a `safe-trading` skill. Set `VIBE_CRYPTO_WITH` (for example `keyring,alpaca-py`) before starting Claude Code to add broker packages. Full guide: [guides/share-with-friends.md](../../guides/share-with-friends.md).
 
 ## Prerequisites
 
@@ -51,11 +68,12 @@ vibe-crypto-mcp --transport http --port 8900
 claude mcp add --transport http vibe-crypto http://127.0.0.1:8900/mcp
 ```
 
-The server binds to 127.0.0.1 by default and rejects foreign Host and Origin headers.
+The server binds to 127.0.0.1 by default and rejects foreign Host and Origin headers. To serve it beyond this computer, set `VIBE_CRYPTO_MCP_TOKEN` (or `--token`). Clients then send `Authorization: Bearer <token>` or use `https://<host>/<token>/mcp`. A non-loopback `--host` without a token is refused, and `--allowed-hosts` (or `VIBE_TRADING_MCP_ALLOWED_HOSTS`) sets the allowed Host names. See [guides/mcp.md](../../guides/mcp.md) and [guides/share-with-friends.md](../../guides/share-with-friends.md).
 
 ## Safety
 
-- Order placement is never exposed through MCP.
+- Order placement is off by default. `trading_place_order` and `trading_cancel_order` exist only when you start the server with `--enable-order-tools` or set `VIBE_CRYPTO_MCP_ENABLE_ORDERS=1` in the process environment.
+- Live orders still need a mandate you approve and pass the kill switch, even with the order tools on.
 - Shell tools (`bash`, `background_run`) are off unless you start the server with `--enable-shell-tools` or set `VIBE_TRADING_ENABLE_SHELL_TOOLS=1`.
 - Paper runs place no real orders.
 

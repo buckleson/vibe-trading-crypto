@@ -1,0 +1,25 @@
+{
+  "name": "vibe-crypto",
+  "owner": {
+    "name": "Vibe Crypto contributors",
+    "url": "https://github.com/buckleson/vibe-trading-crypto"
+  },
+  "metadata": {
+    "description": "Vibe Crypto for Claude Code: research, backtest, paper trade and use your own broker accounts.",
+    "version": "0.4.0"
+  },
+  "plugins": [
+    {
+      "name": "vibe-crypto",
+      "source": "./plugins/vibe-crypto",
+      "description": "Vibe Crypto MCP server (87 tools: market data, backtests, paper runs, 19 broker connectors) plus slash commands and a safe-trading skill.",
+      "version": "0.4.0",
+      "author": {"name": "Vibe Crypto contributors"},
+      "homepage": "https://github.com/buckleson/vibe-trading-crypto/blob/main/guides/share-with-friends.md",
+      "repository": "https://github.com/buckleson/vibe-trading-crypto",
+      "license": "MIT",
+      "keywords": ["trading", "crypto", "stocks", "brokers", "paper-trading", "backtesting", "mcp"],
+      "category": "finance"
+    }
+  ]
+}

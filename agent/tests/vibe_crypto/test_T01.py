@@ -271,6 +271,8 @@ def test_no_internal_identifier_was_renamed_to_a_crypto_variant():
         h for h in _hits(pattern)
         # New in T06 (not a rename): the Claude chat model override.
         if "VIBE_CRYPTO_CLAUDE_MODEL" not in h[2]
+        # New in ADR 0008 (sharing and remote MCP), not renames: MCP token, order opt-in, plugin extras.
+        and not re.search(r"VIBE_CRYPTO_(MCP|WITH)", h[2])
         # T11 test check id, not an identifier.
         and not (h[0] == "desktop/electron/scripts/test-T11.mjs" and "names.vibe-crypto-first" in h[2])
     ]
@@ -903,7 +905,12 @@ def test_electron_package_unchanged_fields(electron_pkg):
     # T11 added cross-platform scripts and made `start` independent of the Windows prepare step.
     base_scripts = {k: v for k, v in base["scripts"].items() if k != "start"}
     assert {k: electron_pkg["scripts"].get(k) for k in base_scripts} == base_scripts
-    assert electron_pkg["version"] == base["version"]
+    # bumped for releases (ADR 0008): must stay valid semver and not drop below the baseline.
+    def _semver(v):
+        m = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", v)
+        assert m, f"not semver: {v}"
+        return tuple(int(x) for x in m.groups())
+    assert _semver(electron_pkg["version"]) >= _semver(base["version"])
     assert electron_pkg["build"]["win"]["icon"] == base["build"]["win"]["icon"]
     assert {k: electron_pkg["devDependencies"].get(k) for k in base["devDependencies"]} == base["devDependencies"]
     lock = json.loads((ELECTRON / "package-lock.json").read_text(encoding="utf-8"))

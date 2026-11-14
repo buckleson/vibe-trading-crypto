@@ -540,12 +540,16 @@ def test_cli_help_has_no_old_brand(cli_help):
 # --------------------------------------------------------------------------- guides
 
 
+MCP_TOKEN_GUIDES = {"share-with-friends.md", "mcp.md"}
 GUIDE_FILES = sorted(p for p in GUIDES.glob("*.md") if p.name != "news.md")
 
 
 @pytest.mark.parametrize("guide", GUIDE_FILES, ids=lambda p: p.name)
 def test_guides_have_no_auth_key_instructions(guide):
     text = read(guide)
+    # The remote MCP token (ADR 0008) is documented with the Bearer header form.
+    if guide.name in MCP_TOKEN_GUIDES:
+        text = text.replace("Authorization: Bearer <token>", "")
     for bad in ("API_AUTH_KEY", "Authorization: Bearer", "Bearer <", "Bearer token",
                 "SSE ticket", "/auth/sse-ticket", "sse_ticket", "enter the key in Settings",
                 "X-API-Key"):
@@ -554,7 +558,10 @@ def test_guides_have_no_auth_key_instructions(guide):
 
 @pytest.mark.parametrize("guide", GUIDE_FILES, ids=lambda p: p.name)
 def test_guides_have_no_bearer_word(guide):
-    assert not re.search(r"\bBearer\b", read(guide))
+    text = read(guide)
+    if guide.name in MCP_TOKEN_GUIDES:
+        text = text.replace("Authorization: Bearer <token>", "")
+    assert not re.search(r"\bBearer\b", text)
 
 
 @pytest.mark.parametrize("guide", GUIDE_FILES, ids=lambda p: p.name)
@@ -1137,7 +1144,7 @@ def test_handoff_task_log_rows():
     body = _h2("Task log")
     rows = re.findall(r"^\| (T\d\d) \| ([^|]+) \| ([^|]+) \| ([^|]+) \|$", body, flags=re.M)
     ids = [r[0] for r in rows]
-    assert ids == [f"T{i:02d}" for i in range(1, 15)]
+    assert ids == [f"T{i:02d}" for i in range(1, 19)]
     for tid, title, status, link in rows:
         assert title.strip()
         assert re.match(r"(done|partial)\b", status.strip()), (tid, status)

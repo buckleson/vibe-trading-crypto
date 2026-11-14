@@ -23,12 +23,16 @@ trading-connector reads, swarm orchestration, trade-journal and shadow-account
 analysis. Every exposed tool is read-only or research-only except
 refresh_strategy_evidence, which writes ONLY the disposable facade-owned
 strategy-evidence cache from local run artifacts; no order-placing or
-order-cancelling tool is ever surfaced via MCP.
+order-cancelling tool is surfaced via MCP unless the operator starts the
+server with --enable-order-tools (ADR 0008).
 
 Usage:
     python mcp_server.py                    # stdio transport (default)
     python mcp_server.py --transport sse    # legacy SSE transport (GET /sse + POST /messages/)
     python mcp_server.py --transport http   # Streamable HTTP transport (single POST/GET /mcp endpoint)
+    VIBE_CRYPTO_MCP_TOKEN=<secret> python mcp_server.py --transport http --host 0.0.0.0
+        # remote use: clients send "Authorization: Bearer <secret>" or use the
+        # URL form http://<host>:<port>/<secret>/mcp (ChatGPT cannot set headers)
 
 The ``http`` (Streamable HTTP) transport is the current MCP spec default
 (2025-03-26+). Modern clients (e.g. QwenPaw, and clients that negotiate by
@@ -56,13 +60,16 @@ from __future__ import annotations
 
 # ruff: noqa: E402
 
+import hmac
+import ipaddress
 import json
 import logging
+import re
 import sys
 from copy import deepcopy
 from importlib import import_module
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 # Ensure agent/ is on sys.path
 AGENT_DIR = Path(__file__).resolve().parent
@@ -314,7 +321,7 @@ class _OriginGuardMiddleware:
         await self.app(scope, receive, send)
 
 
-def _security_middleware(allowed_hosts: list[str]) -> list[Any]:
+def _security_middleware(allowed_hosts: list[str], token: str | None = None) -> list[Any]:
     """Build the Host + Origin allow-list middleware for network MCP transports.
 
     Args:
@@ -325,23 +332,126 @@ def _security_middleware(allowed_hosts: list[str]) -> list[Any]:
     """
     from starlette.middleware import Middleware
 
-    return [
+    stack = [
         Middleware(_HostGuardMiddleware, allowed_hosts=allowed_hosts),
         Middleware(_OriginGuardMiddleware, allowed_hosts=allowed_hosts),
     ]
+    if token:
+        stack.append(Middleware(_TokenGuardMiddleware, token=token))
+    return stack
 
 
-def _build_network_app(transport: str, allowed_hosts: list[str]):
+def _build_network_app(transport: str, allowed_hosts: list[str], token: str | None = None):
     """Build a DNS-rebinding-hardened FastMCP ASGI app for a network transport.
 
     Args:
         transport: ``"sse"`` or ``"streamable-http"``.
         allowed_hosts: Trusted Host/Origin hostnames.
+        token: Optional shared secret; when set every request must carry it.
 
     Returns:
         A Starlette ASGI app (with MCP lifespan) ready for ``uvicorn.run``.
     """
-    return mcp.http_app(transport=transport, middleware=_security_middleware(allowed_hosts))
+    return mcp.http_app(transport=transport, middleware=_security_middleware(allowed_hosts, token))
+
+
+# ---------------------------------------------------------------------------
+# Network-transport token auth (ADR 0008)
+#
+# A server reachable beyond this computer (tunnel, Cloud Run) must not be open:
+# it can drive the owner's broker accounts. VIBE_CRYPTO_MCP_TOKEN is a shared
+# secret accepted either as "Authorization: Bearer <token>" or as a URL path
+# prefix (/<token>/mcp), because ChatGPT connectors cannot send headers.
+# ---------------------------------------------------------------------------
+
+_TOKEN_RE = re.compile(r"[A-Za-z0-9_-]{16,256}")
+
+
+def _validate_token(token: str) -> str:
+    """Return the stripped token, or raise ValueError if it is not URL-safe and long enough."""
+    value = (token or "").strip()
+    if not _TOKEN_RE.fullmatch(value):
+        raise ValueError(
+            "VIBE_CRYPTO_MCP_TOKEN must be 16 to 256 characters of A-Z a-z 0-9 _ - "
+            '(generate one with: python -c "import secrets; print(secrets.token_urlsafe(32))")'
+        )
+    return value
+
+
+def _is_loopback_bind(host: str) -> bool:
+    """Return whether a bind host is loopback only (localhost or a loopback IP literal)."""
+    value = (host or "").strip()
+    if value.startswith("[") and value.endswith("]"):
+        value = value[1:-1]
+    if value.lower() == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(value).is_loopback
+    except ValueError:
+        return False
+
+
+def _network_security_settings(
+    bind_host: str, token: str | None, allowed_hosts_raw: str | None
+) -> tuple[str | None, list[str]]:
+    """Validate token/bind combination and compute the Host allow-list.
+
+    Raises:
+        ValueError: bad token, or a non-loopback bind without a token.
+    """
+    clean = _validate_token(token) if token and token.strip() else None
+    if clean is None and not _is_loopback_bind(bind_host):
+        raise ValueError(
+            f"Refusing to listen on {bind_host} without a token: anyone who can reach this port "
+            "could use your broker accounts. Set VIBE_CRYPTO_MCP_TOKEN (or pass --token) to a "
+            "secret of at least 16 URL-safe characters. See guides/share-with-friends.md."
+        )
+    if allowed_hosts_raw and allowed_hosts_raw.strip():
+        hosts = _parse_allowed_hosts(allowed_hosts_raw)
+    elif clean:
+        hosts = ["*"]
+    else:
+        hosts = list(_DEFAULT_MCP_ALLOWED_HOSTS)
+    return clean, hosts
+
+
+class _TokenGuardMiddleware:
+    """ASGI middleware requiring the shared token (Bearer header or path prefix)."""
+
+    def __init__(self, app: Any, token: str) -> None:
+        self.app = app
+        self._token = token.encode()
+
+    async def __call__(self, scope: Any, receive: Any, send: Any) -> None:
+        if scope.get("type") not in ("http", "websocket"):
+            await self.app(scope, receive, send)
+            return
+        path = scope.get("path", "")
+        first = path.split("/", 2)[1] if path.startswith("/") else ""
+        if first and hmac.compare_digest(first.encode(), self._token):
+            # Path unchanged; root_path makes Starlette route past the prefix and
+            # makes the SSE transport advertise /<token>/messages/.
+            child = dict(scope, root_path=scope.get("root_path", "") + "/" + first)
+            await self.app(child, receive, send)
+            return
+        for key, value in scope.get("headers", []):
+            if key == b"authorization" and hmac.compare_digest(value, b"Bearer " + self._token):
+                await self.app(scope, receive, send)
+                return
+        from starlette.responses import JSONResponse, PlainTextResponse
+
+        if path.startswith("/.well-known/"):
+            response: Any = PlainTextResponse("Not found", status_code=404)
+        else:
+            response = JSONResponse(
+                {"error": "unauthorized"},
+                status_code=401,
+                headers={"WWW-Authenticate": 'Bearer realm="vibe-crypto"'},
+            )
+        if scope["type"] == "websocket":
+            await send({"type": "websocket.close", "code": 1008})
+            return
+        await response(scope, receive, send)
 
 
 def _get_skills_loader():
@@ -2861,6 +2971,145 @@ def iwencai_search(query: str, limit: int = 20) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Opt-in order tools (ADR 0008)
+#
+# trading_place_order / trading_cancel_order are NOT registered by default.
+# The operator opts in with --enable-order-tools or the process environment
+# VIBE_CRYPTO_MCP_ENABLE_ORDERS=1 (never from .env). Live profiles still pass
+# the mandate gate, kill switch and audit ledger inside src.trading.service.
+# ---------------------------------------------------------------------------
+
+_include_order_tools = False
+_order_tools_registered = False
+
+
+def _env_order_tools_enabled() -> bool:
+    """Return whether order tools were explicitly enabled via the process environment."""
+    from src.config.accessor import get_env_config
+
+    return get_env_config().api.vibe_crypto_mcp_enable_orders
+
+
+def _resolve_include_order_tools(cli_opt_in: bool) -> bool:
+    """Resolve whether the MCP server should register order tools.
+
+    Order placement is OFF for every transport unless the operator opts in.
+
+    Args:
+        cli_opt_in: Whether ``--enable-order-tools`` was passed.
+
+    Returns:
+        True only for the flag or ``VIBE_CRYPTO_MCP_ENABLE_ORDERS=1`` in the
+        process environment.
+    """
+    return bool(cli_opt_in) or _env_order_tools_enabled()
+
+
+def trading_place_order(
+    symbol: str,
+    side: Literal["buy", "sell"],
+    quantity: float | None = None,
+    notional: float | None = None,
+    order_type: Literal["market", "limit"] = "market",
+    limit_price: float | None = None,
+    time_in_force: Literal["day", "gtc"] = "day",
+    connection: str | None = None,
+    connection_id: str | None = None,
+    account: str | None = None,
+) -> str:
+    """Place an order on a connected broker profile.
+
+    Paper profiles trade the broker's sandbox. Live profiles need the user's
+    mandate and pass the kill switch. BEFORE calling this, show the user the
+    exact order (profile, paper or live, symbol, side, size, type, limit price)
+    and get explicit confirmation in the current turn. Never retry a failed or
+    uncertain order automatically. Give exactly one of quantity or notional.
+
+    Args:
+        symbol: Instrument symbol.
+        side: "buy" or "sell".
+        quantity: Units to trade (exclusive with notional).
+        notional: Cash amount to trade (exclusive with quantity).
+        order_type: "market" or "limit".
+        limit_price: Required for limit orders.
+        time_in_force: "day" or "gtc".
+        connection: Connection profile name.
+        connection_id: Connection profile id.
+        account: Broker account id.
+    """
+    params: dict[str, Any] = {
+        "symbol": symbol,
+        "side": side,
+        "quantity": quantity,
+        "notional": notional,
+        "order_type": order_type,
+        "limit_price": limit_price,
+        "time_in_force": time_in_force,
+    }
+    params = {k: v for k, v in params.items() if v is not None}
+    params.update(_trading_common_args(connection=connection, connection_id=connection_id, account=account))
+    return _get_registry().execute("trading_place_order", params)
+
+
+def trading_cancel_order(
+    order_id: str,
+    symbol: str | None = None,
+    connection: str | None = None,
+    connection_id: str | None = None,
+    account: str | None = None,
+) -> str:
+    """Cancel an open order on a connected broker profile.
+
+    Show the user which order will be cancelled and on which profile before
+    calling. Never retry automatically.
+
+    Args:
+        order_id: Broker order id.
+        symbol: Instrument symbol (needed by some brokers).
+        connection: Connection profile name.
+        connection_id: Connection profile id.
+        account: Broker account id.
+    """
+    params: dict[str, Any] = {"order_id": order_id}
+    if symbol:
+        params["symbol"] = symbol
+    params.update(_trading_common_args(connection=connection, connection_id=connection_id, account=account))
+    return _get_registry().execute("trading_cancel_order", params)
+
+
+_ORDER_TOOL_FUNCS = {"trading_place_order": trading_place_order, "trading_cancel_order": trading_cancel_order}
+
+
+def _register_order_tools() -> None:
+    """Register the two order tools on ``mcp`` with destructive annotations (idempotent)."""
+    global _order_tools_registered
+    if _order_tools_registered:
+        return
+    from mcp.types import ToolAnnotations
+
+    for name, fn in _ORDER_TOOL_FUNCS.items():
+        mcp.tool(
+            fn,
+            name=name,
+            annotations=ToolAnnotations(
+                readOnlyHint=False, destructiveHint=True, idempotentHint=False, openWorldHint=True
+            ),
+        )
+    _order_tools_registered = True
+
+
+def _unregister_order_tools() -> None:
+    """Remove the order tools again (used by tests)."""
+    global _order_tools_registered
+    for name in _ORDER_TOOL_FUNCS:
+        try:
+            mcp.remove_tool(name)
+        except Exception:  # not registered
+            pass
+    _order_tools_registered = False
+
+
+# ---------------------------------------------------------------------------
 # Institutional-research & alternative-data tools (schema mirrored from source)
 #
 # get_institutional_holdings / etf_holdings / prediction_market /
@@ -2876,7 +3125,8 @@ def iwencai_search(query: str, limit: int = 20) -> str:
 # Read-only is structural here, not a comment: _register_mirrored_tool refuses
 # any class whose ``is_readonly`` is not True, so an order-placing tool cannot
 # be surfaced through this path even if someone adds it to the list below.
-# ``trading_place_order`` / ``trading_cancel_order`` are never MCP-exposed.
+# ``trading_place_order`` / ``trading_cancel_order`` are not exposed through this
+# path; they are opt-in only via ``_register_order_tools`` (ADR 0008).
 #
 # Tradeoff accepted: fastmcp validates call arguments against the wrapper's
 # Python signature, not against ``parameters``, so a mirrored tool receives its
@@ -3511,7 +3761,7 @@ def research_lab(action: str, request: dict | None = None) -> str:
 
 def main():
     """Entry point for `vibe-crypto-mcp` CLI command."""
-    global _include_shell_tools, _registry
+    global _include_shell_tools, _include_order_tools, _registry
     import argparse
 
     parser = argparse.ArgumentParser(description="Vibe Crypto MCP Server")
@@ -3536,6 +3786,25 @@ def main():
         "to setting VIBE_TRADING_ENABLE_SHELL_TOOLS=1 in the process environment "
         "(.env is not consulted for this switch).",
     )
+    parser.add_argument(
+        "--token",
+        default=None,
+        help="Shared secret for --transport sse/http; clients send 'Authorization: Bearer <token>' "
+        "or use the URL path /<token>/mcp. Prefer the VIBE_CRYPTO_MCP_TOKEN env var: "
+        "command-line args are visible to other local users.",
+    )
+    parser.add_argument(
+        "--allowed-hosts",
+        default=None,
+        help="Comma-separated Host/Origin allow-list for sse/http; overrides VIBE_TRADING_MCP_ALLOWED_HOSTS",
+    )
+    parser.add_argument(
+        "--enable-order-tools",
+        action="store_true",
+        help="Register trading_place_order and trading_cancel_order. Paper profiles trade broker "
+        "sandboxes; live profiles still need a mandate and pass the kill switch. Same as "
+        "VIBE_CRYPTO_MCP_ENABLE_ORDERS=1 in the process environment (.env is not consulted).",
+    )
     args = parser.parse_args()
 
     # One-time move of pre-#904 code-relative state into the runtime root.
@@ -3548,6 +3817,13 @@ def main():
         logging.getLogger(__name__).warning("Legacy state migration failed", exc_info=True)
 
     _include_shell_tools = _resolve_include_shell_tools(args.enable_shell_tools)
+    _include_order_tools = _resolve_include_order_tools(args.enable_order_tools)
+    if _include_order_tools:
+        _register_order_tools()
+        logger.warning(
+            "Order tools are ON: trading_place_order / trading_cancel_order are registered. "
+            "Live orders still require a mandate and the kill switch."
+        )
     # After the shell-tool decision: that switch must come from the launch
     # flag or process env, never from a .env written for the web server.
     from src.providers.llm import _ensure_dotenv
@@ -3567,11 +3843,26 @@ def main():
 
         from src.config.accessor import get_env_config
 
-        allowed_hosts = _parse_allowed_hosts(get_env_config().api.vibe_trading_mcp_allowed_hosts)
+        api_cfg = get_env_config().api
+        raw_token = args.token or api_cfg.vibe_crypto_mcp_token
+        raw_hosts = args.allowed_hosts if args.allowed_hosts is not None else api_cfg.vibe_trading_mcp_allowed_hosts
+        try:
+            token, allowed_hosts = _network_security_settings(args.host, raw_token, raw_hosts)
+        except ValueError as exc:
+            print(str(exc), file=sys.stderr)
+            sys.exit(2)
+        if not token:
+            logger.warning(
+                "No VIBE_CRYPTO_MCP_TOKEN set: this server is only safe on this computer. "
+                "Never expose it through a tunnel or proxy."
+            )
         transport = "streamable-http" if args.transport == "http" else "sse"
-        app = _build_network_app(transport, allowed_hosts)
-        uvicorn.run(app, host=args.host, port=args.port)
+        app = _build_network_app(transport, allowed_hosts, token)
+        # access_log off with a token so the path token never reaches logs.
+        uvicorn.run(app, host=args.host, port=args.port, access_log=not token)
     else:
+        if args.token or args.allowed_hosts:
+            logger.info("--token / --allowed-hosts only apply to --transport sse/http; ignored for stdio")
         mcp.run()
 
 

@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "vibe-crypto": {
+      "command": "uvx",
+      "args": [
+        "--python", "3.12",
+        "--with", "${VIBE_CRYPTO_WITH:-keyring}",
+        "--from", "git+https://github.com/buckleson/vibe-trading-crypto",
+        "vibe-crypto-mcp"
+      ]
+    }
+  }
+}

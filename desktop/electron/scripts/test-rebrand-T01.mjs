@@ -65,7 +65,15 @@ await check("package fields unchanged vs baseline", () => {
   // T11 added cross-platform scripts and made `start` independent of the Windows prepare step.
   const { start: _start, ...baseScripts } = base.scripts;
   for (const [name, command] of Object.entries(baseScripts)) assert.equal(pkg.scripts[name], command, name);
-  assert.equal(pkg.version, base.version);
+  // bumped for releases (ADR 0008): valid semver, not lower than the baseline.
+  const semver = (v) => {
+    const m = /^(\d+)\.(\d+)\.(\d+)$/.exec(v);
+    assert.ok(m, `not semver: ${v}`);
+    return m.slice(1).map(Number);
+  };
+  const [a, b] = [semver(pkg.version), semver(base.version)];
+  const cmp = a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
+  assert.ok(cmp >= 0, `version ${pkg.version} is below baseline ${base.version}`);
   assert.equal(pkg.build.win.icon, base.build.win.icon);
 });
 

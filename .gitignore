@@ -185,3 +185,6 @@ agent/tests/artifacts/
 /background-tasks/
 
 agent/vibe_crypto.egg-info/
+
+# Claude Desktop extension bundles
+*.mcpb

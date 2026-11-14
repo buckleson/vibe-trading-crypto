@@ -43,7 +43,7 @@ def mcp_server_config() -> dict:
         "type": "stdio",
         "command": sys.executable,
         "args": [str(path)],
-        "env": {"PYTHONUNBUFFERED": "1"},
+        "env": {"PYTHONUNBUFFERED": "1", "VIBE_CRYPTO_MCP_ENABLE_ORDERS": "0"},
     }
 
 

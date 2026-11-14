@@ -1,0 +1,10 @@
+{
+  "name": "vibe-crypto",
+  "version": "0.4.0",
+  "description": "Vibe Crypto MCP server (87 tools: market data, backtests, paper runs, 19 broker connectors) plus slash commands and a safe-trading skill.",
+  "author": {"name": "Vibe Crypto contributors"},
+  "homepage": "https://github.com/buckleson/vibe-trading-crypto",
+  "repository": "https://github.com/buckleson/vibe-trading-crypto",
+  "license": "MIT",
+  "keywords": ["trading", "crypto", "stocks", "brokers", "paper-trading", "backtesting", "mcp"]
+}

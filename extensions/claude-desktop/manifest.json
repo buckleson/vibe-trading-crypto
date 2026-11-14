@@ -1,0 +1,30 @@
+{
+  "manifest_version": "0.3",
+  "name": "vibe-crypto",
+  "display_name": "Vibe Crypto",
+  "version": "0.4.0",
+  "description": "Research, backtest and paper trade crypto and stocks, and use your own broker accounts, from Claude.",
+  "long_description": "Runs the Vibe Crypto MCP server on your computer with uv (87 tools: market data, backtests, paper runs, 19 broker and exchange connectors). Needs uv installed: https://docs.astral.sh/uv/getting-started/installation/. Your keys stay on your computer. Order tools are off unless you turn them on in the extension settings; live orders also need a mandate and pass the kill switch.",
+  "author": {"name": "Vibe Crypto contributors", "url": "https://github.com/buckleson/vibe-trading-crypto"},
+  "homepage": "https://github.com/buckleson/vibe-trading-crypto",
+  "documentation": "https://github.com/buckleson/vibe-trading-crypto/blob/main/guides/share-with-friends.md",
+  "support": "https://github.com/buckleson/vibe-trading-crypto/issues",
+  "repository": {"type": "git", "url": "https://github.com/buckleson/vibe-trading-crypto"},
+  "license": "MIT",
+  "icon": "icon.png",
+  "keywords": ["trading", "crypto", "stocks", "brokers", "paper trading", "backtesting"],
+  "server": {
+    "type": "binary",
+    "entry_point": "uvx",
+    "mcp_config": {
+      "command": "uvx",
+      "args": ["--python", "3.12", "--with", "${user_config.extra_packages}", "--from", "https://github.com/buckleson/vibe-trading-crypto/archive/refs/heads/main.zip", "vibe-crypto-mcp"],
+      "env": {"VIBE_CRYPTO_MCP_ENABLE_ORDERS": "${user_config.enable_order_tools}"}
+    }
+  },
+  "user_config": {
+    "extra_packages": {"type": "string", "title": "Python packages", "description": "Comma-separated packages added next to Vibe Crypto, for example keyring,alpaca-py for Alpaca. Keep keyring in the list.", "default": "keyring", "required": true},
+    "enable_order_tools": {"type": "boolean", "title": "Enable order tools", "description": "Lets Claude place and cancel orders. Paper profiles trade broker sandboxes; live profiles still need your mandate and pass the kill switch. Claude must ask before each order.", "default": false, "required": false}
+  },
+  "compatibility": {"platforms": ["darwin", "win32", "linux"]}
+}

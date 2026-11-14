@@ -4,6 +4,8 @@
 
 > For Claude Code, the one-command setup is `claude mcp add vibe-crypto -- vibe-crypto-mcp`. See [docs/vibe-crypto/CLAUDE_CODE.md](../docs/vibe-crypto/CLAUDE_CODE.md). The in-app Claude chat panel and the desktop terminal use this same server.
 
+No clone needed: any stdio client can run `uvx --python 3.12 --with keyring --from git+https://github.com/buckleson/vibe-trading-crypto vibe-crypto-mcp`. Claude Code also has a plugin and Claude Desktop has a one-click extension. All install options, the broker list and ChatGPT setup are in [share-with-friends.md](share-with-friends.md).
+
 Vibe Crypto exposes 87 MCP tools for any MCP-compatible client. Runs as a stdio subprocess — no server setup needed. Core research tools work with zero API keys for HK/US/crypto; trading connector tools use the selected connector profile, and `run_swarm` needs an LLM key.
 
 **Environment variables:** the client spawns the server itself, so a shell `export` never reaches it — set them in the client's `env` block. Generated backtest code is sandboxed to the allowed run roots, so writing results into a workspace of your own needs `VIBE_TRADING_ALLOWED_RUN_ROOTS`:
@@ -70,6 +72,15 @@ For HTTP clients (QwenPaw, and any client that negotiates by POSTing an
 client at `/sse`; that path belongs to the deprecated two-endpoint SSE transport
 and will return `405 Method Not Allowed` on `POST`. Override the bind address
 with `--host` / `--port`.
+
+**Token protection (network transports).** Set `VIBE_CRYPTO_MCP_TOKEN` (or `--token`; the environment variable is safer because command-line arguments are visible to other local users) to require a shared secret on `http` and `sse`. The token is 16 to 256 characters of `A-Za-z0-9_-`. Clients send it in either form:
+
+- Header: `Authorization: Bearer <token>` to `https://<host>/mcp` (for example `claude mcp add --transport http vibe-crypto https://<host>/mcp --header "Authorization: Bearer <token>"`).
+- Secret path prefix: `https://<host>/<token>/mcp` (and `/<token>/sse` for SSE). This is the form for ChatGPT, whose connectors cannot send custom headers (set "No authentication").
+
+Requests without the token get 401. Binding a non-loopback host (for example `--host 0.0.0.0`) without a token is refused at startup. With a token the access log is switched off, and the Host/Origin guard accepts any host unless you set `--allowed-hosts a,b` (or `VIBE_TRADING_MCP_ALLOWED_HOSTS`); without a token only loopback hosts are accepted. Hosting guides: [share-with-friends.md](share-with-friends.md) and [deploy/gcp/README.md](../deploy/gcp/README.md).
+
+**Order tools (opt-in).** `trading_place_order` and `trading_cancel_order` are not registered by default, so the tool count stays 87. `--enable-order-tools` or `VIBE_CRYPTO_MCP_ENABLE_ORDERS=1` in the process environment registers them (a `.env` file is not read for this switch). Paper profiles trade broker sandboxes; live profiles still need a mandate and pass the kill switch.
 
 </details>
 

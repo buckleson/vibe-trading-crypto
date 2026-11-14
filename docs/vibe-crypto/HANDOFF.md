@@ -1,7 +1,7 @@
 # Vibe Crypto: handoff
 
 Final handoff after the integration pass (2026-11-14). Per-task detail is in
-`docs/vibe-crypto/handoff/<TASK_ID>.md`; decisions are in `docs/vibe-crypto/ADR/`, the
+`docs/vibe-crypto/handoff/<TASK_ID>.md`; decisions are in `docs/vibe-crypto/ADR/` (ADR 0008 covers sharing, the Claude plugin and extension, and the remote MCP), the
 checklist in `docs/vibe-crypto/TODO.md`, the UI brief and tokens in `cook/BRIEF.md`.
 Screenshots of every main page (light and dark, 1440x900) are in
 `docs/vibe-crypto/screenshots/`.
@@ -31,6 +31,15 @@ access; Anthropic traffic goes through the sandbox's Claude login).
 - **Desktop.** Electron shell with platform-aware backend lookup and an embedded terminal
   (`node-pty` + xterm) that runs the local `claude` with the MCP server wired. Builds with
   `tsc`; the Electron binary itself was not launched here.
+- **Sharing.** Friends install their own copy (ADR 0008, `guides/share-with-friends.md`): Claude Code
+  plugin from `.claude-plugin/marketplace.json` (`plugins/vibe-crypto`), Claude Desktop `.mcpb`
+  (`extensions/claude-desktop`, attached to each GitHub release by `desktop-windows.yml`, desktop
+  version 0.4.0), or `uvx --python 3.12 --with keyring --from git+https://github.com/buckleson/vibe-trading-crypto vibe-crypto-mcp`.
+  The http and sse transports take `VIBE_CRYPTO_MCP_TOKEN` (header or `/<token>/mcp`) and refuse a
+  non-loopback bind without it. Order tools are off unless `--enable-order-tools` or
+  `VIBE_CRYPTO_MCP_ENABLE_ORDERS=1`. ChatGPT needs a self-hosted HTTPS server: your PC plus a tunnel, or
+  `deploy/gcp/deploy.sh` (Cloud Run, Secret Manager token, Cloud Storage data folder). The Cloud Run
+  path was only dry-run, never deployed.
 - **CI.** `.github/workflows/test.yml` (tests) and `.github/workflows/desktop-windows.yml`
   (the only build: Windows installer uploaded as an artifact). Docker, wiki and loader-health
   workflows were deleted.
@@ -51,6 +60,17 @@ access; Anthropic traffic goes through the sandbox's Claude login).
 | `POST /api/claude/chat {"message":"hi"}` | SSE stream: `session` then `text` events (real reply) |
 | MCP stdio client against `vibe-crypto-mcp` | 87 tools listed, `paper_run_list` returns `{"status":"ok","runs":[]}` |
 | `python -c "import yaml; yaml.safe_load(...)"` on both workflows | parse OK |
+| `pytest agent/tests/vibe_crypto` (T15 to T18 added) | 1363 passed, 8 skipped |
+| `pytest agent/tests/test_mcp_remote_auth.py agent/tests/test_mcp_order_tools_optin.py` | 22 passed |
+| `uvx --python 3.12 --with keyring --from git+https://github.com/buckleson/vibe-trading-crypto vibe-crypto-mcp --help` (T16, GitHub main) | exit 0, 4 s warm and 16 s cold; MCP handshake listed 87 tools |
+| `claude plugin validate` on the repo and `plugins/vibe-crypto`, then a real plugin install in an isolated HOME (T16) | validation passed; `claude mcp list` shows the plugin server Connected |
+| `mcpb validate` and `mcpb pack extensions/claude-desktop` (T17) | pass, 3 files and about 22 kB |
+| `vibe-crypto-mcp --transport http --host 0.0.0.0` with no token (T15) | exit 2 with a refusal message; `/<token>/mcp` returns 200, no credentials returns 401 |
+| `bash -n` and shellcheck on `deploy/gcp/deploy.sh` and `teardown.sh`; `deploy.sh --dry-run --project demo-proj --region europe-west1` (T18) | exit 0, full gcloud sequence printed, 0 gcloud calls |
+| Final check: `pytest agent/tests/vibe_crypto agent/tests/*mcp*` | 1830 passed, 8 skipped |
+| Final check: MCP stdio client against `uvx --python 3.12 --with keyring --from <path> vibe-crypto-mcp` for the working tree, `git+https://github.com/buckleson/vibe-trading-crypto` and the `archive/refs/heads/main.zip` URL used by the `.mcpb` | 87 tools each; working tree with `VIBE_CRYPTO_MCP_ENABLE_ORDERS=1` lists 89 (adds `trading_place_order`, `trading_cancel_order`). GitHub reflects the last pushed commit, which predates T15 |
+| Final check: `VIBE_CRYPTO_MCP_TOKEN=<t> vibe-crypto-mcp --transport http` (and `sse`) on 127.0.0.1 and 0.0.0.0, mcp python client | no token or wrong token: 401; Bearer header and `/<t>/mcp` (`/<t>/sse`): initialize, 87 tools, `list_skills` call OK; `Host: x.trycloudflare.com` + path token: 200 |
+| Final check: `claude plugin validate .` and `plugins/vibe-crypto`; `mcpb@2.1.2 validate` + `mcpb pack` + `mcpb info` | all pass, no warnings after adding `plugins/vibe-crypto/.claude-plugin/icon.png`; bundle 23 kB, 3 files, unsigned |
 
 ### Still failing (not caused by the fork)
 
@@ -131,6 +151,59 @@ latest run on `main`, artifact `vibe-crypto-windows` (NSIS installer, `SHA256SUM
 4. From Claude: "Start a paper run from my best backtest", "How are my paper runs doing?".
 
 No orders are sent anywhere. Live trading uses the existing broker connectors, unchanged.
+
+### Share with friends (what to send them)
+
+Each friend runs their own copy with their own broker keys; there is no shared server.
+Everything except the clone-free Cloud Run path needs uv
+(<https://docs.astral.sh/uv/getting-started/installation/>). Full guide, broker list and safety
+rules: `guides/share-with-friends.md`. Order tools are off unless turned on
+(`VIBE_CRYPTO_MCP_ENABLE_ORDERS=1`); live orders still need a mandate and pass the kill switch.
+
+- **Claude Code** (plugin: MCP server, `/vibe-crypto:connect-broker`, `:portfolio`, `:paper-run`,
+  `:status`, skill `safe-trading`):
+
+  ```text
+  /plugin marketplace add buckleson/vibe-trading-crypto
+  /plugin install vibe-crypto@vibe-crypto
+  ```
+
+  Without the plugin: `claude mcp add vibe-crypto -- uvx --python 3.12 --with keyring --from git+https://github.com/buckleson/vibe-trading-crypto vibe-crypto-mcp`
+
+- **Claude Desktop**: open
+  <https://github.com/buckleson/vibe-trading-crypto/releases/latest/download/vibe-crypto-claude-desktop.mcpb>
+  (works once release v0.4.0 is published, risk 25). Manual alternative in
+  `claude_desktop_config.json` (same block for Cursor in `~/.cursor/mcp.json`):
+
+  ```json
+  {"mcpServers": {"vibe-crypto": {"command": "uvx", "args": ["--python", "3.12", "--with", "keyring",
+    "--from", "git+https://github.com/buckleson/vibe-trading-crypto", "vibe-crypto-mcp"]}}}
+  ```
+
+- **Any stdio MCP client**: `uvx --python 3.12 --with keyring --from git+https://github.com/buckleson/vibe-trading-crypto vibe-crypto-mcp`
+  (add broker packages with `--with keyring,alpaca-py`, see the broker table in the guide).
+
+- **ChatGPT via their own PC and a tunnel**:
+
+  ```bash
+  python3 -c "import secrets; print(secrets.token_urlsafe(32))"      # -> <token>
+  VIBE_CRYPTO_MCP_TOKEN=<token> uvx --python 3.12 --with keyring --from git+https://github.com/buckleson/vibe-trading-crypto vibe-crypto-mcp --transport http --port 8900
+  cloudflared tunnel --url http://127.0.0.1:8900                       # or: ngrok http 8900
+  ```
+
+  ChatGPT: Settings > Apps & Connectors > Advanced > Developer mode, create a connector with URL
+  `https://<tunnel-host>/<token>/mcp` and Authentication "No authentication".
+
+- **ChatGPT via their own Google Cloud Run**:
+
+  ```bash
+  git clone https://github.com/buckleson/vibe-trading-crypto && cd vibe-trading-crypto
+  deploy/gcp/deploy.sh --project <their-project> --region <region> --dry-run
+  deploy/gcp/deploy.sh --project <their-project> --region <region>   # prints https://<service-url>/<token>/mcp
+  deploy/gcp/teardown.sh --project <their-project> --region <region> # remove it
+  ```
+
+  Add the printed URL in ChatGPT as above. Not yet deployed for real (risk 26).
 
 ### Tests
 
@@ -222,6 +295,13 @@ Merged from handoff notes T01 to T13, the T14 sweep and the final integration pa
 | 22 | Rebrand breadth (about 3,700 hits) was handled with a script plus review; expect stragglers in rarely used strings. | All | Fix as found; `test_T01.py` guards the main ones. |
 | 23 | Neither GitHub workflow has run yet. `desktop-windows.yml` adds `npm run rebuild:native` and the upload step; the rest of the packaging steps are the upstream ones. | CI | Push to `main` (or dispatch) and check the run and its `vibe-crypto-windows` artifact. |
 | 24 | When a paper run refresh fails (for example no market data), the run shows state Error and its stats read n/a until the next good refresh; the last good numbers are not kept. | Paper runs | Decide whether to keep the last good summary on error. |
+| 25 | The release workflow with the `.mcpb` step has not run on GitHub. The `latest/download/vibe-crypto-claude-desktop.mcpb` link and the Claude Desktop install do not work until release v0.4.0 is published; the PowerShell steps were reviewed by hand only. | CI, Claude Desktop extension | Push, dispatch the workflow, check the v0.4.0 assets and install the `.mcpb` in Claude Desktop. |
+| 26 | `deploy/gcp/deploy.sh` was checked with `--dry-run`, `bash -n` and shellcheck only; the Dockerfile was not built (no Docker daemon here). No real Cloud Run deploy, bucket mount (uid and gid options) or ChatGPT connector has been tried. | Cloud Run | Deploy once to a throwaway project, connect ChatGPT, then tear it down. |
+| 27 | Cloud Storage FUSE has no file locking and the server keeps MCP sessions in memory, so Cloud Run is pinned to one instance. Backtests there run without the vibe-sandbox UID drop. | Cloud Run | Check a backtest after the first deploy; do not raise max instances. |
+| 28 | With the ChatGPT URL form the token is a path segment, so Cloud Run request logs (and any tunnel dashboard) contain it. The server's own access log is off when a token is set. | Remote MCP | Prefer the Authorization header where the client supports it; rotate the token if logs are shared. |
+| 29 | `uvx --from git+...` tracks `main` unpinned, so a broken commit on `main` breaks every friend's next start (and the Cloud Run `--ref main` default). | Sharing | Tag releases and point the guides and plugin at a tag once stable. |
+| 30 | ChatGPT menu names (Settings, Apps and Connectors, Developer mode) and plan availability change; the guide was written without a live ChatGPT account. | Docs | Walk through the ChatGPT steps once and fix the wording. |
+| 31 | Broker credentials on Cloud Run have no keychain: only connector JSON files in the bucket root (confirmed for alpaca, binance, okx, dhan) and `FUTU_TRADE_PWD_MD5` are supported by the code; other connectors were not checked for JSON file support. | Brokers on Cloud Run | Confirm each connector's JSON keys, or add an env or Secret Manager credential path. |
 
 ## Task log
 
@@ -241,6 +321,10 @@ Merged from handoff notes T01 to T13, the T14 sweep and the final integration pa
 | T12 | Wallet connect | done (fake provider only) | [T12](handoff/T12.md) |
 | T13 | Locale sync | done | [T13](handoff/T13.md) |
 | T14 | README, docs and handoff | done | [T14](handoff/T14.md) |
+| T15 | Remote MCP token auth and opt-in order tools | done | [T15](handoff/T15.md) |
+| T16 | uvx install check and Claude Code plugin | done | [T16](handoff/T16.md) |
+| T17 | Claude Desktop extension and release | done in code; workflow not run yet (risk 25) | [T17](handoff/T17.md) |
+| T18 | Share guide, ChatGPT self-hosting and Cloud Run | done; no real deploy (risk 26) | [T18](handoff/T18.md) |
 
 ## Fix log
 

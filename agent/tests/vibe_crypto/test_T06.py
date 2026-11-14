@@ -131,7 +131,7 @@ def test_mcp_config_shape_and_real_path():
     path = Path(cfg["args"][0])
     assert path.name == "mcp_server.py" and path.is_file()
     assert path.resolve() == (REPO / "agent" / "mcp_server.py").resolve()
-    assert cfg["env"] == {"PYTHONUNBUFFERED": "1"}
+    assert cfg["env"] == {"PYTHONUNBUFFERED": "1", "VIBE_CRYPTO_MCP_ENABLE_ORDERS": "0"}
 
 
 def test_mcp_config_uses_find_spec_origin(monkeypatch, tmp_path):

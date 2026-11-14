@@ -380,6 +380,10 @@ class APIConfig(_EnvBase):
     vibe_trading_mcp_allowed_hosts: str = Field(
         alias="VIBE_TRADING_MCP_ALLOWED_HOSTS", default="",
     )
+    # Shared secret for the network MCP transports (ADR 0008). Never returned by any API.
+    vibe_crypto_mcp_token: str = Field(alias="VIBE_CRYPTO_MCP_TOKEN", default="")
+    # Opt-in order tools over MCP (ADR 0008). Process environment only.
+    vibe_crypto_mcp_enable_orders: EnvBool = Field(alias="VIBE_CRYPTO_MCP_ENABLE_ORDERS", default=False)
     enable_session_runtime: EnvBool = Field(alias="ENABLE_SESSION_RUNTIME", default=True)
     vibe_trading_trust_docker_loopback: EnvBool = Field(
         alias="VIBE_TRADING_TRUST_DOCKER_LOOPBACK", default=False,
