@@ -1,3 +1,4 @@
+import { Badge, Button, Card, CardBody, EmptyState, Input, Page, PageHeader, Select, Textarea } from "@/components/ui";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertTriangle, Download, FilePlus2, Loader2, RefreshCw, Search } from "lucide-react";
@@ -223,114 +224,101 @@ export function ResearchArtifacts() {
   }
 
   return (
-    <div className="min-h-screen p-6 lg:p-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-        <section className="flex flex-wrap items-end justify-between gap-4 border-b pb-6">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">{t("researchArtifacts.title")}</h1>
-            <p className="mt-2 max-w-3xl text-sm text-muted-foreground">{t("researchArtifacts.subtitle")}</p>
-          </div>
-          <div className="flex gap-2">
-            <button type="button" className="rounded-md border px-3 py-2 text-sm" onClick={() => setForm(blankForm())}>
-              <FilePlus2 className="me-2 inline h-4 w-4" />{t("researchArtifacts.newResearch")}
-            </button>
-            <button type="button" className="rounded-md border px-3 py-2 text-sm" disabled={loading} onClick={() => void loadArtifacts(query.trim())}>
-              <RefreshCw className={`me-2 inline h-4 w-4 ${loading ? "animate-spin" : ""}`} />{t("reports.refresh")}
-            </button>
-          </div>
-        </section>
+    <Page>
+      <div className="flex flex-col gap-6">
+        <PageHeader title={t("researchArtifacts.title")} description={t("researchArtifacts.subtitle")} actions={<>
+          <Button onClick={() => setForm(blankForm())}><FilePlus2 className="h-4 w-4" />{t("researchArtifacts.newResearch")}</Button>
+          <Button disabled={loading} onClick={() => void loadArtifacts(query.trim())}><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />{t("reports.refresh")}</Button>
+        </>} />
 
         <form className="flex gap-2" onSubmit={(event) => { event.preventDefault(); void loadArtifacts(query.trim()); }}>
           <label className="relative flex-1">
             <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input className="w-full rounded-md border bg-background py-2 ps-9 pe-3 text-sm" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("researchArtifacts.searchPlaceholder")} />
+            <Input className="ps-9" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("researchArtifacts.searchPlaceholder")} />
           </label>
-          <button type="submit" className="rounded-md border px-4 py-2 text-sm">{t("alphaZoo.search")}</button>
+          <Button type="submit">{t("alphaZoo.search")}</Button>
         </form>
 
-        {error && <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
-        {notice && <div role="status" className="rounded-md border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm">{notice}</div>}
+        {error && <div role="alert" className="rounded-lg border border-danger/40 bg-danger/10 p-3 text-sm text-danger">{error}</div>}
+        {notice && <div role="status" className="rounded-lg border border-success/40 bg-success/10 p-3 text-sm">{notice}</div>}
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.7fr)]">
           <div className="space-y-4">
             {loading && <div className="flex justify-center p-8"><Loader2 className="h-5 w-5 animate-spin" /></div>}
             {!loading && artifacts.length === 0 && (
-              <section className="rounded-lg border border-dashed p-8 text-center">
-                <h2 className="font-medium">{t("researchArtifacts.emptyTitle")}</h2>
-                <p className="mt-2 text-sm text-muted-foreground">{t("researchArtifacts.emptyHint")}</p>
-              </section>
+              <Card><EmptyState title={t("researchArtifacts.emptyTitle")} description={t("researchArtifacts.emptyHint")} /></Card>
             )}
             {artifacts.map((item) => (
-              <button key={item.artifact_id} type="button" onClick={() => void openArtifact(item.artifact_id)} className="w-full rounded-lg border p-4 text-start transition hover:bg-muted/50">
+              <button key={item.artifact_id} type="button" onClick={() => void openArtifact(item.artifact_id)} className="w-full rounded-lg border border-border bg-card p-4 text-start transition-colors hover:bg-muted/50">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h2 className="font-medium">{item.subject}</h2>
-                  <span className="text-xs text-muted-foreground">r{item.revision_number}</span>
+                  <h2 className="text-sm font-medium">{item.subject}</h2>
+                  <Badge>r{item.revision_number}</Badge>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                   {item.universe && <span>{item.universe}</span>}
                   <span>{t("researchArtifacts.dataAsOf")}: {item.data_as_of}</span>
                   <span>{t("researchArtifacts.verification")}: {item.verification_status}</span>
                 </div>
-                {item.evidence_missing && <div className="mt-2 flex items-center gap-1 text-xs text-amber-600"><AlertTriangle className="h-3.5 w-3.5" />{t("researchArtifacts.evidenceMissing")}</div>}
+                {item.evidence_missing && <div className="mt-2 flex items-center gap-1 text-xs text-warning"><AlertTriangle className="h-3.5 w-3.5" />{t("researchArtifacts.evidenceMissing")}</div>}
               </button>
             ))}
 
             {detail && (
-              <section className="rounded-lg border p-4">
+              <Card className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h2 className="font-medium">{detail.artifact.subject}</h2>
                     <p className="mt-1 text-xs text-muted-foreground">{detail.artifact.artifact_id}</p>
                   </div>
-                  <button type="button" className="text-sm text-muted-foreground" onClick={() => {
+                  <Button variant="ghost" size="sm" onClick={() => {
                     detailRequest.current += 1;
                     comparisonRequest.current += 1;
                     setComparing(false);
                     setComparison(null);
                     setDetail(null);
-                  }}>{t("researchArtifacts.close")}</button>
+                  }}>{t("researchArtifacts.close")}</Button>
                 </div>
-                <pre className="mt-4 max-h-96 overflow-auto whitespace-pre-wrap rounded-md bg-muted/40 p-3 font-sans text-sm">{detail.artifact.content}</pre>
+                <pre className="mt-4 max-h-96 overflow-auto whitespace-pre-wrap rounded-lg bg-muted/40 p-3 font-sans text-sm">{detail.artifact.content}</pre>
                 <details className="mt-3 text-sm">
                   <summary className="cursor-pointer">{t("researchArtifacts.evidence")}</summary>
                   <pre className="mt-2 overflow-auto whitespace-pre-wrap">{JSON.stringify(detail.artifact.evidence, null, 2)}</pre>
                 </details>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <button type="button" className="rounded-md border px-3 py-1.5 text-sm" onClick={() => setForm(revisionForm(detail.artifact))}>{t("researchArtifacts.revise")}</button>
-                  <button type="button" className="rounded-md border px-3 py-1.5 text-sm" disabled={exporting !== null} onClick={() => void exportArtifact("json")}>
-                    <Download className="me-1 inline h-4 w-4" />{exporting === "json" ? t("researchArtifacts.exporting") : t("researchArtifacts.exportJson")}
-                  </button>
-                  <button type="button" className="rounded-md border px-3 py-1.5 text-sm" disabled={exporting !== null} onClick={() => void exportArtifact("markdown")}>
-                    <Download className="me-1 inline h-4 w-4" />{exporting === "markdown" ? t("researchArtifacts.exporting") : t("researchArtifacts.exportMarkdown")}
-                  </button>
+                  <Button size="sm" onClick={() => setForm(revisionForm(detail.artifact))}>{t("researchArtifacts.revise")}</Button>
+                  <Button size="sm" disabled={exporting !== null} onClick={() => void exportArtifact("json")}>
+                    <Download className="h-4 w-4" />{exporting === "json" ? t("researchArtifacts.exporting") : t("researchArtifacts.exportJson")}
+                  </Button>
+                  <Button size="sm" disabled={exporting !== null} onClick={() => void exportArtifact("markdown")}>
+                    <Download className="h-4 w-4" />{exporting === "markdown" ? t("researchArtifacts.exporting") : t("researchArtifacts.exportMarkdown")}
+                  </Button>
                 </div>
                 {detail.revisions.length > 1 && (
-                  <div className="mt-4 rounded-md border p-3 text-sm">
+                  <div className="mt-4 rounded-lg border p-3 text-sm">
                     <h3 className="font-medium">{t("researchArtifacts.compareTitle")}</h3>
                     <div className="mt-2 grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
                       <label className="text-xs text-muted-foreground">{t("researchArtifacts.fromRevision")}
-                        <select className="mt-1 w-full rounded-md border bg-background px-2 py-2 text-sm text-foreground" value={compareFrom} onChange={(event) => {
+                        <Select className="mt-1" value={compareFrom} onChange={(event) => {
                           setCompareFrom(event.target.value);
                           comparisonRequest.current += 1;
                           setComparing(false);
                           setComparison(null);
                         }}>
                           {detail.revisions.map((revision) => <option key={revision.revision_id} value={revision.revision_id}>r{revision.revision_number} · {revision.data_as_of}</option>)}
-                        </select>
+                        </Select>
                       </label>
                       <label className="text-xs text-muted-foreground">{t("researchArtifacts.toRevision")}
-                        <select className="mt-1 w-full rounded-md border bg-background px-2 py-2 text-sm text-foreground" value={compareTo} onChange={(event) => {
+                        <Select className="mt-1" value={compareTo} onChange={(event) => {
                           setCompareTo(event.target.value);
                           comparisonRequest.current += 1;
                           setComparing(false);
                           setComparison(null);
                         }}>
                           {detail.revisions.map((revision) => <option key={revision.revision_id} value={revision.revision_id}>r{revision.revision_number} · {revision.data_as_of}</option>)}
-                        </select>
+                        </Select>
                       </label>
-                      <button type="button" className="self-end rounded-md border px-3 py-2 disabled:opacity-50" disabled={comparing || !compareFrom || !compareTo} onClick={() => void compareSelectedRevisions()}>
+                      <Button className="self-end" disabled={comparing || !compareFrom || !compareTo} onClick={() => void compareSelectedRevisions()}>
                         {comparing ? t("researchArtifacts.comparing") : t("researchArtifacts.compareAction")}
-                      </button>
+                      </Button>
                     </div>
                     <p className="mt-2 text-xs text-muted-foreground">{t("researchArtifacts.comparisonOnly")}</p>
                     {comparison && (
@@ -341,29 +329,29 @@ export function ResearchArtifacts() {
                         {comparison.content.changed && (
                           <section>
                             <h4 className="text-xs font-medium">{t("researchArtifacts.content")}</h4>
-                            <pre className="mt-1 max-h-96 overflow-auto whitespace-pre-wrap rounded-md bg-muted/40 p-2 font-mono text-xs">{comparison.content.diff.join("\n")}</pre>
-                            {comparison.content.truncated && <p className="mt-1 text-xs text-amber-600">{t("researchArtifacts.compareTruncated")}</p>}
+                            <pre className="mt-1 max-h-96 overflow-auto whitespace-pre-wrap rounded-lg bg-muted/40 p-2 font-mono text-xs">{comparison.content.diff.join("\n")}</pre>
+                            {comparison.content.truncated && <p className="mt-1 text-xs text-warning">{t("researchArtifacts.compareTruncated")}</p>}
                           </section>
                         )}
                         {comparison.evidence.changed && (
                           <section>
                             <h4 className="text-xs font-medium">{t("researchArtifacts.evidence")}</h4>
-                            <pre className="mt-1 max-h-64 overflow-auto whitespace-pre-wrap rounded-md bg-muted/40 p-2 text-xs">{JSON.stringify(comparison.evidence, null, 2)}</pre>
+                            <pre className="mt-1 max-h-64 overflow-auto whitespace-pre-wrap rounded-lg bg-muted/40 p-2 text-xs">{JSON.stringify(comparison.evidence, null, 2)}</pre>
                           </section>
                         )}
                         {Object.keys(comparison.metadata).length > 0 && (
                           <section>
                             <h4 className="text-xs font-medium">{t("researchArtifacts.metadataChanges")}</h4>
-                            <pre className="mt-1 max-h-64 overflow-auto whitespace-pre-wrap rounded-md bg-muted/40 p-2 text-xs">{JSON.stringify(comparison.metadata, null, 2)}</pre>
+                            <pre className="mt-1 max-h-64 overflow-auto whitespace-pre-wrap rounded-lg bg-muted/40 p-2 text-xs">{JSON.stringify(comparison.metadata, null, 2)}</pre>
                           </section>
                         )}
                         <div className="flex flex-wrap gap-2 border-t pt-3">
-                          <button type="button" className="rounded-md border px-3 py-1.5 text-sm" disabled={comparisonExporting !== null} onClick={() => void exportComparison("json")}>
-                            <Download className="me-1 inline h-4 w-4" />{comparisonExporting === "json" ? t("researchArtifacts.exporting") : t("researchArtifacts.exportComparisonJson")}
-                          </button>
-                          <button type="button" className="rounded-md border px-3 py-1.5 text-sm" disabled={comparisonExporting !== null} onClick={() => void exportComparison("markdown")}>
-                            <Download className="me-1 inline h-4 w-4" />{comparisonExporting === "markdown" ? t("researchArtifacts.exporting") : t("researchArtifacts.exportComparisonMarkdown")}
-                          </button>
+                          <Button size="sm" disabled={comparisonExporting !== null} onClick={() => void exportComparison("json")}>
+                            <Download className="h-4 w-4" />{comparisonExporting === "json" ? t("researchArtifacts.exporting") : t("researchArtifacts.exportComparisonJson")}
+                          </Button>
+                          <Button size="sm" disabled={comparisonExporting !== null} onClick={() => void exportComparison("markdown")}>
+                            <Download className="h-4 w-4" />{comparisonExporting === "markdown" ? t("researchArtifacts.exporting") : t("researchArtifacts.exportComparisonMarkdown")}
+                          </Button>
                         </div>
                       </div>
                     )}
@@ -372,7 +360,7 @@ export function ResearchArtifacts() {
                 <h3 className="mt-5 text-sm font-medium">{t("researchArtifacts.history")}</h3>
                 <div className="mt-2 space-y-2">
                   {detail.revisions.map((revision) => (
-                    <details key={revision.revision_id} className="rounded-md border p-3 text-sm">
+                    <details key={revision.revision_id} className="rounded-lg border p-3 text-sm">
                       <summary className="cursor-pointer">r{revision.revision_number} · {revision.data_as_of} · {revision.created_at}</summary>
                       <pre className="mt-3 whitespace-pre-wrap font-sans text-muted-foreground">{revision.content}</pre>
                       <p className="mt-2 text-xs text-muted-foreground">{t("researchArtifacts.verification")}: {revision.verification_status}</p>
@@ -380,49 +368,49 @@ export function ResearchArtifacts() {
                     </details>
                   ))}
                 </div>
-              </section>
+              </Card>
             )}
           </div>
 
-          <form className="space-y-3 rounded-lg border p-4" onSubmit={(event) => void save(event)}>
-            <h2 className="font-medium">{t(form.artifact_id ? "researchArtifacts.formTitleRevision" : "researchArtifacts.formTitleNew")}</h2>
-            <label className="block text-sm">{t("researchArtifacts.subject")}
-              <input required className="mt-1 w-full rounded-md border bg-background px-3 py-2" disabled={Boolean(form.artifact_id)} value={form.subject} onChange={(event) => update("subject", event.target.value)} />
+          <Card className="h-fit"><CardBody><form className="space-y-3" onSubmit={(event) => void save(event)}>
+            <h2 className="text-sm font-semibold">{t(form.artifact_id ? "researchArtifacts.formTitleRevision" : "researchArtifacts.formTitleNew")}</h2>
+            <label className="block space-y-1.5 text-[13px] font-medium">{t("researchArtifacts.subject")}
+              <Input required  disabled={Boolean(form.artifact_id)} value={form.subject} onChange={(event) => update("subject", event.target.value)} />
             </label>
-            <label className="block text-sm">{t("researchArtifacts.universe")}
-              <input className="mt-1 w-full rounded-md border bg-background px-3 py-2" disabled={Boolean(form.artifact_id)} value={form.universe} onChange={(event) => update("universe", event.target.value)} />
+            <label className="block space-y-1.5 text-[13px] font-medium">{t("researchArtifacts.universe")}
+              <Input  disabled={Boolean(form.artifact_id)} value={form.universe} onChange={(event) => update("universe", event.target.value)} />
             </label>
-            <label className="block text-sm">{t("researchArtifacts.dataAsOf")}
-              <input required className="mt-1 w-full rounded-md border bg-background px-3 py-2" value={form.data_as_of} onChange={(event) => update("data_as_of", event.target.value)} />
+            <label className="block space-y-1.5 text-[13px] font-medium">{t("researchArtifacts.dataAsOf")}
+              <Input required  value={form.data_as_of} onChange={(event) => update("data_as_of", event.target.value)} />
             </label>
-            <label className="block text-sm">{t("researchArtifacts.content")}
-              <textarea required rows={7} className="mt-1 w-full rounded-md border bg-background px-3 py-2" value={form.content} onChange={(event) => update("content", event.target.value)} />
+            <label className="block space-y-1.5 text-[13px] font-medium">{t("researchArtifacts.content")}
+              <Textarea required rows={7} value={form.content} onChange={(event) => update("content", event.target.value)} />
             </label>
             <div className="grid grid-cols-2 gap-3">
-              <label className="block text-sm">{t("researchArtifacts.verification")}
-                <input className="mt-1 w-full rounded-md border bg-background px-3 py-2" value={form.verification_status} onChange={(event) => update("verification_status", event.target.value)} />
+              <label className="block space-y-1.5 text-[13px] font-medium">{t("researchArtifacts.verification")}
+                <Input  value={form.verification_status} onChange={(event) => update("verification_status", event.target.value)} />
               </label>
-              <label className="block text-sm">{t("researchArtifacts.completeness")}
-                <input className="mt-1 w-full rounded-md border bg-background px-3 py-2" value={form.completeness} onChange={(event) => update("completeness", event.target.value)} />
+              <label className="block space-y-1.5 text-[13px] font-medium">{t("researchArtifacts.completeness")}
+                <Input  value={form.completeness} onChange={(event) => update("completeness", event.target.value)} />
               </label>
             </div>
-            <label className="block text-sm">{t("researchArtifacts.additionalEvidence")}
-              <textarea rows={3} className="mt-1 w-full rounded-md border bg-background px-3 py-2" value={form.newEvidence} onChange={(event) => update("newEvidence", event.target.value)} />
+            <label className="block space-y-1.5 text-[13px] font-medium">{t("researchArtifacts.additionalEvidence")}
+              <Textarea rows={3} value={form.newEvidence} onChange={(event) => update("newEvidence", event.target.value)} />
             </label>
             <details className="text-sm">
               <summary className="cursor-pointer">{t("researchArtifacts.optionalLinks")}</summary>
               <div className="mt-2 grid grid-cols-2 gap-2">
                 {(["hypothesis_id", "goal_id", "session_id", "run_id"] as const).map((key) => (
-                  <input key={key} aria-label={t(`researchArtifacts.${key}`)} placeholder={t(`researchArtifacts.${key}`)} className="rounded-md border bg-background px-3 py-2" value={form[key]} onChange={(event) => update(key, event.target.value)} />
+                  <Input key={key} aria-label={t(`researchArtifacts.${key}`)} placeholder={t(`researchArtifacts.${key}`)} value={form[key]} onChange={(event) => update(key, event.target.value)} />
                 ))}
               </div>
             </details>
-            <button type="submit" disabled={saving} className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50">
+            <Button type="submit" variant="primary" disabled={saving} className="w-full">
               {saving ? t("researchArtifacts.saving") : t("researchArtifacts.save")}
-            </button>
-          </form>
+            </Button>
+          </form></CardBody></Card>
         </div>
       </div>
-    </div>
+    </Page>
   );
 }

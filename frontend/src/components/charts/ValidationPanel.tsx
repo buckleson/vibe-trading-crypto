@@ -1,5 +1,6 @@
 import i18n from '@/i18n';
 import { cn } from "@/lib/utils";
+import { Card, CardBody, Table, TBody, TD, TH, THead, TR } from "@/components/ui";
 import type { ValidationData } from "@/lib/api";
 import { DistributionChart } from "@/components/charts/DistributionChart";
 import { MonteCarloPathsChart } from "@/components/charts/MonteCarloPathsChart";
@@ -15,10 +16,10 @@ function Badge({ value, good }: { value: string; good: boolean | null }) {
   return (
     <span
       className={cn(
-        "inline-block px-2 py-0.5 rounded-full text-xs font-semibold",
-        good === true && "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
-        good === false && "bg-red-500/15 text-red-600 dark:text-red-400",
-        good === null && "bg-zinc-500/10 text-zinc-500",
+        "inline-block rounded-sm px-1.5 py-0.5 text-xs font-medium",
+        good === true && "bg-success/12 text-success",
+        good === false && "bg-danger/12 text-danger",
+        good === null && "bg-muted text-muted-foreground",
       )}
     >
       {value}
@@ -29,9 +30,9 @@ function Badge({ value, good }: { value: string; good: boolean | null }) {
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="text-center py-2">
-      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
-      <p className="text-sm font-bold font-mono tabular-nums">{value}</p>
-      {sub && <p className="text-[10px] text-muted-foreground">{sub}</p>}
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-sm font-semibold tabular-nums">{value}</p>
+      {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
     </div>
   );
 }
@@ -52,7 +53,7 @@ function MonteCarloSection({ mc }: { mc: NonNullable<ValidationData["monte_carlo
       <p className="text-xs text-muted-foreground">
         {i18n.t("validation.monteCarloDesc", { n: mc.n_simulations.toLocaleString() })}
       </p>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 rounded-xl border border-border/60 bg-muted/20 p-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 rounded-lg border border-border/60 bg-muted/30 p-3">
         <Stat label={i18n.t("validation.actualSharpe")} value={mc.actual_sharpe.toFixed(2)} />
         <Stat label={i18n.t("validation.pValueSharpe")} value={mc.p_value_sharpe.toFixed(4)} sub={sig ? "< 0.05" : ">= 0.05"} />
         <Stat label={i18n.t("validation.simulatedMean")} value={mc.simulated_sharpe_mean.toFixed(2)} sub={`std ${mc.simulated_sharpe_std.toFixed(2)}`} />
@@ -81,14 +82,14 @@ function MonteCarloSection({ mc }: { mc: NonNullable<ValidationData["monte_carlo
         </div>
       ) : (
         <div className="space-y-1">
-          <div className="flex justify-between text-[10px] text-muted-foreground font-mono">
+          <div className="flex justify-between text-xs text-muted-foreground">
             <span>P5: {mc.simulated_sharpe_p5.toFixed(2)}</span>
             <span>Actual: {mc.actual_sharpe.toFixed(2)}</span>
             <span>P95: {mc.simulated_sharpe_p95.toFixed(2)}</span>
           </div>
           <div className="relative h-3 rounded-full bg-muted overflow-hidden">
-            <div className="absolute inset-y-0 bg-zinc-300 dark:bg-zinc-600 rounded-full" style={barStyle(mc.simulated_sharpe_p5, mc.simulated_sharpe_p95, mc.simulated_sharpe_p5, mc.simulated_sharpe_p95)} />
-            <div className="absolute top-0 bottom-0 w-0.5 bg-emerald-500" style={markerStyle(mc.actual_sharpe, mc.simulated_sharpe_p5, mc.simulated_sharpe_p95)} />
+            <div className="absolute inset-y-0 bg-muted-foreground/40 rounded-full" style={barStyle(mc.simulated_sharpe_p5, mc.simulated_sharpe_p95, mc.simulated_sharpe_p5, mc.simulated_sharpe_p95)} />
+            <div className="absolute top-0 bottom-0 w-0.5 bg-success" style={markerStyle(mc.actual_sharpe, mc.simulated_sharpe_p5, mc.simulated_sharpe_p95)} />
           </div>
         </div>
       )}
@@ -108,7 +109,7 @@ function BootstrapSection({ bs }: { bs: NonNullable<ValidationData["bootstrap"]>
       <p className="text-xs text-muted-foreground">
         {i18n.t("validation.bootstrapDesc", { n: bs.n_bootstrap.toLocaleString(), pct: (bs.confidence * 100).toFixed(0) + "%" })}
       </p>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 rounded-xl border border-border/60 bg-muted/20 p-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 rounded-lg border border-border/60 bg-muted/30 p-3">
         <Stat label={i18n.t("validation.observedSharpe")} value={bs.observed_sharpe.toFixed(2)} />
         <Stat label={i18n.t("validation.ci", { pct: (bs.confidence * 100).toFixed(0) + "%" })} value={`[${bs.ci_lower.toFixed(2)}, ${bs.ci_upper.toFixed(2)}]`} />
         <Stat label={i18n.t("validation.medianSharpe")} value={bs.median_sharpe.toFixed(2)} />
@@ -130,12 +131,12 @@ function BootstrapSection({ bs }: { bs: NonNullable<ValidationData["bootstrap"]>
         </div>
       ) : (
         <div className="space-y-1">
-          <div className="flex justify-between text-[10px] text-muted-foreground font-mono">
+          <div className="flex justify-between text-xs text-muted-foreground">
             <span>{bs.ci_lower.toFixed(2)}</span>
             <span>{bs.ci_upper.toFixed(2)}</span>
           </div>
           <div className="relative h-3 rounded-full bg-muted overflow-hidden">
-            <div className={cn("absolute inset-y-0 rounded-full", reliable ? "bg-emerald-500/30" : "bg-amber-500/30")} style={barStyle(bs.ci_lower, bs.ci_upper, Math.min(bs.ci_lower, 0), Math.max(bs.ci_upper, 1))} />
+            <div className={cn("absolute inset-y-0 rounded-full", reliable ? "bg-success/30" : "bg-warning/30")} style={barStyle(bs.ci_lower, bs.ci_upper, Math.min(bs.ci_lower, 0), Math.max(bs.ci_upper, 1))} />
             <div className="absolute top-0 bottom-0 w-0.5 bg-foreground" style={markerStyle(bs.observed_sharpe, Math.min(bs.ci_lower, 0), Math.max(bs.ci_upper, 1))} />
           </div>
         </div>
@@ -156,7 +157,7 @@ function WalkForwardSection({ wf }: { wf: NonNullable<ValidationData["walk_forwa
       <p className="text-xs text-muted-foreground">
         {i18n.t("validation.walkForwardDesc", { n: wf.n_windows })}
       </p>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 rounded-xl border border-border/60 bg-muted/20 p-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 rounded-lg border border-border/60 bg-muted/30 p-3">
         <Stat label={i18n.t("validation.consistency")} value={pctFmt(wf.consistency_rate)} />
         <Stat label={i18n.t("validation.avgReturn")} value={pctFmt(wf.return_mean)} sub={`std ${pctFmt(wf.return_std)}`} />
         <Stat label={i18n.t("validation.avgSharpe")} value={wf.sharpe_mean.toFixed(2)} sub={`std ${wf.sharpe_std.toFixed(2)}`} />
@@ -170,34 +171,32 @@ function WalkForwardSection({ wf }: { wf: NonNullable<ValidationData["walk_forwa
         </div>
       )}
       {/* Per-window table */}
-      <div className="overflow-x-auto">
-      <table className="w-full text-xs">
-        <thead>
-          <tr className="border-b text-left text-muted-foreground">
-            <th className="py-1.5 pr-3">#</th>
-            <th className="py-1.5 pr-3">{i18n.t("validation.period2")}</th>
-            <th className="py-1.5 pr-3 text-right">{i18n.t("validation.return")}</th>
-            <th className="py-1.5 pr-3 text-right">{i18n.t("reports.sharpe")}</th>
-            <th className="py-1.5 pr-3 text-right">{i18n.t("validation.maxDd")}</th>
-            <th className="py-1.5 pr-3 text-right">{i18n.t("runDetail.trades")}</th>
-            <th className="py-1.5 text-right">{i18n.t("validation.winRate")}</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table>
+        <THead>
+          <TR>
+            <TH>#</TH>
+            <TH>{i18n.t("validation.period2")}</TH>
+            <TH numeric>{i18n.t("validation.return")}</TH>
+            <TH numeric>{i18n.t("reports.sharpe")}</TH>
+            <TH numeric>{i18n.t("validation.maxDd")}</TH>
+            <TH numeric>{i18n.t("runDetail.trades")}</TH>
+            <TH numeric>{i18n.t("validation.winRate")}</TH>
+          </TR>
+        </THead>
+        <TBody>
           {wf.windows.map((w) => (
-            <tr key={w.window} className="border-b last:border-0">
-              <td className="py-1.5 pr-3 font-mono">{w.window}</td>
-              <td className="py-1.5 pr-3 font-mono text-muted-foreground">{w.start} ~ {w.end}</td>
-              <td className={cn("py-1.5 pr-3 text-right font-mono tabular-nums", w.return > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400")}>{pctFmt(w.return)}</td>
-              <td className="py-1.5 pr-3 text-right font-mono tabular-nums">{w.sharpe.toFixed(2)}</td>
-              <td className="py-1.5 pr-3 text-right font-mono tabular-nums">{pctFmt(w.max_dd)}</td>
-              <td className="py-1.5 pr-3 text-right font-mono tabular-nums">{w.trades}</td>
-              <td className="py-1.5 text-right font-mono tabular-nums">{pctFmt(w.win_rate)}</td>
-            </tr>
+            <TR key={w.window}>
+              <TD>{w.window}</TD>
+              <TD className="text-muted-foreground">{w.start} ~ {w.end}</TD>
+              <TD numeric className={w.return > 0 ? "text-success" : "text-danger"}>{pctFmt(w.return)}</TD>
+              <TD numeric>{w.sharpe.toFixed(2)}</TD>
+              <TD numeric>{pctFmt(w.max_dd)}</TD>
+              <TD numeric>{w.trades}</TD>
+              <TD numeric>{pctFmt(w.win_rate)}</TD>
+            </TR>
           ))}
-        </tbody>
-      </table>
-      </div>
+        </TBody>
+      </Table>
     </div>
   );
 }
@@ -225,12 +224,12 @@ export function ValidationPanel({ data, compact = false }: Props) {
     return <p className="p-8 text-sm text-muted-foreground">{i18n.t("validation.noData")}</p>;
   }
 
-  const sectionClass = compact ? undefined : "rounded-xl border border-border/60 bg-card p-4 shadow-sm";
+  const frame = (node: React.ReactNode) => compact ? <section>{node}</section> : <Card><CardBody>{node}</CardBody></Card>;
   return (
-    <div className={compact ? "space-y-6" : "p-4 space-y-4"}>
-      {hasMC && <section className={sectionClass}><MonteCarloSection mc={data.monte_carlo!} /></section>}
-      {hasBS && <section className={sectionClass}><BootstrapSection bs={data.bootstrap!} /></section>}
-      {hasWF && <section className={sectionClass}><WalkForwardSection wf={data.walk_forward!} /></section>}
+    <div className={compact ? "space-y-6" : "space-y-6"}>
+      {hasMC && frame(<MonteCarloSection mc={data.monte_carlo!} />)}
+      {hasBS && frame(<BootstrapSection bs={data.bootstrap!} />)}
+      {hasWF && frame(<WalkForwardSection wf={data.walk_forward!} />)}
     </div>
   );
 }

@@ -7,12 +7,9 @@ import { getChartTheme } from "@/lib/chart-theme";
 import { useThemeDark } from "@/lib/theme-store";
 import type { RunData } from "@/lib/api";
 import { runTrades } from "@/lib/runReports";
+import { getPnlColors } from "@/lib/pnl-colors";
+import { Badge, Card, CardBody, CardHeader, Stat, Table, TBody, TD, TH, THead, TR } from "@/components/ui";
 
-const BLUE = "#3676df";
-const DEEP_BLUE = "#2156ae";
-const ORANGE = "#ff8a3d";
-const GREEN = "#3b9b8f";
-const SLATE = "#8f98a6";
 
 function num(value: unknown): number | null {
   const parsed = Number(value);
@@ -21,12 +18,12 @@ function num(value: unknown): number | null {
 
 function fixed(value: unknown, digits = 2): string {
   const parsed = num(value);
-  return parsed == null ? "—" : parsed.toFixed(digits);
+  return parsed == null ? "-" : parsed.toFixed(digits);
 }
 
 function pct(value: unknown, digits = 1): string {
   const parsed = num(value);
-  return parsed == null ? "—" : `${(parsed * 100).toFixed(digits)}%`;
+  return parsed == null ? "-" : `${(parsed * 100).toFixed(digits)}%`;
 }
 
 function timestamp(row: Record<string, string>): string {
@@ -109,16 +106,6 @@ function rollingSharpe(rows: Array<Record<string, string>>, window = 20): Array<
   });
 }
 
-function FigureTitle({ index, title, note }: { index: string; title: string; note: string }) {
-  return (
-    <div className="border-l-4 border-[#3676df] pl-3">
-      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#3676df]">Figure {index}</p>
-      <h3 className="mt-0.5 text-sm font-semibold text-foreground">{title}</h3>
-      <p className="mt-1 text-xs text-muted-foreground">{note}</p>
-    </div>
-  );
-}
-
 export function StrategyResearchDashboard({ run }: { run: RunData }) {
   const { t } = useTranslation();
   const navRef = useRef<HTMLDivElement>(null);
@@ -143,9 +130,12 @@ export function StrategyResearchDashboard({ run }: { run: RunData }) {
     const charts = nodes.map((node) => echarts.init(node!));
     const [navChart, riskChart, tradeChart] = charts;
     const theme = getChartTheme();
+    const pnl = getPnlColors();
+    const [BLUE, , GREEN, , SLATE] = theme.seriesPalette;
+    const tooltip = { trigger: "axis", backgroundColor: theme.tooltipBg, borderColor: theme.tooltipBorder, borderWidth: 1, extraCssText: "box-shadow:none;", textStyle: { color: theme.tooltipText, fontSize: 12 } };
     const axis = {
       axisLine: { lineStyle: { color: theme.axisColor } },
-      axisLabel: { color: theme.textColor, fontSize: 10 },
+      axisLabel: { color: theme.textColor, fontSize: 12 },
       splitLine: { lineStyle: { color: theme.gridColor } },
     };
     const dates = equityRows.map(timestamp);
@@ -156,11 +146,11 @@ export function StrategyResearchDashboard({ run }: { run: RunData }) {
 
     navChart.setOption({
       backgroundColor: "transparent",
-      tooltip: { trigger: "axis" },
-      legend: { top: 0, right: 4, textStyle: { color: theme.textColor, fontSize: 10 } },
+      tooltip,
+      legend: { top: 0, left: 0, textStyle: { color: theme.textColor, fontSize: 12 } },
       grid: { left: 18, right: 22, top: 32, bottom: 18, containLabel: true },
       xAxis: { ...axis, type: "category", data: dates, boundaryGap: false },
-      yAxis: { ...axis, type: "value", axisLabel: { color: theme.textColor, fontSize: 10, formatter: (v: number) => `${v.toFixed(2)}x` } },
+      yAxis: { ...axis, type: "value", axisLabel: { color: theme.textColor, fontSize: 12, formatter: (v: number) => `${v.toFixed(2)}x` } },
       series: [
         { name: t("runDashboard.seriesStrategy"), type: "line", showSymbol: false, data: equities.map((v) => v == null ? null : v / firstEquity), lineStyle: { color: BLUE, width: 2.5 }, itemStyle: { color: BLUE } },
         ...(benchmarks.some((value) => value != null) ? [{ name: t("runDashboard.seriesBenchmark"), type: "line", showSymbol: false, data: benchmarks.map((v) => v == null ? null : v / firstBenchmark), lineStyle: { color: SLATE, width: 1.5, type: "dashed" }, itemStyle: { color: SLATE } }] : []),
@@ -171,16 +161,16 @@ export function StrategyResearchDashboard({ run }: { run: RunData }) {
     const sharpe = rollingSharpe(equityRows);
     riskChart.setOption({
       backgroundColor: "transparent",
-      tooltip: { trigger: "axis" },
-      legend: { top: 0, right: 4, textStyle: { color: theme.textColor, fontSize: 10 } },
+      tooltip,
+      legend: { top: 0, left: 0, textStyle: { color: theme.textColor, fontSize: 12 } },
       grid: { left: 18, right: 24, top: 32, bottom: 18, containLabel: true },
       xAxis: { ...axis, type: "category", data: dates, boundaryGap: false },
       yAxis: [
-        { ...axis, type: "value", axisLabel: { color: theme.textColor, fontSize: 10, formatter: (v: number) => `${(v * 100).toFixed(0)}%` } },
-        { ...axis, type: "value", splitLine: { show: false }, axisLabel: { color: theme.textColor, fontSize: 10 } },
+        { ...axis, type: "value", axisLabel: { color: theme.textColor, fontSize: 12, formatter: (v: number) => `${(v * 100).toFixed(0)}%` } },
+        { ...axis, type: "value", splitLine: { show: false }, axisLabel: { color: theme.textColor, fontSize: 12 } },
       ],
       series: [
-        { name: t("runDashboard.seriesDrawdown"), type: "line", showSymbol: false, data: drawdown, lineStyle: { color: ORANGE, width: 2 }, areaStyle: { color: "rgba(255,138,61,.10)" }, itemStyle: { color: ORANGE } },
+        { name: t("runDashboard.seriesDrawdown"), type: "line", showSymbol: false, data: drawdown, lineStyle: { color: pnl.loss, width: 2 }, areaStyle: { color: pnl.loss + "1A" }, itemStyle: { color: pnl.loss } },
         { name: t("runDashboard.seriesRollingSharpe"), type: "line", yAxisIndex: 1, showSymbol: false, connectNulls: false, data: sharpe, lineStyle: { color: GREEN, width: 1.5 }, itemStyle: { color: GREEN } },
       ],
     });
@@ -188,11 +178,11 @@ export function StrategyResearchDashboard({ run }: { run: RunData }) {
     const exits = trades.filter((trade) => (num(trade.pnl) || 0) !== 0).slice(-60);
     tradeChart.setOption({
       backgroundColor: "transparent",
-      tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
+      tooltip: { ...tooltip, axisPointer: { type: "shadow" } },
       grid: { left: 18, right: 18, top: 14, bottom: 18, containLabel: true },
-      xAxis: { ...axis, type: "category", data: exits.map((trade, index) => trade.timestamp || String(index + 1)), axisLabel: { color: theme.textColor, fontSize: 9, hideOverlap: true } },
+      xAxis: { ...axis, type: "category", data: exits.map((trade, index) => trade.timestamp || String(index + 1)), axisLabel: { color: theme.textColor, fontSize: 12, hideOverlap: true } },
       yAxis: { ...axis, type: "value" },
-      series: [{ type: "bar", barMaxWidth: 12, data: exits.map((trade) => { const value = num(trade.pnl) || 0; return { value, itemStyle: { color: value >= 0 ? GREEN : ORANGE } }; }) }],
+      series: [{ type: "bar", barMaxWidth: 12, data: exits.map((trade) => { const value = num(trade.pnl) || 0; return { value, itemStyle: { color: value >= 0 ? pnl.profit : pnl.loss } }; }) }],
     });
 
     let frame: number | null = null;
@@ -215,7 +205,7 @@ export function StrategyResearchDashboard({ run }: { run: RunData }) {
   // to the Studio tab instead, which actually renders that run's data.
   if (equityRows.length === 0 && trades.length === 0 && (run.risk_xray || run.rebalance_notes)) {
     return (
-      <div className="mx-auto max-w-[640px] rounded-xl border border-[#dfe2e7] bg-card p-8 text-center shadow-sm">
+      <div className="mx-auto max-w-[640px] rounded-lg border border-border bg-card p-8 text-center">
         <FlaskConical className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden="true" />
         <p className="mt-3 text-sm font-medium text-foreground">{t("runDashboard.noBacktestData")}</p>
         <p className="mt-1 text-sm text-muted-foreground">{t("runDashboard.noBacktestDataStudioHint")}</p>
@@ -224,69 +214,102 @@ export function StrategyResearchDashboard({ run }: { run: RunData }) {
   }
 
   const metrics: Record<string, number> = run.metrics || {};
-  const kpis = [
-    [t("runDashboard.kpiTotalReturn"), pct(metrics.total_return), BLUE],
-    [t("runDashboard.kpiAnnualReturn"), pct(metrics.annual_return), DEEP_BLUE],
-    ["Sharpe", fixed(metrics.sharpe), GREEN],
-    [t("runDashboard.kpiMaxDrawdown"), pct(metrics.max_drawdown), ORANGE],
-    [t("runDashboard.kpiWinRate"), pct(metrics.win_rate), GREEN],
-    [t("runDashboard.kpiTrades"), fixed(metrics.trade_count, 0), SLATE],
-  ] as const;
+  const kpis: Array<[string, string, "neutral" | "success" | "danger"]> = [
+    [t("runDashboard.kpiTotalReturn"), pct(metrics.total_return), (metrics.total_return ?? 0) < 0 ? "danger" : "success"],
+    [t("runDashboard.kpiAnnualReturn"), pct(metrics.annual_return), (metrics.annual_return ?? 0) < 0 ? "danger" : "success"],
+    ["Sharpe", fixed(metrics.sharpe), "neutral"],
+    [t("runDashboard.kpiMaxDrawdown"), pct(metrics.max_drawdown), "danger"],
+    [t("runDashboard.kpiWinRate"), pct(metrics.win_rate), "neutral"],
+    [t("runDashboard.kpiTrades"), fixed(metrics.trade_count, 0), "neutral"],
+  ];
+  const chartBox = "overflow-hidden rounded-lg border border-border";
+  const meta = "inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5";
 
   return (
-    <article className="mx-auto max-w-[1180px] overflow-hidden border border-[#dfe2e7] bg-card shadow-sm">
-      <header className="relative overflow-hidden border-b border-[#dfe2e7] bg-gradient-to-br from-[#3676df]/[0.10] via-background to-[#3b9b8f]/[0.05] p-5 md:p-8">
-        <div className="absolute -right-16 -top-20 h-52 w-52 rounded-full bg-[#3676df]/[0.08] blur-3xl" aria-hidden="true" />
-        <div className="relative">
+    <div className="mx-auto max-w-[1180px] space-y-6">
+      <Card>
+        <CardBody className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#3676df]">{t("runDashboard.eyebrow")}</p>
-            <span className="rounded-full border border-[#3676df]/20 bg-background/70 px-2.5 py-1 font-mono text-[10px] text-muted-foreground">RUN {run.run_id.slice(-8).toUpperCase()}</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-xl font-semibold tracking-tight">{identity.title}</h2>
+              {identity.strategyInferred && <Badge tone="warning">{t("runDashboard.strategyInferred")}</Badge>}
+            </div>
+            <Badge>Run {run.run_id.slice(-8)}</Badge>
           </div>
-          <div className="mt-4 flex max-w-4xl flex-wrap items-center gap-2">
-            <h2 className="text-2xl font-semibold leading-tight tracking-[-0.025em] text-foreground md:text-[30px]">{identity.title}</h2>
-            {identity.strategyInferred && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-[#ff8a3d]/30 bg-[#ff8a3d]/10 px-2 py-0.5 text-[11px] text-[#c25a14]">
-                {t("runDashboard.strategyInferred")}
-              </span>
-            )}
+          {run.prompt && <p className="max-w-4xl text-sm text-muted-foreground">{compactPrompt(run.prompt)}</p>}
+          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+            {(identity.startDate || identity.endDate) && <span className={meta}><CalendarRange className="h-3.5 w-3.5" aria-hidden="true" />{identity.startDate || "-"} - {identity.endDate || "-"}</span>}
+            {identity.engine && <span className={meta}><FlaskConical className="h-3.5 w-3.5" aria-hidden="true" />{identity.engine.toUpperCase()} {t("runDashboard.engine")}</span>}
+            {identity.source && <span className={meta}><Database className="h-3.5 w-3.5" aria-hidden="true" />{identity.source}</span>}
           </div>
-          {run.prompt && (
-            <p className="mt-2 max-w-4xl text-sm leading-6 text-muted-foreground">{compactPrompt(run.prompt)}</p>
-          )}
-          <div className="mt-5 flex flex-wrap gap-2 text-xs text-muted-foreground">
-            {(identity.startDate || identity.endDate) && <span className="inline-flex items-center gap-1.5 rounded-md border border-border/70 bg-background/65 px-2.5 py-1.5"><CalendarRange className="h-3.5 w-3.5 text-[#3676df]" />{identity.startDate || "—"} — {identity.endDate || "—"}</span>}
-            {identity.engine && <span className="inline-flex items-center gap-1.5 rounded-md border border-border/70 bg-background/65 px-2.5 py-1.5"><FlaskConical className="h-3.5 w-3.5 text-[#3676df]" />{identity.engine.toUpperCase()} {t("runDashboard.engine")}</span>}
-            {identity.source && <span className="inline-flex items-center gap-1.5 rounded-md border border-border/70 bg-background/65 px-2.5 py-1.5"><Database className="h-3.5 w-3.5 text-[#3676df]" />{identity.source}</span>}
-          </div>
-        </div>
-      </header>
+        </CardBody>
+      </Card>
 
-      <div className="grid grid-cols-2 border-b border-[#dfe2e7] md:grid-cols-3 lg:grid-cols-6">
-        {kpis.map(([label, value, color]) => <div key={label} className="border-b border-r border-[#dfe2e7] p-4 lg:border-b-0"><p className="text-[11px] text-muted-foreground">{label}</p><p className="mt-1 font-mono text-xl font-semibold tabular-nums" style={{ color }}>{value}</p></div>)}
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+        {kpis.map(([label, value, tone]) => <Card key={label} className="p-4"><Stat label={label} value={value} tone={tone} /></Card>)}
       </div>
 
-      <div className="space-y-8 p-5 md:p-7">
-        <section className="space-y-3"><FigureTitle index="01" title={t("runDashboard.figEquityTitle")} note={t("runDashboard.figEquityNote")} /><div ref={navRef} className="h-[320px] border border-[#dfe2e7] bg-background/40" /></section>
-        <section className="space-y-3"><FigureTitle index="02" title={t("runDashboard.figRiskTitle")} note={t("runDashboard.figRiskNote")} /><div ref={riskRef} className="h-[300px] border border-[#dfe2e7] bg-background/40" /></section>
-        <section className="space-y-3"><FigureTitle index="03" title={t("runDashboard.figPnlTitle")} note={t("runDashboard.figPnlNote")} /><div ref={tradesRef} className="h-[260px] border border-[#dfe2e7] bg-background/40" /></section>
-        <section className="space-y-3"><FigureTitle index="04" title={t("runDashboard.figLedgerTitle")} note={t("runDashboard.figLedgerNote")} /><TradeTable rows={trades.slice(-100).reverse()} /></section>
-        <section className="space-y-3"><FigureTitle index="05" title={t("runDashboard.figMetricsTitle")} note={t("runDashboard.figMetricsNote")} /><MetricTable metrics={metrics} /></section>
-      </div>
-    </article>
+      <Card>
+        <CardHeader title={t("runDashboard.figEquityTitle")} description={t("runDashboard.figEquityNote")} />
+        <CardBody><div ref={navRef} className={`h-[320px] ${chartBox}`} /></CardBody>
+      </Card>
+      <Card>
+        <CardHeader title={t("runDashboard.figRiskTitle")} description={t("runDashboard.figRiskNote")} />
+        <CardBody><div ref={riskRef} className={`h-[300px] ${chartBox}`} /></CardBody>
+      </Card>
+      <Card>
+        <CardHeader title={t("runDashboard.figPnlTitle")} description={t("runDashboard.figPnlNote")} />
+        <CardBody><div ref={tradesRef} className={`h-[260px] ${chartBox}`} /></CardBody>
+      </Card>
+      <Card>
+        <CardHeader title={t("runDashboard.figLedgerTitle")} description={t("runDashboard.figLedgerNote")} />
+        <CardBody><TradeTable rows={trades.slice(-100).reverse()} /></CardBody>
+      </Card>
+      <Card>
+        <CardHeader title={t("runDashboard.figMetricsTitle")} description={t("runDashboard.figMetricsNote")} />
+        <CardBody><MetricTable metrics={metrics} /></CardBody>
+      </Card>
+    </div>
   );
 }
 
 function TradeTable({ rows }: { rows: Array<Record<string, string>> }) {
   const { t } = useTranslation();
   if (!rows.length) return <EmptyData text={t("runDashboard.noTrades")} />;
-  return <div className="max-h-[440px] overflow-auto border border-[#dfe2e7]"><table className="w-full min-w-[760px] text-xs"><thead className="sticky top-0 bg-[#f5f7fa] text-muted-foreground dark:bg-slate-900"><tr><th className="px-3 py-2 text-left">{t("runDashboard.colTime")}</th><th className="px-3 py-2 text-left">{t("runDashboard.colSymbol")}</th><th className="px-3 py-2 text-left">{t("runDashboard.colSide")}</th><th className="px-3 py-2 text-right">{t("runDashboard.colPrice")}</th><th className="px-3 py-2 text-right">{t("runDashboard.colQty")}</th><th className="px-3 py-2 text-right">{t("runDashboard.colPnl")}</th><th className="px-3 py-2 text-left">{t("runDashboard.colReason")}</th></tr></thead><tbody>{rows.map((row, index) => { const pnl = num(row.pnl) || 0; return <tr key={`${row.timestamp}-${row.code}-${index}`} className="border-t border-[#dfe2e7]"><td className="px-3 py-2 font-mono">{row.timestamp || "—"}</td><td className="px-3 py-2 font-mono">{row.code || "—"}</td><td className="px-3 py-2 uppercase">{row.side || "—"}</td><td className="px-3 py-2 text-right font-mono">{fixed(row.price, 4)}</td><td className="px-3 py-2 text-right font-mono">{fixed(row.qty, 4)}</td><td className="px-3 py-2 text-right font-mono font-semibold" style={{ color: pnl > 0 ? GREEN : pnl < 0 ? ORANGE : SLATE }}>{fixed(pnl)}</td><td className="px-3 py-2 text-muted-foreground">{row.reason || "—"}</td></tr>; })}</tbody></table></div>;
+  return (
+    <Table wrapperClassName="max-h-[440px] overflow-auto" className="min-w-[760px]">
+      <THead className="sticky top-0"><TR>
+        <TH>{t("runDashboard.colTime")}</TH><TH>{t("runDashboard.colSymbol")}</TH><TH>{t("runDashboard.colSide")}</TH>
+        <TH numeric>{t("runDashboard.colPrice")}</TH><TH numeric>{t("runDashboard.colQty")}</TH><TH numeric>{t("runDashboard.colPnl")}</TH><TH>{t("runDashboard.colReason")}</TH>
+      </TR></THead>
+      <TBody>{rows.map((row, index) => {
+        const pnl = num(row.pnl) || 0;
+        return (
+          <TR key={`${row.timestamp}-${row.code}-${index}`}>
+            <TD className="tabular-nums">{row.timestamp || "-"}</TD>
+            <TD>{row.code || "-"}</TD>
+            <TD>{row.side || "-"}</TD>
+            <TD numeric>{fixed(row.price, 4)}</TD>
+            <TD numeric>{fixed(row.qty, 4)}</TD>
+            <TD numeric className={pnl > 0 ? "font-semibold text-success" : pnl < 0 ? "font-semibold text-danger" : "text-muted-foreground"}>{fixed(pnl)}</TD>
+            <TD className="text-muted-foreground">{row.reason || "-"}</TD>
+          </TR>
+        );
+      })}</TBody>
+    </Table>
+  );
 }
 
 function MetricTable({ metrics }: { metrics: Record<string, number> }) {
-  const entries = Object.entries(metrics);
-  return <div className="overflow-x-auto border border-[#dfe2e7]"><table className="w-full text-xs"><tbody>{entries.map(([key, value]) => <tr key={key} className="border-b border-[#dfe2e7] last:border-0"><td className="w-1/2 bg-[#f5f7fa] px-3 py-2 font-mono text-muted-foreground dark:bg-slate-900">{key}</td><td className="px-3 py-2 text-right font-mono tabular-nums">{fixed(value, 4)}</td></tr>)}</tbody></table></div>;
+  return (
+    <Table>
+      <TBody>{Object.entries(metrics).map(([key, value]) => (
+        <TR key={key}><TD className="w-1/2 bg-muted/40 text-muted-foreground">{key}</TD><TD numeric>{fixed(value, 4)}</TD></TR>
+      ))}</TBody>
+    </Table>
+  );
 }
 
 function EmptyData({ text }: { text: string }) {
-  return <div className="border border-dashed border-[#dfe2e7] p-6 text-center text-xs text-muted-foreground">{text}</div>;
+  return <div className="rounded-lg border border-dashed border-border p-6 text-center text-xs text-muted-foreground">{text}</div>;
 }

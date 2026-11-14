@@ -14,7 +14,7 @@ it("keeps unknown cells distinct from measured zero in labels and escaped toolti
   const series = option.series[0];
   const unknown = series.data.find((d: any) => d.value[0] === 1 && d.value[1] === 0);
   const zero = series.data.find((d: any) => d.value[0] === 2 && d.value[1] === 0);
-  expect(series.label.formatter(unknown)).toBe("—");
+  expect(series.label.formatter(unknown)).toBe("-");
   expect(series.label.formatter(zero)).toBe("0.00");
   expect(unknown.itemStyle.opacity).toBeLessThan(1);
   expect(option.tooltip.formatter({ data: unknown })).toContain("undefined");

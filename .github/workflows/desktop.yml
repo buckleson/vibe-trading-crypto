@@ -1,18 +1,18 @@
-name: Desktop Windows
+name: Desktop
 
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - ".github/workflows/desktop-windows.yml"
+      - ".github/workflows/desktop.yml"
       - "agent/**"
       - "desktop/electron/**"
       - "frontend/**"
       - "pyproject.toml"
   pull_request:
     paths:
-      - ".github/workflows/desktop-windows.yml"
+      - ".github/workflows/desktop.yml"
       - "agent/**"
       - "desktop/electron/**"
       - "frontend/**"
@@ -40,6 +40,44 @@ env:
   NPM_CONFIG_FUND: "false"
 
 jobs:
+  checks:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    env:
+      ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: desktop/electron/package-lock.json
+
+      - name: Install desktop dependencies
+        working-directory: desktop/electron
+        run: npm ci
+
+      - name: Build desktop shell
+        working-directory: desktop/electron
+        run: npm run build
+
+      - name: Backend resolution tests
+        working-directory: desktop/electron
+        run: node scripts/test-backend-resolution.mjs
+
+      - name: Locale tests
+        working-directory: desktop/electron
+        run: node scripts/test-locales.mjs
+
+      - name: Terminal tests
+        working-directory: desktop/electron
+        run: node scripts/test-terminal.mjs
+
   package:
     # GTK is extracted as a checksum-pinned archive rather than executed as a
     # legacy NSIS installer, so packaging can run on the current Windows image.

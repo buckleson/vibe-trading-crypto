@@ -25,7 +25,6 @@ const OVERLAY_OPTIONS: { id: Overlay; label: string; group: string }[] = [
 ];
 
 const RANGE_BARS: Record<Range, number> = { "1M": 22, "3M": 63, "6M": 126, "1Y": 252, ALL: Infinity };
-const OVERLAY_COLORS = ["#f59e0b", "#8b5cf6", "#3b82f6", "#ec4899", "#10b981", "#f97316", "#6366f1"];
 
 interface Props {
   data: PriceBar[];
@@ -51,7 +50,7 @@ export function CandlestickChart({ data, markers, indicators, height = 500 }: Pr
     });
   }, []);
 
-  // Memoize base data arrays — only recompute when raw data changes
+  // Memoize base data arrays - only recompute when raw data changes
   const baseData = useMemo(() => {
     const dates = data.map(d => d.time);
     const closes = data.map(d => d.close);
@@ -62,7 +61,7 @@ export function CandlestickChart({ data, markers, indicators, height = 500 }: Pr
     return { dates, closes, highs, lows, opens, candle };
   }, [data]);
 
-  // Memoize indicator calculations — only recompute when data changes (not on overlay toggle)
+  // Memoize indicator calculations - only recompute when data changes (not on overlay toggle)
   const indicatorCache = useMemo(() => ({
     ma5: calcMA(baseData.closes, 5),
     ma10: calcMA(baseData.closes, 10),
@@ -85,7 +84,7 @@ export function CandlestickChart({ data, markers, indicators, height = 500 }: Pr
     });
   }, [indicators, baseData.dates]);
 
-  // Init chart instance — only on mount/unmount and dark mode change
+  // Init chart instance - only on mount/unmount and dark mode change
   useEffect(() => {
     if (!containerRef.current || data.length === 0) return;
     const chart = echarts.init(containerRef.current);
@@ -110,7 +109,7 @@ export function CandlestickChart({ data, markers, indicators, height = 500 }: Pr
     };
   }, [data.length === 0, dark]); // only re-init when going empty↔non-empty or theme changes
 
-  // Update chart options — setOption on existing instance, no dispose
+  // Update chart options - setOption on existing instance, no dispose
   useEffect(() => {
     const chart = chartRef.current;
     if (!chart || data.length === 0) return;
@@ -123,6 +122,7 @@ export function CandlestickChart({ data, markers, indicators, height = 500 }: Pr
     const overlaySeries: any[] = [];
     const legendNames: string[] = ["K"];
     let colorIdx = 0;
+    const overlayColors = [...t.seriesPalette, t.warningColor];
 
     const overlayMap: Record<string, { name: string; data: (number | null)[] }> = {
       ma5: { name: "MA5", data: indicatorCache.ma5 },
@@ -135,7 +135,7 @@ export function CandlestickChart({ data, markers, indicators, height = 500 }: Pr
 
     for (const [key, { name, data: lineData }] of Object.entries(overlayMap)) {
       if (overlays.has(key as Overlay)) {
-        overlaySeries.push({ name, type: "line", data: lineData, xAxisIndex: 0, yAxisIndex: 0, symbol: "none", lineStyle: { color: OVERLAY_COLORS[colorIdx], width: 1 } });
+        overlaySeries.push({ name, type: "line", data: lineData, xAxisIndex: 0, yAxisIndex: 0, symbol: "none", lineStyle: { color: overlayColors[colorIdx % overlayColors.length], width: 1 } });
         legendNames.push(name);
         colorIdx++;
       }
@@ -162,7 +162,7 @@ export function CandlestickChart({ data, markers, indicators, height = 500 }: Pr
         escapeHtml(m.reason || ""),
       ].filter(Boolean).join("\n"),
       itemStyle: { color: m.side === "BUY" ? t.upColor : t.downColor },
-      label: { color: "#fff", fontSize: 10, fontWeight: "bold" as const },
+      label: { color: "white", fontSize: 12, fontWeight: "bold" as const },
     }));
 
     // Volume
@@ -175,7 +175,7 @@ export function CandlestickChart({ data, markers, indicators, height = 500 }: Pr
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let subSeries: any[] = [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let subYAxis: any = { scale: true, gridIndex: 1, splitLine: { lineStyle: { color: t.gridColor } }, axisLabel: { color: t.textColor, fontSize: 10 } };
+    let subYAxis: any = { scale: true, gridIndex: 1, splitLine: { lineStyle: { color: t.gridColor } }, axisLabel: { color: t.textColor, fontSize: 12 } };
 
     if (sub === "vol") {
       subSeries = [{ name: "Vol", type: "bar", data: vol, xAxisIndex: 1, yAxisIndex: 1 }];
@@ -198,7 +198,7 @@ export function CandlestickChart({ data, markers, indicators, height = 500 }: Pr
       subSeries = [
         { name: "%K", type: "line", data: kdj.k, xAxisIndex: 1, yAxisIndex: 1, symbol: "none", lineStyle: { width: 1, color: t.infoColor } },
         { name: "%D", type: "line", data: kdj.d, xAxisIndex: 1, yAxisIndex: 1, symbol: "none", lineStyle: { width: 1, color: t.warningColor } },
-        { name: "%J", type: "line", data: kdj.j, xAxisIndex: 1, yAxisIndex: 1, symbol: "none", lineStyle: { width: 1, color: "#a855f7" } },
+        { name: "%J", type: "line", data: kdj.j, xAxisIndex: 1, yAxisIndex: 1, symbol: "none", lineStyle: { width: 1, color: t.seriesPalette[3] } },
       ];
       legendNames.push("%K", "%D", "%J");
     }
@@ -206,7 +206,7 @@ export function CandlestickChart({ data, markers, indicators, height = 500 }: Pr
     // Backend custom indicators (Map-based O(1) lookup)
     const extraSeries = extraIndicators.map((ind, i) => {
       legendNames.push(ind.name);
-      return { name: ind.name, type: "line" as const, data: ind.values, xAxisIndex: 0, yAxisIndex: 0, symbol: "none", lineStyle: { width: 1, color: OVERLAY_COLORS[(colorIdx + i) % OVERLAY_COLORS.length], type: "dashed" as const } };
+      return { name: ind.name, type: "line" as const, data: ind.values, xAxisIndex: 0, yAxisIndex: 0, symbol: "none", lineStyle: { width: 1, color: overlayColors[(colorIdx + i) % overlayColors.length], type: "dashed" as const } };
     });
 
     const maxBars = RANGE_BARS[range];
@@ -216,8 +216,8 @@ export function CandlestickChart({ data, markers, indicators, height = 500 }: Pr
       backgroundColor: "transparent",
       tooltip: {
         trigger: "axis", axisPointer: { type: "cross" },
-        backgroundColor: t.tooltipBg, borderColor: t.tooltipBorder,
-        textStyle: { color: t.tooltipText, fontSize: 11 },
+        backgroundColor: t.tooltipBg, borderColor: t.tooltipBorder, borderWidth: 1, extraCssText: "box-shadow:none;",
+        textStyle: { color: t.tooltipText, fontSize: 12 },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         formatter: (params: any) => {
           if (!Array.isArray(params) || !params.length) return "";
@@ -243,17 +243,17 @@ export function CandlestickChart({ data, markers, indicators, height = 500 }: Pr
         feature: { saveAsImage: { title: "Save" }, dataZoom: { title: { zoom: "Zoom", back: "Reset" } }, restore: { title: "Reset" } },
         right: 8, top: 0, iconStyle: { borderColor: t.textColor },
       },
-      legend: { data: legendNames, textStyle: { color: t.textColor, fontSize: 10 }, right: 80, top: 2, type: "scroll", itemWidth: 12, itemHeight: 8, itemGap: 8 },
+      legend: { data: legendNames, textStyle: { color: t.textColor, fontSize: 12 }, left: 0, top: 0, type: "scroll", itemWidth: 12, itemHeight: 8, itemGap: 8 },
       grid: [
         { left: 8, right: 8, top: 36, height: "55%", containLabel: true },
         { left: 8, right: 8, top: "66%", height: "22%", containLabel: true },
       ],
       xAxis: [
-        { type: "category", data: dates, gridIndex: 0, axisLine: { lineStyle: { color: t.axisColor } }, axisLabel: { color: t.textColor, fontSize: 10 }, boundaryGap: true },
+        { type: "category", data: dates, gridIndex: 0, axisLine: { lineStyle: { color: t.axisColor } }, axisLabel: { color: t.textColor, fontSize: 12 }, boundaryGap: true },
         { type: "category", data: dates, gridIndex: 1, axisLine: { lineStyle: { color: t.axisColor } }, axisLabel: { show: false }, boundaryGap: true },
       ],
       yAxis: [
-        { scale: true, gridIndex: 0, splitLine: { lineStyle: { color: t.gridColor } }, axisLabel: { color: t.textColor, fontSize: 10 } },
+        { scale: true, gridIndex: 0, splitLine: { lineStyle: { color: t.gridColor } }, axisLabel: { color: t.textColor, fontSize: 12 } },
         subYAxis,
       ],
       dataZoom: [
@@ -283,7 +283,7 @@ export function CandlestickChart({ data, markers, indicators, height = 500 }: Pr
         {/* Time range */}
         <div className="flex gap-0.5">
           {(["1M", "3M", "6M", "1Y", "ALL"] as const).map((r) => (
-            <button key={r} onClick={() => setRange(r)} className={cn("px-1.5 py-0.5 rounded text-[10px] font-mono transition-colors", range === r ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground/50 hover:text-muted-foreground")}>{r}</button>
+            <button key={r} onClick={() => setRange(r)} className={cn("px-1.5 py-0.5 rounded text-xs font-mono transition-colors", range === r ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground/50 hover:text-muted-foreground")}>{r}</button>
           ))}
         </div>
 
@@ -293,15 +293,15 @@ export function CandlestickChart({ data, markers, indicators, height = 500 }: Pr
         <div className="relative">
           <button
             onClick={() => setShowMenu(!showMenu)}
-            className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            className="flex items-center gap-1 px-2 py-0.5 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
           >
             Indicators ({overlays.size}) <ChevronDown className="h-3 w-3" />
           </button>
           {showMenu && (
-            <div className="absolute top-full left-0 mt-1 z-50 bg-card border rounded-lg shadow-lg p-2 min-w-[160px]" onMouseLeave={() => setShowMenu(false)}>
+            <div className="absolute top-full left-0 mt-1 z-50 bg-card border rounded-lg p-2 min-w-[160px]" onMouseLeave={() => setShowMenu(false)}>
               {["MA", "Channel"].map(group => (
                 <div key={group}>
-                  <p className="text-[9px] text-muted-foreground/50 uppercase tracking-wider px-1 pt-1">{group}</p>
+                  <p className="text-xs text-muted-foreground/50r px-1 pt-1">{group}</p>
                   {OVERLAY_OPTIONS.filter(o => o.group === group).map(o => (
                     <label key={o.id} className="flex items-center gap-2 px-1 py-0.5 rounded hover:bg-muted/30 cursor-pointer">
                       <input type="checkbox" checked={overlays.has(o.id)} onChange={() => toggleOverlay(o.id)} className="h-3 w-3 rounded accent-primary" />
@@ -311,7 +311,7 @@ export function CandlestickChart({ data, markers, indicators, height = 500 }: Pr
                 </div>
               ))}
               <div className="border-t mt-1 pt-1">
-                <button onClick={() => { setOverlays(new Set()); setShowMenu(false); }} className="text-[10px] text-muted-foreground hover:text-foreground px-1 py-0.5 w-full text-left rounded hover:bg-muted/30">
+                <button onClick={() => { setOverlays(new Set()); setShowMenu(false); }} className="text-xs text-muted-foreground hover:text-foreground px-1 py-0.5 w-full text-left rounded hover:bg-muted/30">
                   Bare K (clear all)
                 </button>
               </div>
@@ -324,7 +324,7 @@ export function CandlestickChart({ data, markers, indicators, height = 500 }: Pr
         {/* Sub-chart selector */}
         <div className="flex gap-0.5">
           {(["vol", "macd", "rsi", "kdj"] as const).map((id) => (
-            <button key={id} onClick={() => setSub(id)} className={cn("px-1.5 py-0.5 rounded text-[10px] font-mono uppercase transition-colors", sub === id ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground/50 hover:text-muted-foreground")}>{id}</button>
+            <button key={id} onClick={() => setSub(id)} className={cn("px-1.5 py-0.5 rounded text-xs font-mono transition-colors", sub === id ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground/50 hover:text-muted-foreground")}>{id}</button>
           ))}
         </div>
       </div>

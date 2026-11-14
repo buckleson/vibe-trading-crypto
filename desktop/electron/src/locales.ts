@@ -10,6 +10,7 @@ export type DesktopMessages = {
   backendExitedEarly: string;
   backendHealthTimeout: string;
   backendNotFound: string;
+  backendMissingPosix: string;
   portUnavailable: string;
   credentialEncryptionUnavailable: string;
   credentialFileUnsupported: string;
@@ -69,6 +70,7 @@ const messages: Record<DesktopLocale, DesktopMessages> = {
     backendExitedEarly: "The Vibe Crypto backend exited before it was ready (code {code}).\n{details}",
     backendHealthTimeout: "Timed out waiting for the Vibe Crypto backend.\n{details}",
     backendNotFound: "Could not find vibe-trading.exe. Install the backend first or set VIBE_TRADING_EXECUTABLE.",
+    backendMissingPosix: "Vibe Crypto needs its Python backend. In the project folder run: pip install -e . (or uv pip install -e .), then restart. You can also set VIBE_TRADING_EXECUTABLE to the vibe-crypto command.",
     portUnavailable: "Could not allocate a local port.",
     credentialEncryptionUnavailable: "Credential encryption is unavailable for this Windows user session.",
     credentialFileUnsupported: "The desktop credential file format is not supported.",
@@ -104,6 +106,7 @@ const messages: Record<DesktopLocale, DesktopMessages> = {
     backendExitedEarly: "Vibe Crypto 后端在就绪前退出（代码 {code}）。\n{details}",
     backendHealthTimeout: "等待 Vibe Crypto 后端就绪超时。\n{details}",
     backendNotFound: "找不到 vibe-trading.exe。请先安装后端，或设置 VIBE_TRADING_EXECUTABLE。",
+    backendMissingPosix: "Vibe Crypto needs its Python backend. In the project folder run: pip install -e . (or uv pip install -e .), then restart. You can also set VIBE_TRADING_EXECUTABLE to the vibe-crypto command.",
     portUnavailable: "无法分配本地端口。",
     credentialEncryptionUnavailable: "当前 Windows 用户会话无法使用凭据加密。",
     credentialFileUnsupported: "桌面凭据文件格式不受支持。",
@@ -139,6 +142,7 @@ const messages: Record<DesktopLocale, DesktopMessages> = {
     backendExitedEarly: "Vibe Crypto バックエンドが準備完了前に終了しました（コード {code}）。\n{details}",
     backendHealthTimeout: "Vibe Crypto バックエンドの準備待ちがタイムアウトしました。\n{details}",
     backendNotFound: "vibe-trading.exe が見つかりません。バックエンドをインストールするか、VIBE_TRADING_EXECUTABLE を設定してください。",
+    backendMissingPosix: "Vibe Crypto needs its Python backend. In the project folder run: pip install -e . (or uv pip install -e .), then restart. You can also set VIBE_TRADING_EXECUTABLE to the vibe-crypto command.",
     portUnavailable: "ローカルポートを割り当てられませんでした。",
     credentialEncryptionUnavailable: "この Windows ユーザーセッションでは資格情報の暗号化を利用できません。",
     credentialFileUnsupported: "デスクトップ資格情報ファイルの形式はサポートされていません。",
@@ -174,6 +178,7 @@ const messages: Record<DesktopLocale, DesktopMessages> = {
     backendExitedEarly: "Vibe Crypto 백엔드가 준비되기 전에 종료되었습니다(코드 {code}).\n{details}",
     backendHealthTimeout: "Vibe Crypto 백엔드 준비를 기다리는 동안 시간이 초과되었습니다.\n{details}",
     backendNotFound: "vibe-trading.exe를 찾을 수 없습니다. 백엔드를 설치하거나 VIBE_TRADING_EXECUTABLE을 설정하세요.",
+    backendMissingPosix: "Vibe Crypto needs its Python backend. In the project folder run: pip install -e . (or uv pip install -e .), then restart. You can also set VIBE_TRADING_EXECUTABLE to the vibe-crypto command.",
     portUnavailable: "로컬 포트를 할당할 수 없습니다.",
     credentialEncryptionUnavailable: "현재 Windows 사용자 세션에서 자격 증명 암호화를 사용할 수 없습니다.",
     credentialFileUnsupported: "데스크톱 자격 증명 파일 형식이 지원되지 않습니다.",
@@ -209,6 +214,7 @@ const messages: Record<DesktopLocale, DesktopMessages> = {
     backendExitedEarly: "توقفت الواجهة الخلفية لـ Vibe Crypto قبل أن تصبح جاهزة (الرمز {code}).\n{details}",
     backendHealthTimeout: "انتهت مهلة انتظار جاهزية الواجهة الخلفية لـ Vibe Crypto.\n{details}",
     backendNotFound: "تعذّر العثور على vibe-trading.exe. ثبّت الواجهة الخلفية أولاً أو اضبط VIBE_TRADING_EXECUTABLE.",
+    backendMissingPosix: "Vibe Crypto needs its Python backend. In the project folder run: pip install -e . (or uv pip install -e .), then restart. You can also set VIBE_TRADING_EXECUTABLE to the vibe-crypto command.",
     portUnavailable: "تعذّر تخصيص منفذ محلي.",
     credentialEncryptionUnavailable: "تشفير بيانات الاعتماد غير متاح لجلسة مستخدم Windows الحالية.",
     credentialFileUnsupported: "تنسيق ملف بيانات اعتماد سطح المكتب غير مدعوم.",

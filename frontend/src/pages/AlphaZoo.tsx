@@ -1,6 +1,6 @@
 import i18n from '@/i18n';
 /**
- * Alpha Zoo — browse / detail / bench views.
+ * Alpha Zoo - browse / detail / bench views.
  *
  * Routing model: a single page component, three URL shapes:
  *   /alpha-zoo                 → browse view
@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Badge, Button, Card, CardBody, CardHeader, Input, Page, PageHeader, Select, Stat, Textarea } from "@/components/ui";
 import {
   api,
   type AlphaSummary,
@@ -49,7 +50,7 @@ interface ZooCard {
 }
 
 // IMPORTANT: The Kakushadze 101 zoo must use the author's name as the label.
-// The legacy / trademark name is forbidden by a CI grep gate — do not add it.
+// The legacy / trademark name is forbidden by a CI grep gate - do not add it.
 const ZOO_CARDS: ZooCard[] = [
   {
     id: "qlib158",
@@ -74,7 +75,7 @@ const ZOO_CARDS: ZooCard[] = [
 ];
 
 // Benchmarkable data universes (bench + compare): each one needs a panel loader
-// on the backend, so there is no Korea/India entry — the KRX factor capability
+// on the backend, so there is no Korea/India entry - the KRX factor capability
 // is a metadata universe, not a benchmark universe.
 const UNIVERSE_OPTIONS = [
   { value: "csi300" },
@@ -108,13 +109,13 @@ const PAGE_SIZE = 50;
 
 function fmtNum(v: unknown, digits = 3): string {
   const n = Number(v);
-  if (!Number.isFinite(n)) return "—";
+  if (!Number.isFinite(n)) return "-";
   return n.toFixed(digits);
 }
 
 function metaString(meta: Record<string, unknown>, key: string): string {
   const v = meta[key];
-  if (v === undefined || v === null || v === "") return "—";
+  if (v === undefined || v === null || v === "") return "-";
   if (Array.isArray(v)) return v.join(", ");
   return String(v);
 }
@@ -203,21 +204,15 @@ function BrowseView() {
   const visible = filtered.slice(0, visibleCount);
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8">
-      {/* Hero */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-wide">
-          <Layers className="h-3.5 w-3.5" aria-hidden="true" /> {i18n.t("alphaZoo.title")}
-        </div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {loading
-            ? i18n.t("alphaZoo.prebuiltAlphaLoading")
-            : i18n.t("alphaZoo.prebuiltAlpha", { count: total })}
-        </h1>
-        <p className="text-sm text-muted-foreground max-w-2xl">
+    <Page>
+      <PageHeader
+        title={i18n.t("alphaZoo.title")}
+        description={<>
+          {loading ? i18n.t("alphaZoo.prebuiltAlphaLoading") : i18n.t("alphaZoo.prebuiltAlpha", { count: total })}
+          {". "}
           {i18n.t("alphaZoo.browseDesc")}
-        </p>
-      </div>
+        </>}
+      />
 
       {/* Zoo cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -229,14 +224,14 @@ function BrowseView() {
               type="button"
               onClick={() => setZooFilter(active ? "" : z.id)}
               className={cn(
-                "text-left rounded-xl border border-border/60 bg-card p-4 space-y-2 shadow-sm transition",
-                "bg-none hover:bg-muted/60",
+                "space-y-2 rounded-lg border border-border bg-card p-4 text-left transition-colors",
+                "hover:bg-muted/60",
                 active && "border-primary/40 bg-primary/10 text-primary",
               )}
             >
               <div className="flex items-center justify-between">
                 <Library className="h-5 w-5 text-primary" aria-hidden="true" />
-                <span className="text-xs font-mono text-muted-foreground">
+                <span className="text-xs tabular-nums text-muted-foreground">
                   {z.approxCount}
                 </span>
               </div>
@@ -250,9 +245,9 @@ function BrowseView() {
       </div>
 
       {/* Filter bar */}
-      <div className="flex flex-col md:flex-row md:items-end gap-3 rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+      <Card className="flex flex-col gap-3 p-4 md:flex-row md:items-end">
         <div className="flex-1 min-w-0">
-          <label htmlFor="alpha-search" className="text-xs text-muted-foreground block mb-1">
+          <label htmlFor="alpha-search" className="mb-1.5 block text-[13px] font-medium">
             {i18n.t("alphaZoo.search")}
           </label>
           <div className="relative">
@@ -260,24 +255,23 @@ function BrowseView() {
               className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground"
               aria-hidden="true"
             />
-            <input
+            <Input
               id="alpha-search"
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                       }}
               placeholder={i18n.t("alphaZoo.searchPlaceholder")}
-              className="w-full pl-9 pr-3 py-2 rounded-lg border border-border/60 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="pl-9"
             />
           </div>
         </div>
         <div className="md:w-40">
-          <label htmlFor="alpha-zoo-filter" className="text-xs text-muted-foreground block mb-1">{i18n.t("alphaZoo.zoo")}</label>
-          <select
+          <label htmlFor="alpha-zoo-filter" className="mb-1.5 block text-[13px] font-medium">{i18n.t("alphaZoo.zoo")}</label>
+          <Select
             id="alpha-zoo-filter"
             value={zooFilter}
             onChange={(e) => setZooFilter(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-border/60 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
             <option value="">{i18n.t("alphaZoo.allZoos")}</option>
             {ZOO_CARDS.map((z) => (
@@ -285,17 +279,16 @@ function BrowseView() {
                 {i18n.t("alphaZoo.zooCardTitle." + z.id as any)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="md:w-40">
-          <label htmlFor="alpha-theme-filter" className="text-xs text-muted-foreground block mb-1">
+          <label htmlFor="alpha-theme-filter" className="mb-1.5 block text-[13px] font-medium">
             {i18n.t("alphaZoo.theme")}
           </label>
-          <select
+          <Select
             id="alpha-theme-filter"
             value={themeFilter}
             onChange={(e) => setThemeFilter(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-border/60 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
             <option value="">{i18n.t("alphaZoo.allThemes")}</option>
             {themeOptions.map((tname) => (
@@ -303,17 +296,16 @@ function BrowseView() {
                 {i18n.t("alphaZoo.themes." + tname, { defaultValue: tname })}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="md:w-44">
-          <label htmlFor="alpha-universe-filter" className="text-xs text-muted-foreground block mb-1">
+          <label htmlFor="alpha-universe-filter" className="mb-1.5 block text-[13px] font-medium">
             {i18n.t("alphaZoo.universe")}
           </label>
-          <select
+          <Select
             id="alpha-universe-filter"
             value={universeFilter}
             onChange={(e) => setUniverseFilter(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-border/60 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
             <option value="">{i18n.t("alphaZoo.allUniverses")}</option>
             {FILTER_UNIVERSE_OPTIONS.map((u) => (
@@ -321,11 +313,11 @@ function BrowseView() {
                 {i18n.t("alphaZoo.universeOption." + u.value as any)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <Link
           to={compareHref}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-border/60 text-sm font-medium hover:bg-muted/60 hover:text-foreground transition"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-medium transition-colors hover:bg-muted"
           title={i18n.t("alphaZoo.compareTooltip")}
         >
           <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden="true" /> {i18n.t("alphaZoo.compare")}
@@ -333,21 +325,21 @@ function BrowseView() {
         </Link>
         <Link
           to={selected.size === 1 ? `/alpha-zoo/bench?alpha_id=${encodeURIComponent([...selected][0])}&zoo=${encodeURIComponent(alphas.find((a) => a.id === [...selected][0])?.zoo ?? "alpha101")}&universe=${alphas.find((a) => a.id === [...selected][0])?.universe.includes("equity_us") ? "sp500" : "csi300"}` : selected.size > 1 ? compareHref : "/alpha-zoo/bench"}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
           <Play className="h-3.5 w-3.5" aria-hidden="true" /> {selected.size ? i18n.t("analysis.evaluateSelected", { count: selected.size }) : i18n.t("alphaZoo.runBenchmark")}
         </Link>
-      </div>
+      </Card>
 
       <p className="text-sm text-muted-foreground">{i18n.t("analysis.factorSelectionHint")}</p>
       {/* Table */}
       {/* TODO(v0.2): switch to react-window if alpha count exceeds 5000 */}
-      <div className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
         <div className="overflow-x-auto">
           <table className="w-full text-sm" aria-label={i18n.t("alphaZoo.alphaCatalogue")}>
             <caption className="sr-only">{i18n.t("alphaZoo.alphaCatalogue")}</caption>
             <thead>
-              <tr className="border-b bg-muted/40 text-[11px] uppercase tracking-wide text-muted-foreground [&_th]:font-medium">
+              <tr className="border-b border-border bg-muted/60 text-xs text-muted-foreground [&_th]:font-medium">
                 <th className="w-10 px-3 py-2.5">
                   <span className="sr-only">{i18n.t("alphaZoo.selectForCompare")}</span>
                 </th>
@@ -387,7 +379,7 @@ function BrowseView() {
                   <tr
                     key={`${a.zoo}:${a.id}`}
                     className={cn(
-                      "border-b last:border-0 hover:bg-muted/40",
+                      "border-b border-border last:border-0 hover:bg-muted/40",
                       selected.has(a.id) && "bg-primary/10",
                     )}
                   >
@@ -415,13 +407,13 @@ function BrowseView() {
                     </td>
                     <td className="px-4 py-2 text-xs">{a.zoo}</td>
                     <td className="px-4 py-2 text-xs text-muted-foreground">
-                      {(a.theme || []).map((t) => i18n.t("alphaZoo.themes." + t, { defaultValue: t })).join(", ") || "—"}
+                      {(a.theme || []).map((t) => i18n.t("alphaZoo.themes." + t, { defaultValue: t })).join(", ") || "-"}
                     </td>
                     <td className="px-4 py-2 text-xs text-muted-foreground hidden md:table-cell">
-                      {(a.universe || []).map((u) => i18n.t("alphaZoo.universeOption." + u, { defaultValue: u })).join(", ") || "—"}
+                      {(a.universe || []).map((u) => i18n.t("alphaZoo.universeOption." + u, { defaultValue: u })).join(", ") || "-"}
                     </td>
-                    <td className="px-4 py-2 text-right font-mono tabular-nums text-xs">
-                      {a.decay_horizon ?? "—"}
+                    <td className="px-4 py-2 text-right tabular-nums text-xs">
+                      {a.decay_horizon ?? "-"}
                     </td>
                   </tr>
                 ))
@@ -434,17 +426,13 @@ function BrowseView() {
             <span>
               {i18n.t("alphaZoo.showingOf", { visible: visible.length, total: filtered.length })}
             </span>
-            <button
-              type="button"
-              onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-              className="px-3 py-1 rounded-md border border-border/60 hover:bg-muted/60 hover:text-foreground transition"
-            >
+            <Button size="sm" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
               {i18n.t("alphaZoo.loadMore")}
-            </button>
+            </Button>
           </div>
         )}
       </div>
-    </div>
+    </Page>
   );
 }
 
@@ -492,17 +480,17 @@ function DetailView({ alphaId }: DetailProps) {
 
   if (error || !detail) {
     return (
-      <div className="p-8 max-w-3xl mx-auto space-y-4">
+      <Page width="narrow" className="max-w-3xl">
         <Link to="/alpha-zoo" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" /> {i18n.t("alphaZoo.backToAlphaZoo")}
         </Link>
-        <div className="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+        <div className="rounded-lg border border-border bg-card p-5">
           <h2 className="font-semibold text-sm mb-1 flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-warning" aria-hidden="true" /> {i18n.t("alphaZoo.couldNotLoad")}
           </h2>
           <p className="text-sm text-muted-foreground">{error || i18n.t("alphaZoo.unknownError")}</p>
         </div>
-      </div>
+      </Page>
     );
   }
 
@@ -525,42 +513,29 @@ function DetailView({ alphaId }: DetailProps) {
     : `/alpha-zoo/bench?zoo=${encodeURIComponent(a.zoo)}&period=2020-2025&alpha_id=${encodeURIComponent(a.id)}`;
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between gap-2 flex-wrap">
+    <Page width="narrow">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <Link
           to="/alpha-zoo"
           className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
         >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" /> {i18n.t("alphaZoo.backToAlphaZoo")}
         </Link>
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          size="sm"
           onClick={() => navigate(benchHref)}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition"
         >
           <Play className="h-3.5 w-3.5" aria-hidden="true" /> {i18n.t("analysis.evaluateFactor")}
-        </button>
+        </Button>
       </div>
 
-      {/* Title */}
-      <div className="space-y-1">
-        <div className="flex items-center gap-2 flex-wrap">
-          <h1 className="font-mono text-2xl font-semibold tracking-tight">
-            {a.id}
-          </h1>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
-            {a.zoo}
-          </span>
-        </div>
-        {nickname && (
-          <p className="text-sm text-muted-foreground">{nickname}</p>
-        )}
-      </div>
+      <PageHeader title={a.id} description={nickname || undefined} actions={<Badge tone="info">{a.zoo}</Badge>} />
 
       {/* Formula */}
       <section className="space-y-2">
         <h2 className="text-sm font-semibold text-muted-foreground">{i18n.t("alphaZoo.formula")}</h2>
-        <pre className="overflow-x-auto rounded-xl border border-border/60 bg-muted/40 p-4 text-xs leading-relaxed shadow-sm">
+        <pre className="overflow-x-auto rounded-lg border border-border bg-muted/40 p-4 text-xs leading-relaxed">
           <code>{formulaLatex || i18n.t("alphaZoo.noFormula")}</code>
         </pre>
       </section>
@@ -568,7 +543,7 @@ function DetailView({ alphaId }: DetailProps) {
       {/* Metadata */}
       <section className="space-y-2">
         <h2 className="text-sm font-semibold text-muted-foreground">{i18n.t("alphaZoo.metadata")}</h2>
-        <div className="overflow-x-auto rounded-xl border border-border/60 bg-card shadow-sm">
+        <div className="overflow-x-auto rounded-lg border border-border bg-card">
           <table className="w-full text-sm">
             <tbody>
               <MetaRow
@@ -578,7 +553,7 @@ function DetailView({ alphaId }: DetailProps) {
                     ? meta.theme.map((t: string) => i18n.t("alphaZoo.themes." + t, { defaultValue: t })).join(", ")
                     : typeof meta.theme === "string"
                     ? i18n.t("alphaZoo.themes." + meta.theme, { defaultValue: meta.theme })
-                    : "—"
+                    : "-"
                 }
               />
               <MetaRow
@@ -588,14 +563,14 @@ function DetailView({ alphaId }: DetailProps) {
                     ? meta.universe.map((u: string) => i18n.t("alphaZoo.universeOption." + u, { defaultValue: u })).join(", ")
                     : typeof meta.universe === "string"
                     ? i18n.t("alphaZoo.universeOption." + meta.universe, { defaultValue: meta.universe })
-                    : "—"
+                    : "-"
                 }
               />
               <MetaRow label={i18n.t("alphaZoo.frequency")} value={metaString(meta, "frequency")} />
               <MetaRow label={i18n.t("alphaZoo.decayHorizon")} value={metaString(meta, "decay_horizon")} />
               <MetaRow label={i18n.t("alphaZoo.minWarmupBars")} value={metaString(meta, "min_warmup_bars")} />
               <MetaRow label={i18n.t("alphaZoo.requiresSector")} value={metaString(meta, "requires_sector")} />
-              <MetaRow label={i18n.t("alphaZoo.modulePath")} value={a.module_path || "—"} />
+              <MetaRow label={i18n.t("alphaZoo.modulePath")} value={a.module_path || "-"} />
               <MetaRow label={i18n.t("alphaZoo.notes")} value={metaString(meta, "notes")} last />
             </tbody>
           </table>
@@ -605,16 +580,16 @@ function DetailView({ alphaId }: DetailProps) {
       {/* Source code */}
       <section className="space-y-2">
         <h2 className="text-sm font-semibold text-muted-foreground">{i18n.t("alphaZoo.sourceCode")}</h2>
-        <details className="group rounded-xl border border-border/60 bg-card shadow-sm">
+        <details className="group rounded-lg border border-border bg-card">
           <summary className="cursor-pointer px-4 py-3 text-sm font-semibold hover:bg-muted/40 select-none">
             {i18n.t("alphaZoo.viewSource", { lines: (detail.source_code || "").split("\n").length })}
           </summary>
-          <pre className="border-t border-border/60 bg-muted/40 p-4 overflow-x-auto text-xs leading-relaxed">
+          <pre className="border-t border-border bg-muted/40 p-4 overflow-x-auto text-xs leading-relaxed">
             <code>{detail.source_code || i18n.t("alphaZoo.noSource")}</code>
           </pre>
         </details>
       </section>
-    </div>
+    </Page>
   );
 }
 
@@ -668,77 +643,67 @@ function BenchView() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
+    <Page>
       <Link
         to="/alpha-zoo"
-        className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" /> {i18n.t("alphaZoo.backToAlphaZoo")}
       </Link>
 
-      <div className="space-y-1">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-wide">
-          <Play className="h-3.5 w-3.5" aria-hidden="true" /> {i18n.t("alphaZoo.benchRunner")}
-        </div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {alphaId ? i18n.t("analysis.evaluateFactor") : i18n.t("alphaZoo.scoreZoo")}
-        </h1>
-        <p className="text-sm text-muted-foreground max-w-2xl">
-          {alphaId ? i18n.t("analysis.selectedFactor", { id: alphaId }) : i18n.t("alphaZoo.scoreDesc")}
-        </p>
-      </div>
+      <PageHeader
+        title={alphaId ? i18n.t("analysis.evaluateFactor") : i18n.t("alphaZoo.scoreZoo")}
+        description={alphaId ? i18n.t("analysis.selectedFactor", { id: alphaId }) : i18n.t("alphaZoo.scoreDesc")}
+      />
 
       {/* Form */}
       <form
         onSubmit={startBench}
-        className="grid grid-cols-1 items-end gap-3 rounded-xl border border-border/60 bg-card p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-5"
+        className="grid grid-cols-1 items-end gap-3 rounded-lg border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-5"
       >
         <div>
-          <label htmlFor="bench-zoo" className="text-xs text-muted-foreground block mb-1">{i18n.t("alphaZoo.zoo")}</label>
-          <select
+          <label htmlFor="bench-zoo" className="mb-1.5 block text-[13px] font-medium">{i18n.t("alphaZoo.zoo")}</label>
+          <Select
             id="bench-zoo"
             value={zoo}
             onChange={(e) => setZoo(e.target.value)}
             disabled={busy || Boolean(alphaId)}
-            className="w-full px-3 py-2 rounded-lg border border-border/60 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
           >
             {ZOO_CARDS.map((z) => (
               <option key={z.id} value={z.id}>
                 {i18n.t("alphaZoo.zooCardTitle." + z.id as any)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div>
-          <label htmlFor="bench-universe" className="text-xs text-muted-foreground block mb-1">{i18n.t("alphaZoo.universe")}</label>
-          <select
+          <label htmlFor="bench-universe" className="mb-1.5 block text-[13px] font-medium">{i18n.t("alphaZoo.universe")}</label>
+          <Select
             id="bench-universe"
             value={universe}
             onChange={(e) => setUniverse(e.target.value)}
             disabled={busy}
-            className="w-full px-3 py-2 rounded-lg border border-border/60 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
           >
             {UNIVERSE_OPTIONS.map((u) => (
               <option key={u.value} value={u.value} disabled={u.value === "btc-usdt"}>
                 {i18n.t("alphaZoo.universeOption." + u.value as any)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div>
-          <label htmlFor="bench-period" className="text-xs text-muted-foreground block mb-1">{i18n.t("alphaZoo.period")}</label>
-          <input
+          <label htmlFor="bench-period" className="mb-1.5 block text-[13px] font-medium">{i18n.t("alphaZoo.period")}</label>
+          <Input
             id="bench-period"
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
             disabled={busy}
             placeholder="2020-2025"
-            className="w-full px-3 py-2 rounded-lg border border-border/60 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
           />
         </div>
         <div>
-          <label htmlFor="bench-top" className="text-xs text-muted-foreground block mb-1">{i18n.t("analysis.resultLimit")}</label>
-          <input
+          <label htmlFor="bench-top" className="mb-1.5 block text-[13px] font-medium">{i18n.t("analysis.resultLimit")}</label>
+          <Input
             id="bench-top"
             type="number"
             min={1}
@@ -750,15 +715,10 @@ function BenchView() {
               setTop(e.target.value === "" ? 20 : Number(e.target.value))
             }
             disabled={busy}
-            className="w-full px-3 py-2 rounded-lg border border-border/60 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
           />
         </div>
         <div className="flex flex-col gap-1">
-          <button
-            type="submit"
-            disabled={busy}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
-          >
+          <Button type="submit" variant="primary" disabled={busy}>
             {busy ? (
               <>
                 <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> {i18n.t("alphaZoo.running")}
@@ -768,11 +728,11 @@ function BenchView() {
                 <Play className="h-3.5 w-3.5" aria-hidden="true" /> {i18n.t("alphaZoo.runBenchmark")}
               </>
             )}
-          </button>
+          </Button>
         </div>
         {formError && (
           <p
-            className="sm:col-span-2 lg:col-span-5 text-xs text-red-600 dark:text-red-400"
+            className="sm:col-span-2 lg:col-span-5 text-xs text-danger"
             role="alert"
           >
             {formError}
@@ -782,7 +742,7 @@ function BenchView() {
 
       {zoo === "fundamental" && <p className="text-sm text-muted-foreground">{i18n.t("analysis.fundamentalsRequirement")}</p>}
       <ReadinessPanel readiness={readiness} universe={universe} count={alphaId ? 1 : readiness.data?.zoo_counts[zoo]} />
-      {status === "disconnected" && <button type="button" onClick={job.reconnect} className="text-primary underline">{i18n.t("analysis.resumeJob")}</button>}
+      {status === "disconnected" && <Button onClick={job.reconnect}>{i18n.t("analysis.resumeJob")}</Button>}
       {/* Progress */}
       {(status === "submitting" || status === "streaming" || status === "disconnected") && (
         <ProgressPanel jobId={jobId} progress={progress} />
@@ -791,7 +751,7 @@ function BenchView() {
       {/* Result */}
       {result && job.request && <p className="text-sm text-muted-foreground">{i18n.t("alphaZoo.universe")}: {i18n.t("alphaZoo.universeOption." + job.request.universe, { defaultValue: job.request.universe })} · {i18n.t("alphaZoo.period")}: {job.request.period}</p>}
       {result && <ResultPanel result={result} />}
-    </div>
+    </Page>
   );
 }
 
@@ -806,7 +766,7 @@ function ProgressPanel({
     ? Math.min(100, Math.round((progress.n_done / progress.n_total) * 100))
     : 0;
   return (
-    <div className="space-y-3 rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+    <div className="space-y-3 rounded-lg border border-border bg-card p-4">
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span className="flex items-center gap-1.5">
           <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
@@ -815,7 +775,7 @@ function ProgressPanel({
             : i18n.t("alphaZoo.submitting")}
         </span>
         {progress && (
-          <span className="font-mono tabular-nums">
+          <span className="tabular-nums">
             {progress.n_done} / {progress.n_total}
           </span>
         )}
@@ -829,7 +789,7 @@ function ProgressPanel({
       <p className="text-sm text-muted-foreground">{i18n.t(`analysis.stage_${progress?.stage ?? (progress?.n_done ? "computing" : "loading_data")}`)}</p>
       <p className="text-xs text-muted-foreground">{i18n.t("analysis.backgroundJob")}</p>
       {progress?.current_alpha_id && (
-        <p className="text-xs text-muted-foreground font-mono truncate">
+        <p className="truncate text-xs text-muted-foreground">
           {i18n.t("alphaZoo.computing", { id: progress.current_alpha_id })}
         </p>
       )}
@@ -852,21 +812,21 @@ function ResultPanel({ result }: { result: AlphaBenchResult }) {
       tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
       legend: {
         data: [i18n.t("alphaZoo.alive"), i18n.t("alphaZoo.reversed"), i18n.t("alphaZoo.dead")],
-        textStyle: { color: theme.textColor, fontSize: 11 },
-        right: 8,
-        top: 4,
+        textStyle: { color: theme.textColor, fontSize: 12 },
+        left: 0,
+        top: 0,
       },
       grid: { left: 8, right: 8, top: 32, bottom: 8, containLabel: true },
       xAxis: {
         type: "category",
         data: themes.map((t) => i18n.t("alphaZoo.themes." + t, { defaultValue: t })),
         axisLine: { lineStyle: { color: theme.axisColor } },
-        axisLabel: { color: theme.textColor, fontSize: 10, rotate: themes.length > 6 ? 30 : 0 },
+        axisLabel: { color: theme.textColor, fontSize: 12, rotate: themes.length > 6 ? 30 : 0 },
       },
       yAxis: {
         type: "value",
         splitLine: { lineStyle: { color: theme.gridColor } },
-        axisLabel: { color: theme.textColor, fontSize: 10 },
+        axisLabel: { color: theme.textColor, fontSize: 12 },
       },
       series: [
         { name: i18n.t("alphaZoo.alive"), type: "bar", stack: "n", data: aliveSeries, itemStyle: { color: theme.upColor } },
@@ -877,9 +837,9 @@ function ResultPanel({ result }: { result: AlphaBenchResult }) {
   }, [result]);
 
   const totals = [
-    { label: i18n.t("alphaZoo.alive"), value: result.alive, icon: CheckCircle2, tone: "text-green-600 dark:text-green-400" },
+    { label: i18n.t("alphaZoo.alive"), value: result.alive, icon: CheckCircle2, tone: "text-success" },
     { label: i18n.t("alphaZoo.reversed"), value: result.reversed, icon: AlertTriangle, tone: "text-warning" },
-    { label: i18n.t("alphaZoo.dead"), value: result.dead, icon: XCircle, tone: "text-red-600 dark:text-red-400" },
+    { label: i18n.t("alphaZoo.dead"), value: result.dead, icon: XCircle, tone: "text-danger" },
     { label: i18n.t("alphaZoo.skipped"), value: result.skipped ?? 0, icon: Loader2, tone: "text-muted-foreground" },
   ];
 
@@ -888,32 +848,27 @@ function ResultPanel({ result }: { result: AlphaBenchResult }) {
       <FactorDataNotice meta={result.meta} />
       {result.n_alphas_tested === 0 && <p role="alert" className="text-warning">{i18n.t("analysis.noEvaluableFactors")}</p>}
       {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {totals.map(({ label, value, icon: Icon, tone }) => (
-          <div key={label} className="flex items-center gap-3 rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+          <Card key={label} className="flex items-center gap-3 p-4">
             <Icon className={cn("h-5 w-5 shrink-0", tone)} aria-hidden="true" />
-            <div>
-              <p className="text-xs text-muted-foreground">{label}</p>
-              <p className="font-mono text-xl font-semibold tabular-nums">{value}</p>
-            </div>
-          </div>
+            <Stat label={label} value={value} />
+          </Card>
         ))}
       </div>
 
       {/* Top tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <TopTable title={i18n.t("alphaZoo.topByIr")} rows={result.top5_by_ir || []} />
         <TopTable title={i18n.t("alphaZoo.mostReversed")} rows={(result.dead_examples || []).slice(0, 3)} />
       </div>
 
       {/* By-theme breakdown */}
       {result.by_theme && Object.keys(result.by_theme).length > 0 && (
-        <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-2">
-            {i18n.t("alphaZoo.byTheme")}
-          </h3>
-          <div ref={chartRef} style={{ height: 240 }} />
-        </div>
+        <Card>
+          <CardHeader title={i18n.t("alphaZoo.byTheme")} />
+          <CardBody><div ref={chartRef} style={{ height: 240 }} /></CardBody>
+        </Card>
       )}
     </div>
   );
@@ -921,8 +876,8 @@ function ResultPanel({ result }: { result: AlphaBenchResult }) {
 
 function TopTable({ title, rows }: { title: string; rows: AlphaBenchTopRow[] }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
-      <div className="px-4 py-2.5 border-b border-border/60 bg-muted/40">
+    <div className="overflow-hidden rounded-lg border border-border bg-card">
+      <div className="px-4 py-2.5 border-b border-border bg-muted/40">
         <h3 className="text-sm font-semibold text-muted-foreground">{title}</h3>
       </div>
       {rows.length === 0 ? (
@@ -933,7 +888,7 @@ function TopTable({ title, rows }: { title: string; rows: AlphaBenchTopRow[] }) 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-muted/40 text-[11px] uppercase tracking-wide text-muted-foreground [&_th]:font-medium">
+              <tr className="border-b border-border bg-muted/60 text-xs text-muted-foreground [&_th]:font-medium">
                 <th className="text-left px-4 py-2 font-medium">{i18n.t("alphaZoo.id")}</th>
                 <th className="text-right px-4 py-2 font-medium">{i18n.t("alphaZoo.meanIc")}</th>
                 <th className="text-right px-4 py-2 font-medium">{i18n.t("alphaZoo.ir")}</th>
@@ -943,7 +898,7 @@ function TopTable({ title, rows }: { title: string; rows: AlphaBenchTopRow[] }) 
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.id} className="border-b last:border-0 hover:bg-muted/40">
+                <tr key={r.id} className="border-b border-border last:border-0 hover:bg-muted/40">
                   <td className="px-4 py-2">
                     <Link
                       to={`/alpha-zoo/${encodeURIComponent(r.id)}`}
@@ -952,10 +907,10 @@ function TopTable({ title, rows }: { title: string; rows: AlphaBenchTopRow[] }) 
                       {r.id}
                     </Link>
                   </td>
-                  <td className="px-4 py-2 text-right font-mono tabular-nums text-xs">{fmtNum(r.ic_mean)}</td>
-                  <td className="px-4 py-2 text-right font-mono tabular-nums text-xs">{fmtNum(r.ir)}</td>
+                  <td className="px-4 py-2 text-right tabular-nums text-xs">{fmtNum(r.ic_mean)}</td>
+                  <td className="px-4 py-2 text-right tabular-nums text-xs">{fmtNum(r.ir)}</td>
                   <td className="px-4 py-2 text-xs text-muted-foreground">
-                    {(r.theme || []).map((t) => i18n.t("alphaZoo.themes." + t, { defaultValue: t })).join(", ") || "—"}
+                    {(r.theme || []).map((t) => i18n.t("alphaZoo.themes." + t, { defaultValue: t })).join(", ") || "-"}
                   </td>
                   <td className="px-4 py-2 text-xs">
                     <CategoryBadge category={r.category} />
@@ -978,10 +933,10 @@ function TopTable({ title, rows }: { title: string; rows: AlphaBenchTopRow[] }) 
 function CategoryBadge({ category }: { category: AlphaBenchTopRow["category"] }) {
   const tone =
     category === "alive"
-      ? "bg-green-500/10 text-green-700 dark:text-green-300"
+      ? "bg-success/12 text-success"
       : category === "reversed"
-        ? "bg-warning/10 text-warning"
-        : "bg-red-500/10 text-red-700 dark:text-red-300";
+        ? "bg-warning/12 text-warning"
+        : "bg-danger/12 text-danger";
   const label =
     category === "alive"
       ? i18n.t("alphaZoo.alive")
@@ -989,7 +944,7 @@ function CategoryBadge({ category }: { category: AlphaBenchTopRow["category"] })
         ? i18n.t("alphaZoo.reversed")
         : i18n.t("alphaZoo.dead");
   return (
-    <span className={cn("inline-block px-2 py-0.5 rounded-full text-[10px] font-medium", tone)}>
+    <span className={cn("inline-block rounded-sm px-1.5 py-0.5 text-xs font-medium", tone)}>
       {label}
     </span>
   );
@@ -1021,8 +976,8 @@ function parseAlphaIds(text: string): string[] {
 /**
  * Head-to-head comparison of a hand-picked set of alphas.
  *
- * Uses the same recoverable job lifecycle as {@link BenchView}. Ids are prefilled from `?ids=a,b,c` — set by
- * the BrowseView multi-select — and remain editable as free text.
+ * Uses the same recoverable job lifecycle as {@link BenchView}. Ids are prefilled from `?ids=a,b,c` - set by
+ * the BrowseView multi-select - and remain editable as free text.
  */
 function CompareView() {
   const { search: locSearch } = useLocation();
@@ -1049,97 +1004,80 @@ function CompareView() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
+    <Page>
       <Link
         to="/alpha-zoo"
-        className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" /> {i18n.t("alphaZoo.backToAlphaZoo")}
       </Link>
 
-      <div className="space-y-1">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-wide">
-          <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden="true" /> {i18n.t("alphaZoo.headToHeadCompare")}
-        </div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {i18n.t("alphaZoo.compareAlphas")}
-        </h1>
-        <p className="text-sm text-muted-foreground max-w-2xl">
-          {i18n.t("alphaZoo.compareDesc")}
-        </p>
-      </div>
+      <PageHeader title={i18n.t("alphaZoo.compareAlphas")} description={i18n.t("alphaZoo.compareDesc")} />
 
-      <form onSubmit={startCompare} className="space-y-3 rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+      <form onSubmit={startCompare} className="space-y-3 rounded-lg border border-border bg-card p-4">
         <div>
-          <label htmlFor="compare-ids" className="text-xs text-muted-foreground block mb-1">
+          <label htmlFor="compare-ids" className="mb-1.5 block text-[13px] font-medium">
             {i18n.t("alphaZoo.alphaIds")}{ids.length > 0 ? ` (${ids.length} ${i18n.t("alphaZoo.selected")})` : ""}
           </label>
-          <textarea
+          <Textarea
             id="compare-ids"
             value={idsText}
             onChange={(e) => setIdsText(e.target.value)}
             disabled={busy}
             rows={2}
             placeholder="alpha101_1, alpha101_2, gtja191_5"
-            className="w-full px-3 py-2 rounded-lg border border-border/60 bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
+            className="font-mono"
           />
-          <p className="text-[11px] text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             {i18n.t("alphaZoo.alphaIdsHint")}
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label htmlFor="compare-universe" className="text-xs text-muted-foreground block mb-1">{i18n.t("alphaZoo.universe")}</label>
-            <select
+            <label htmlFor="compare-universe" className="mb-1.5 block text-[13px] font-medium">{i18n.t("alphaZoo.universe")}</label>
+            <Select
               id="compare-universe"
               value={universe}
               onChange={(e) => setUniverse(e.target.value)}
               disabled={busy}
-              className="w-full px-3 py-2 rounded-lg border border-border/60 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
             >
               {UNIVERSE_OPTIONS.map((u) => (
                 <option key={u.value} value={u.value} disabled={u.value === "btc-usdt"}>
                   {i18n.t("alphaZoo.universeOption." + u.value as any)}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           <div>
-            <label htmlFor="compare-period" className="text-xs text-muted-foreground block mb-1">{i18n.t("alphaZoo.period")}</label>
-            <input
+            <label htmlFor="compare-period" className="mb-1.5 block text-[13px] font-medium">{i18n.t("alphaZoo.period")}</label>
+            <Input
               id="compare-period"
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
               disabled={busy}
               placeholder="2020-2025"
-              className="w-full px-3 py-2 rounded-lg border border-border/60 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
             />
           </div>
           <div>
-            <label htmlFor="compare-sort" className="text-xs text-muted-foreground block mb-1">{i18n.t("alphaZoo.rankBy")}</label>
-            <select
+            <label htmlFor="compare-sort" className="mb-1.5 block text-[13px] font-medium">{i18n.t("alphaZoo.rankBy")}</label>
+            <Select
               id="compare-sort"
               value={sort}
               onChange={(e) => setSort(e.target.value)}
               disabled={busy}
-              className="w-full px-3 py-2 rounded-lg border border-border/60 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
             >
               {SORT_OPTIONS.map((s) => (
                 <option key={s.value} value={s.value}>
                   {i18n.t("alphaZoo.sortOption." + (s.value === "ic_mean" ? "icMean" : s.value === "ic_positive_ratio" ? "icPositiveRatio" : s.value === "ic_count" ? "icCount" : s.value) as any)}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            type="submit"
-            disabled={busy || ids.length < 2}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
-          >
+          <Button type="submit" variant="primary" disabled={busy || ids.length < 2}>
             {busy ? (
               <>
                 <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> {i18n.t("alphaZoo.running")}
@@ -1149,27 +1087,27 @@ function CompareView() {
                 <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden="true" /> {i18n.t("alphaZoo.compare")}
               </>
             )}
-          </button>
+          </Button>
           {ids.length < 2 && (
             <span className="text-xs text-muted-foreground">{i18n.t("alphaZoo.pickAtLeast2")}</span>
           )}
         </div>
 
         {formError && (
-          <p className="text-xs text-red-600 dark:text-red-400" role="alert">
+          <p className="text-xs text-danger" role="alert">
             {formError}
           </p>
         )}
       </form>
 
       <ReadinessPanel readiness={readiness} universe={universe} count={ids.length} />
-      {status === "disconnected" && <button type="button" onClick={job.reconnect} className="text-primary underline">{i18n.t("analysis.resumeJob")}</button>}
+      {status === "disconnected" && <Button onClick={job.reconnect}>{i18n.t("analysis.resumeJob")}</Button>}
       {(status === "submitting" || status === "streaming" || status === "disconnected") && (
         <ProgressPanel jobId={jobId} progress={progress} />
       )}
 
       {result && <CompareResultPanel result={result} />}
-    </div>
+    </Page>
   );
 }
 
@@ -1198,11 +1136,11 @@ function CompareResultPanel({ result }: { result: AlphaCompareResult }) {
         )}
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
         <div className="overflow-x-auto">
           <table className="w-full text-sm" aria-label={i18n.t("alphaZoo.alphaComparisonRanking")}>
             <thead>
-              <tr className="border-b bg-muted/40 text-[11px] uppercase tracking-wide text-muted-foreground [&_th]:font-medium">
+              <tr className="border-b border-border bg-muted/60 text-xs text-muted-foreground [&_th]:font-medium">
                 <th className="text-right px-3 py-2">#</th>
                 <th className="text-left px-3 py-2">{i18n.t("alphaZoo.alpha")}</th>
                 <th className="text-right px-3 py-2 hidden sm:table-cell">{i18n.t("alphaZoo.zoo")}</th>
@@ -1219,11 +1157,11 @@ function CompareResultPanel({ result }: { result: AlphaCompareResult }) {
                 <tr
                   key={`${r.zoo}:${r.id}`}
                   className={cn(
-                    "border-b last:border-0 hover:bg-muted/40",
+                    "border-b border-border last:border-0 hover:bg-muted/40",
                     r.rank === 1 && "bg-success/5",
                   )}
                 >
-                  <td className="px-3 py-2 text-right font-mono tabular-nums">{r.rank}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{r.rank}</td>
                   <td className="px-3 py-2 font-mono text-xs">
                     <Link
                       to={`/alpha-zoo/${encodeURIComponent(r.id)}`}
@@ -1233,13 +1171,13 @@ function CompareResultPanel({ result }: { result: AlphaCompareResult }) {
                     </Link>
                   </td>
                   <td className="px-3 py-2 text-xs text-muted-foreground hidden sm:table-cell">{r.zoo}</td>
-                  <td className="px-3 py-2 text-right font-mono tabular-nums">{fmtNum(r.ic_mean, 4)}</td>
-                  <td className="px-3 py-2 text-right font-mono tabular-nums hidden md:table-cell">{fmtNum(r.ic_std, 4)}</td>
-                  <td className="px-3 py-2 text-right font-mono tabular-nums">{fmtNum(r.ir, 3)}</td>
-                  <td className="px-3 py-2 text-right font-mono tabular-nums hidden md:table-cell">{fmtNum(r.ic_positive_ratio, 3)}</td>
-                  <td className="px-3 py-2 text-right font-mono tabular-nums hidden lg:table-cell">{r.ic_count}</td>
-                  <td className="px-3 py-2 text-right font-mono tabular-nums text-muted-foreground">
-                    {r.rank === 1 ? "—" : fmtNum(Number(r[deltaKey]), 4)}
+                  <td className="px-3 py-2 text-right tabular-nums">{fmtNum(r.ic_mean, 4)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums hidden md:table-cell">{fmtNum(r.ic_std, 4)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{fmtNum(r.ir, 3)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums hidden md:table-cell">{fmtNum(r.ic_positive_ratio, 3)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums hidden lg:table-cell">{r.ic_count}</td>
+                  <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">
+                    {r.rank === 1 ? "-" : fmtNum(Number(r[deltaKey]), 4)}
                   </td>
                 </tr>
               ))}
@@ -1272,17 +1210,17 @@ function useReadiness() {
 
 function ReadinessPanel({ readiness, universe, count }: { readiness: ReturnType<typeof useReadiness>; universe: string; count?: number }) {
   const info = readiness.data?.universes[universe];
-  return <div className="space-y-2 rounded-xl border bg-card p-4 text-sm" role="status">
+  return <div className="space-y-2 rounded-lg border border-border bg-card p-4 text-sm" role="status">
     <p>{i18n.t("analysis.evaluationScope", { count: count ?? "–" })}</p>
     <p className={info?.ready ? "text-muted-foreground" : "text-warning"}>{info ? i18n.t(`analysis.ready_${info.reason}`) : readiness.error || i18n.t("analysis.checkingData")}</p>
-    {readiness.error && <button onClick={readiness.retry} className="text-primary underline">{i18n.t("connection.retry")}</button>}
+    {readiness.error && <Button size="sm" onClick={readiness.retry}>{i18n.t("connection.retry")}</Button>}
     {info && !info.ready && universe !== "btc-usdt" && <Link to="/settings" className="inline-block text-primary underline">{i18n.t("layout.settings")}</Link>}
   </div>;
 }
 
 function FactorDataNotice({ meta }: { meta?: import("@/lib/api").AlphaDataMeta }) {
   if (!meta) return null;
-  return <div className="space-y-1 rounded-lg border bg-card p-3 text-sm">
+  return <div className="space-y-1 rounded-lg border border-border bg-card p-3 text-sm">
     {meta.fetched_instruments !== undefined && <p>{i18n.t("analysis.factorCoverage", { count: meta.fetched_instruments, total: meta.requested_instruments ?? "–" })}</p>}
     {meta.missing_instruments?.length ? <p className="text-warning">{i18n.t("analysis.missingAssets", { assets: meta.missing_instruments.join(", ") })}</p> : null}
     {meta.survivorship_bias && <p className="text-warning">{i18n.t("analysis.survivorshipBias")}</p>}

@@ -207,10 +207,10 @@ describe("Settings IM channels panel", () => {
     expect(
       await screen.findByDisplayValue("https://api.githubcopilot.com"),
     ).toBeDisabled();
-    const authStatus = screen.getByText(
-      "This provider manages authentication. Run: gh auth login",
-    );
-    expect(authStatus.closest("label")?.querySelector("input")).toBeDisabled();
+    expect(
+      screen.getByText("This provider manages authentication. Run: gh auth login"),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Authentication")).toBeDisabled();
   });
 
   it("translates stable model-discovery warning codes in the frontend", async () => {

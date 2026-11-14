@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { Database, KeyRound, Loader2, RefreshCw, RotateCcw, Save, Server, SlidersHorizontal } from "lucide-react";
+import { Loader2, RefreshCw, RotateCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { ClaudeSettings } from "@/components/settings/ClaudeSettings";
+import { SecretInput } from "@/components/settings/SecretInput";
+import { Badge, Button, Card, CardBody, CardHeader, EmptyState, Field, Input, Page, PageHeader, Select } from "@/components/ui";
 import { ChannelSettings } from "@/components/settings/ChannelSettings";
 import { CustomProviderManager } from "@/components/settings/CustomProviderManager";
 import { ModelPicker } from "@/components/settings/ModelPicker";
@@ -19,10 +22,16 @@ interface LLMFormState {
   reasoning_effort: string;
 }
 
-const fieldClass =
-  "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60";
-const labelClass = "text-sm font-medium";
-const hintClass = "text-xs text-muted-foreground";
+const SECTIONS = [
+  { id: "model", key: "settings.navModel", label: "Model" },
+  { id: "claude", key: "settings.navClaude", label: "Claude" },
+  { id: "data", key: "settings.navData", label: "Data sources" },
+  { id: "providers", key: "settings.navProviders", label: "Custom providers" },
+  { id: "channels", key: "settings.navChannels", label: "Channels" },
+  { id: "desktop", key: "settings.navDesktop", label: "Desktop" },
+] as const;
+
+const checkboxLabel = "flex shrink-0 items-center gap-2 text-xs text-muted-foreground";
 
 function toForm(settings: LLMSettings): LLMFormState {
   return {
@@ -59,6 +68,7 @@ export function Settings() {
   const [saving, setSaving] = useState(false);
   const [dataSaving, setDataSaving] = useState(false);
   const [settingsLoadError, setSettingsLoadError] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<string>("model");
 
   useEffect(() => {
     let alive = true;
@@ -112,6 +122,20 @@ export function Settings() {
       alive = false;
     };
   }, [t]);
+
+  // Highlight the section nearest the top while scrolling.
+  useEffect(() => {
+    if (loading || typeof IntersectionObserver === "undefined") return;
+    const nodes = SECTIONS
+      .map((section) => document.getElementById(`settings-${section.id}`))
+      .filter((node): node is HTMLElement => node !== null);
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries.filter((entry) => entry.isIntersecting);
+      if (visible.length) setActiveSection(visible[0].target.id.replace("settings-", ""));
+    }, { rootMargin: "0px 0px -70% 0px" });
+    nodes.forEach((node) => observer.observe(node));
+    return () => observer.disconnect();
+  }, [loading]);
 
   const providers = settings?.providers ?? [];
   const selectedProvider = useMemo<LLMProviderOption | undefined>(
@@ -299,38 +323,34 @@ export function Settings() {
     }
   };
 
-  const partnerSection = (
-    <section className="rounded-lg border bg-card p-5">
-      <h2 className="text-lg font-semibold">{t("gildata.partner")}</h2>
-      <div className="mt-2 flex flex-wrap gap-4 text-sm text-primary underline">
-        <a href="https://www.gildata.com/products/datamap" target="_blank" rel="noreferrer">{t("gildata.website")}</a>
-        {dataSettings && <a href="#gildata-settings">{t("gildata.features")}</a>}
-      </div>
-    </section>
+
+  const sections = SECTIONS.filter((section) => section.id !== "desktop" || isDesktop);
+
+  const header = (
+    <PageHeader
+      title={t("settings.title")}
+      description={t("settings.subtitle")}
+    />
   );
 
   if (loading || !form || !settings || !dataSettings) {
     return (
-      <div className="mx-auto max-w-5xl space-y-6 p-6">
-        <div className="space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight">{t("settings.title")}</h1>
-          <p className="max-w-3xl text-sm text-muted-foreground">{t("settings.subtitle")}</p>
-        </div>
-        {partnerSection}
-        <div className="flex min-h-32 items-center justify-center rounded-lg border bg-card p-5 text-sm text-muted-foreground">
+      <Page width="narrow">
+        {header}
+        <Card>
           {settingsLoadError ? (
-            <div className="text-center">
-              <div className="font-medium text-foreground">{t("settings.unavailable")}</div>
-              <div className="mt-1">{settingsLoadError}</div>
-            </div>
+            <EmptyState
+              title={t("settings.unavailable")}
+              description={<span role="alert">{settingsLoadError}</span>}
+            />
           ) : (
-            <>
-              <Loader2 className="me-2 h-4 w-4 animate-spin" />
+            <div className="flex min-h-32 items-center justify-center gap-2 text-[13px] text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
               {t("settings.loading")}
-            </>
+            </div>
           )}
-        </div>
-      </div>
+        </Card>
+      </Page>
     );
   }
 
@@ -352,374 +372,385 @@ export function Settings() {
     ? t("settings.configured")
     : t("settings.keepCurrentToken");
 
+  const goTo = (id: string) => {
+    setActiveSection(id);
+    document.getElementById(`settings-${id}`)?.scrollIntoView?.({ block: "start" });
+  };
+
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("settings.title")}</h1>
-        <p className="max-w-3xl text-sm text-muted-foreground">{t("settings.subtitle")}</p>
-      </div>
+    <Page width="narrow">
+      {header}
 
-
-      {partnerSection}
-
-      <ChannelSettings />
-
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold tracking-tight">{t("settings.llmSettings")}</h2>
-        <p className="max-w-3xl text-sm text-muted-foreground">{t("settings.llmSettingsDesc")}</p>
-      </div>
-
-      {/* Column ratio matches the data-source section so the
-          card seams align down the page. */}
-      <form onSubmit={submit} className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)]">
-        <section className="rounded-lg border bg-card p-5 shadow-sm">
-          <div className="mb-5 flex items-center gap-2">
-            <Server className="h-4 w-4 text-primary" />
-            <h2 className="text-base font-semibold">{t("settings.connection")}</h2>
-          </div>
-
-          <div className="grid gap-4">
-            <label className="grid gap-2">
-              <span className={labelClass}>{t("settings.provider")}</span>
-              <select
-                value={form.provider}
-                onChange={(event) => onProviderChange(event.target.value)}
-                className={fieldClass}
-              >
-                {providers.map((provider) => (
-                  <option key={provider.name} value={provider.name}>{provider.label}</option>
-                ))}
-              </select>
-              <span className={hintClass}>
-                {t("settings.providerChangeHint", {
-                  defaultValue: "Changing providers updates the recommended model and endpoint.",
-                })}
-              </span>
-            </label>
-
-            <label className="grid gap-2">
-              <span className={labelClass}>{t("settings.model")}</span>
-              <div className="flex flex-wrap gap-2">
-                <ModelPicker
-                  value={form.model_name}
-                  options={modelOptions}
-                  labels={modelLabels}
-                  onChange={(modelName) => setForm({ ...form, model_name: modelName })}
-                  ariaLabel={t("settings.model")}
-                  optionsAriaLabel={t("settings.modelOptions")}
-                />
-                <button
-                  type="button"
-                  onClick={() => void refreshModels({ refresh: true })}
-                  disabled={modelsLoading}
-                  className="inline-flex shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
-                  title={t("settings.loadModels")}
+      <div className="grid gap-6 lg:grid-cols-[176px_minmax(0,1fr)]">
+        <nav aria-label={t("settings.sections", { defaultValue: "Settings sections" })} className="hidden lg:block">
+          <ul className="sticky top-6 space-y-0.5">
+            {sections.map((section) => (
+              <li key={section.id}>
+                <a
+                  href={`#settings-${section.id}`}
+                  onClick={(event) => { event.preventDefault(); goTo(section.id); }}
+                  aria-current={activeSection === section.id ? "true" : undefined}
+                  className={`block rounded-md px-3 py-1.5 text-[13px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                    activeSection === section.id
+                      ? "bg-muted font-medium text-foreground"
+                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  }`}
                 >
-                  {modelsLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                  <span className="hidden sm:inline">{t("settings.loadModels")}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => applyProviderDefaults()}
-                  className="inline-flex shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                  title={t("settings.useProviderDefaults")}
-                >
-                  <RotateCcw className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t("settings.useProviderDefaults")}</span>
-                </button>
-              </div>
-              <span className={hintClass}>
-                {modelListHint || t("settings.modelPickerHint")}
-              </span>
-            </label>
+                  {t(section.key, { defaultValue: section.label })}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-            <label className="grid gap-2">
-              <span className={labelClass}>{t("settings.baseUrl")}</span>
-              <input
-                value={form.base_url}
-                onChange={(event) => setForm({ ...form, base_url: event.target.value })}
-                className={fieldClass}
-                placeholder={selectedProvider?.default_base_url}
-                list={selectedProvider?.base_url_options?.length ? "llm-base-url-options" : undefined}
-                disabled={usesManagedAuth}
-              />
-              {selectedProvider?.base_url_options?.length ? (
-                <datalist id="llm-base-url-options">
-                  {selectedProvider.base_url_options.map((baseUrl) => (
-                    <option key={baseUrl} value={baseUrl} />
-                  ))}
-                </datalist>
-              ) : null}
-            </label>
-
-            <label className="grid gap-2">
-              <span className={labelClass}>
-                {usesManagedAuth
-                  ? t("settings.authentication", { defaultValue: "Authentication" })
-                  : t("settings.apiKey", { defaultValue: "API key" })}
-              </span>
-              <div className="relative">
-                <KeyRound className="pointer-events-none absolute start-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(event) => setApiKey(event.target.value)}
-                  className={`${fieldClass} ps-9`}
-                  placeholder={keyStatus}
-                  autoComplete="current-password"
-                  disabled={apiKeyDisabled}
+        <div className="min-w-0 space-y-6">
+          <section id="settings-model" className="scroll-mt-6">
+            <form onSubmit={submit}>
+              <Card>
+                <CardHeader
+                  title={t("settings.llmSettings")}
+                  description={t("settings.llmSettingsDesc")}
                 />
-              </div>
-              <div className="flex items-start justify-between gap-3">
-                <span className={hintClass}>{keyStatus}</span>
-                {selectedProvider?.api_key_required ? (
-                  <label className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
-                    <input
-                      type="checkbox"
-                      checked={clearApiKey}
-                      onChange={(event) => {
-                        setClearApiKey(event.target.checked);
-                        if (event.target.checked) setApiKey("");
-                      }}
-                      className="h-3.5 w-3.5 accent-primary"
+                <CardBody className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Field
+                      label={t("settings.provider")}
+                      htmlFor="llm-provider"
+                      hint={t("settings.providerChangeHint", {
+                        defaultValue: "Changing providers updates the recommended model and endpoint.",
+                      })}
+                    >
+                      <Select
+                        id="llm-provider"
+                        value={form.provider}
+                        onChange={(event) => onProviderChange(event.target.value)}
+                      >
+                        {providers.map((provider) => (
+                          <option key={provider.name} value={provider.name}>{provider.label}</option>
+                        ))}
+                      </Select>
+                    </Field>
+
+                    <Field
+                      label={t("settings.baseUrl")}
+                      htmlFor="llm-base-url"
+                    >
+                      <Input
+                        id="llm-base-url"
+                        value={form.base_url}
+                        onChange={(event) => setForm({ ...form, base_url: event.target.value })}
+                        placeholder={selectedProvider?.default_base_url}
+                        list={selectedProvider?.base_url_options?.length ? "llm-base-url-options" : undefined}
+                        disabled={usesManagedAuth}
+                      />
+                      {selectedProvider?.base_url_options?.length ? (
+                        <datalist id="llm-base-url-options">
+                          {selectedProvider.base_url_options.map((baseUrl) => (
+                            <option key={baseUrl} value={baseUrl} />
+                          ))}
+                        </datalist>
+                      ) : null}
+                    </Field>
+                  </div>
+
+                  <Field
+                    label={t("settings.model")}
+                    hint={modelListHint || t("settings.modelPickerHint")}
+                  >
+                    <div className="flex flex-wrap gap-2">
+                      <ModelPicker
+                        value={form.model_name}
+                        options={modelOptions}
+                        labels={modelLabels}
+                        onChange={(modelName) => setForm({ ...form, model_name: modelName })}
+                        ariaLabel={t("settings.model")}
+                        optionsAriaLabel={t("settings.modelOptions")}
+                      />
+                      <Button
+                        onClick={() => void refreshModels({ refresh: true })}
+                        disabled={modelsLoading}
+                        title={t("settings.loadModels")}
+                      >
+                        {modelsLoading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <RefreshCw className="h-4 w-4" aria-hidden="true" />}
+                        <span className="hidden sm:inline">{t("settings.loadModels")}</span>
+                      </Button>
+                      <Button
+                        onClick={() => applyProviderDefaults()}
+                        title={t("settings.useProviderDefaults")}
+                      >
+                        <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                        <span className="hidden sm:inline">{t("settings.useProviderDefaults")}</span>
+                      </Button>
+                    </div>
+                  </Field>
+
+                  <Field
+                    label={usesManagedAuth
+                      ? t("settings.authentication", { defaultValue: "Authentication" })
+                      : t("settings.apiKey", { defaultValue: "API key" })}
+                    htmlFor="llm-api-key"
+                    hint={keyStatus}
+                  >
+                    <SecretInput
+                      id="llm-api-key"
+                      value={apiKey}
+                      onChange={(event) => setApiKey(event.target.value)}
+                      placeholder={keyStatus}
+                      disabled={apiKeyDisabled}
                     />
-                    {t("settings.clearApiKey")}
-                  </label>
-                ) : null}
-              </div>
-            </label>
-          </div>
-        </section>
+                    {selectedProvider?.api_key_required ? (
+                      <label className={checkboxLabel}>
+                        <input
+                          type="checkbox"
+                          checked={clearApiKey}
+                          onChange={(event) => {
+                            setClearApiKey(event.target.checked);
+                            if (event.target.checked) setApiKey("");
+                          }}
+                          className="h-3.5 w-3.5 accent-primary"
+                        />
+                        {t("settings.clearApiKey")}
+                      </label>
+                    ) : null}
+                  </Field>
 
-        <section className="rounded-lg border bg-card p-5 shadow-sm">
-          <div className="mb-5 flex items-center gap-2">
-            <SlidersHorizontal className="h-4 w-4 text-primary" />
-            <h2 className="text-base font-semibold">{t("settings.generation")}</h2>
-          </div>
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <Field label={t("settings.temperature")} htmlFor="llm-temperature" hint={t("settings.temperatureDesc")}>
+                      <Input
+                        id="llm-temperature"
+                        type="number"
+                        min={0}
+                        max={2}
+                        step={0.1}
+                        value={form.temperature}
+                        onChange={(event) => setForm({ ...form, temperature: Number(event.target.value) })}
+                      />
+                    </Field>
+                    <Field label={t("settings.timeoutSeconds")} htmlFor="llm-timeout">
+                      <Input
+                        id="llm-timeout"
+                        type="number"
+                        min={1}
+                        max={3600}
+                        step={1}
+                        value={form.timeout_seconds}
+                        onChange={(event) => setForm({ ...form, timeout_seconds: Number(event.target.value) })}
+                      />
+                    </Field>
+                    <Field label={t("settings.maxRetries")} htmlFor="llm-retries">
+                      <Input
+                        id="llm-retries"
+                        type="number"
+                        min={0}
+                        max={20}
+                        step={1}
+                        value={form.max_retries}
+                        onChange={(event) => setForm({ ...form, max_retries: Number(event.target.value) })}
+                      />
+                    </Field>
+                  </div>
 
-          <div className="grid gap-4">
-            <label className="grid gap-2">
-              <span className={labelClass}>{t("settings.temperature")}</span>
-              <input
-                type="number"
-                min={0}
-                max={2}
-                step={0.1}
-                value={form.temperature}
-                onChange={(event) => setForm({ ...form, temperature: Number(event.target.value) })}
-                className={fieldClass}
-              />
-              <span className={hintClass}>{t("settings.temperatureDesc")}</span>
-            </label>
+                  <Field
+                    label={t("settings.reasoningEffort")}
+                    htmlFor="llm-effort"
+                    hint={(
+                      <>
+                        {t("settings.reasoningEffortDesc")}
+                        {form.provider === "openai-codex" && defaultEffortsByModel[form.model_name] && (
+                          <span className="block">
+                            {t("settings.providerDefault")}:
+                            {" "}{effortLabelKey(defaultEffortsByModel[form.model_name])
+                              ? t(effortLabelKey(defaultEffortsByModel[form.model_name])!)
+                              : defaultEffortsByModel[form.model_name]}
+                          </span>
+                        )}
+                        {unsupportedEffort && (
+                          <span className="block">
+                            {t("settings.reasoningEffortReset", {
+                              level: unsupportedEffortKey ? t(unsupportedEffortKey) : unsupportedEffort,
+                            })}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  >
+                    <Select
+                      id="llm-effort"
+                      value={unsupportedEffort ? "" : form.reasoning_effort}
+                      onChange={(event) => setForm({ ...form, reasoning_effort: event.target.value })}
+                    >
+                      <option value="">{t("settings.providerDefault")}</option>
+                      {visibleEffortLevels.map((level) => {
+                        const labelKey = effortLabelKey(level);
+                        return (
+                          <option key={level} value={level}>
+                            {labelKey ? t(labelKey) : level}
+                          </option>
+                        );
+                      })}
+                    </Select>
+                  </Field>
 
-            <label className="grid gap-2">
-              <span className={labelClass}>{t("settings.timeoutSeconds")}</span>
-              <input
-                type="number"
-                min={1}
-                max={3600}
-                step={1}
-                value={form.timeout_seconds}
-                onChange={(event) => setForm({ ...form, timeout_seconds: Number(event.target.value) })}
-                className={fieldClass}
-              />
-            </label>
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+                    <p className="min-w-0 break-all text-xs text-muted-foreground">
+                      {t("settings.saved")}: <span className="font-mono text-[13px]">{settings.env_path}</span>
+                    </p>
+                    <Button type="submit" variant="primary" loading={saving}>
+                      {saving ? t("settings.saving") : t("settings.save")}
+                    </Button>
+                  </div>
+                </CardBody>
+              </Card>
+            </form>
+          </section>
 
-            <label className="grid gap-2">
-              <span className={labelClass}>{t("settings.maxRetries")}</span>
-              <input
-                type="number"
-                min={0}
-                max={20}
-                step={1}
-                value={form.max_retries}
-                onChange={(event) => setForm({ ...form, max_retries: Number(event.target.value) })}
-                className={fieldClass}
-              />
-            </label>
+          <section id="settings-claude" className="scroll-mt-6">
+            <ClaudeSettings />
+          </section>
 
-            <label className="grid gap-2">
-              <span className={labelClass}>{t("settings.reasoningEffort")}</span>
-              <select
-                value={unsupportedEffort ? "" : form.reasoning_effort}
-                onChange={(event) => setForm({ ...form, reasoning_effort: event.target.value })}
-                className={fieldClass}
-              >
-                <option value="">{t("settings.providerDefault")}</option>
-                {visibleEffortLevels.map((level) => {
-                  const labelKey = effortLabelKey(level);
-                  return (
-                    <option key={level} value={level}>
-                      {labelKey ? t(labelKey) : level}
-                    </option>
-                  );
-                })}
-              </select>
-              <span className={hintClass}>{t("settings.reasoningEffortDesc")}</span>
-              {form.provider === "openai-codex" && defaultEffortsByModel[form.model_name] && (
-                <span className={hintClass}>
-                  {t("settings.providerDefault")}:
-                  {" "}{effortLabelKey(defaultEffortsByModel[form.model_name])
-                    ? t(effortLabelKey(defaultEffortsByModel[form.model_name])!)
-                    : defaultEffortsByModel[form.model_name]}
-                </span>
-              )}
-              {unsupportedEffort && (
-                <span className={hintClass}>
-                  {t("settings.reasoningEffortReset", {
-                    level: unsupportedEffortKey ? t(unsupportedEffortKey) : unsupportedEffort,
-                  })}
-                </span>
-              )}
-            </label>
-
-            <div className="rounded-md border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">{t("settings.saved")}: </span>
-              <span className="break-all font-mono">{settings.env_path}</span>
-            </div>
-
-            <button
-              type="submit"
-              disabled={saving}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              {saving ? t("settings.saving") : t("settings.save")}
-            </button>
-          </div>
-        </section>
-      </form>
-
-      <CustomProviderManager onActivated={() => {
-        void api.getLLMSettings().then((value) => { setSettings(value); setForm(toForm(value)); });
-      }} />
-
-      <form onSubmit={submitDataSources} className="rounded-lg border bg-card p-5 shadow-sm">
-        <div className="mb-5 space-y-1">
-          <div className="flex items-center gap-2">
-            <Database className="h-4 w-4 text-primary" />
-            <h2 className="text-base font-semibold">{t("settings.dataSourceSettings")}</h2>
-          </div>
-          <p className="text-sm text-muted-foreground">{t("settings.dataSourceSettingsDesc")}</p>
-        </div>
-
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)]">
-          <div className="grid gap-4">
-            <label className="grid gap-2">
-              <span className={labelClass}>{t("settings.tushareToken")}</span>
-              <div className="relative">
-                <KeyRound className="pointer-events-none absolute start-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <input
-                  type="password"
-                  value={tushareToken}
-                  onChange={(event) => setTushareToken(event.target.value)}
-                  className={`${fieldClass} ps-9`}
-                  placeholder={tushareStatus}
-                  autoComplete="current-password"
-                  disabled={clearTushareToken}
+          <section id="settings-data" className="scroll-mt-6 space-y-6">
+            <form onSubmit={submitDataSources}>
+              <Card>
+                <CardHeader
+                  title={t("settings.dataSourceSettings")}
+                  description={t("settings.dataSourceSettingsDesc")}
                 />
-              </div>
-              <div className="flex items-start justify-between gap-3">
-                <span className={hintClass}>
-                  {t("settings.tushareTokenDesc", {
-                    defaultValue: "Used for China A-share, futures, fund, and macro data. If unset, the project falls back to AKShare where available.",
-                  })}
-                </span>
-                <label className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
-                  <input
-                    type="checkbox"
-                    checked={clearTushareToken}
-                    onChange={(event) => {
-                      setClearTushareToken(event.target.checked);
-                      if (event.target.checked) setTushareToken("");
-                    }}
-                    className="h-3.5 w-3.5 accent-primary"
-                  />
-                  {t("settings.clearTushareToken")}
-                </label>
-              </div>
-            </label>
+                <CardBody className="space-y-4">
+                  <Field
+                    label={t("settings.tushareToken")}
+                    htmlFor="tushare-token"
+                    hint={t("settings.tushareTokenDesc", {
+                      defaultValue: "Used for China A-share, futures, fund, and macro data. If unset, the project falls back to AKShare where available.",
+                    })}
+                  >
+                    <SecretInput
+                      id="tushare-token"
+                      value={tushareToken}
+                      onChange={(event) => setTushareToken(event.target.value)}
+                      placeholder={tushareStatus}
+                      disabled={clearTushareToken}
+                    />
+                    <label className={checkboxLabel}>
+                      <input
+                        type="checkbox"
+                        checked={clearTushareToken}
+                        onChange={(event) => {
+                          setClearTushareToken(event.target.checked);
+                          if (event.target.checked) setTushareToken("");
+                        }}
+                        className="h-3.5 w-3.5 accent-primary"
+                      />
+                      {t("settings.clearTushareToken")}
+                    </label>
+                  </Field>
 
-            <label className="grid gap-2">
-              <span className={labelClass}>{t("settings.gildataToken")}</span>
-              <div className="relative">
-                <KeyRound className="pointer-events-none absolute start-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <input
-                  type="password"
-                  value={gildataToken}
-                  onChange={(event) => setGildataToken(event.target.value)}
-                  className={`${fieldClass} ps-9`}
-                  placeholder={gildataStatus}
-                  autoComplete="current-password"
-                  disabled={clearGildataToken}
+                  <Field
+                    label={t("settings.gildataToken")}
+                    htmlFor="gildata-token"
+                    hint={t("settings.gildataTokenDesc", { defaultValue: "Optional Gildata data credentials." })}
+                  >
+                    <SecretInput
+                      id="gildata-token"
+                      value={gildataToken}
+                      onChange={(event) => setGildataToken(event.target.value)}
+                      placeholder={gildataStatus}
+                      disabled={clearGildataToken}
+                    />
+                    <label className={checkboxLabel}>
+                      <input
+                        type="checkbox"
+                        checked={clearGildataToken}
+                        onChange={(event) => {
+                          setClearGildataToken(event.target.checked);
+                          if (event.target.checked) setGildataToken("");
+                        }}
+                        className="h-3.5 w-3.5 accent-primary"
+                      />
+                      {t("settings.clearGildataToken")}
+                    </label>
+                  </Field>
+
+                  <fieldset id="gildata-settings" disabled={dataSaving} className="grid gap-2 rounded-md border border-border p-3">
+                    <legend className="px-1 text-[13px] font-medium">{t("gildata.features")}</legend>
+                    <p className="text-[13px] text-muted-foreground">{t("gildata.optInHelp")}</p>
+                    {gildataFeatures.map((feature) => (
+                      <label key={feature} className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          className="accent-primary"
+                          checked={features.includes(feature)}
+                          onChange={(event) => setFeatures(event.target.checked
+                            ? [...features, feature]
+                            : features.filter((item) => item !== feature))}
+                        />
+                        {t(`gildata.${feature}`)}
+                      </label>
+                    ))}
+                    <div className="flex flex-wrap gap-4 pt-1 text-[13px]">
+                      <a className="text-primary hover:underline" href="https://www.gildata.com/products/datamap" target="_blank" rel="noreferrer">
+                        {t("gildata.website")}
+                      </a>
+                      <span className="text-muted-foreground">{t("gildata.partner")}</span>
+                    </div>
+                  </fieldset>
+
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-muted/40 px-3 py-2">
+                    <span className="text-[13px] font-medium">{t("settings.baostock")}</span>
+                    <Badge tone={dataSettings.baostock_supported ? "success" : "warning"}>
+                      {dataSettings.baostock_supported ? t("settings.loaderAvailable") : t("settings.noProjectLoader")}
+                    </Badge>
+                    <div className="basis-full space-y-1 text-[13px] text-muted-foreground">
+                      <p>{dataSettings.baostock_message}</p>
+                      <p>
+                        {dataSettings.baostock_installed
+                          ? t("settings.pythonPackageInstalled")
+                          : t("settings.pythonPackageNotInstalled")}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+                    <p className="min-w-0 break-all text-xs text-muted-foreground">
+                      {t("settings.saved")}: <span className="font-mono text-[13px]">{dataSettings.env_path}</span>
+                    </p>
+                    <Button type="submit" variant="primary" loading={dataSaving}>
+                      {dataSaving ? t("settings.saving") : t("settings.saveDataSourceSettings")}
+                    </Button>
+                  </div>
+                </CardBody>
+              </Card>
+            </form>
+
+            <SourcePrioritySettings />
+          </section>
+
+          <section id="settings-providers" className="scroll-mt-6">
+            <CustomProviderManager onActivated={() => {
+              void api.getLLMSettings().then((value) => { setSettings(value); setForm(toForm(value)); });
+            }} />
+          </section>
+
+          <section id="settings-channels" className="scroll-mt-6">
+            <ChannelSettings />
+          </section>
+
+          {isDesktop && (
+            <section id="settings-desktop" className="scroll-mt-6">
+              <Card>
+                <CardHeader
+                  title={t("settings.desktopTitle", { defaultValue: "Desktop" })}
+                  description={t("settings.desktopDesc", { defaultValue: "How credentials are stored in the desktop app." })}
                 />
-              </div>
-              <div className="flex items-start justify-between gap-3">
-                <span className={hintClass}>
-                  {t("settings.gildataTokenDesc", {
-                    defaultValue: "Optional Gildata data credentials.",
+                <CardBody className="text-[13px] text-muted-foreground">
+                  {t("settings.desktopCredentialNote", {
+                    defaultValue: "API keys and tokens saved here are kept by the desktop app. The backend restarts when one changes.",
                   })}
-                </span>
-                <label className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
-                  <input
-                    type="checkbox"
-                    checked={clearGildataToken}
-                    onChange={(event) => {
-                      setClearGildataToken(event.target.checked);
-                      if (event.target.checked) setGildataToken("");
-                    }}
-                    className="h-3.5 w-3.5 accent-primary"
-                  />
-                  {t("settings.clearGildataToken")}
-                </label>
-              </div>
-            </label>
-
-            <fieldset id="gildata-settings" disabled={dataSaving} className="grid gap-2 rounded-md border p-3">
-              <legend className="px-1 text-sm font-medium">{t("gildata.features")}</legend>
-              <p className="text-sm text-muted-foreground">{t("gildata.optInHelp")}</p>
-              {gildataFeatures.map(feature => <label key={feature} className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={features.includes(feature)}
-                  onChange={event => setFeatures(event.target.checked
-                    ? [...features, feature] : features.filter(item => item !== feature))} />
-                {t(`gildata.${feature}`)}
-              </label>)}
-            </fieldset>
-            <div className="rounded-md border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">{t("settings.saved")}: </span>
-              <span className="break-all font-mono">{dataSettings.env_path}</span>
-            </div>
-
-            <button
-              type="submit"
-              disabled={dataSaving}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {dataSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              {dataSaving ? t("settings.saving") : t("settings.saveDataSourceSettings")}
-            </button>
-          </div>
-
-          <div className="rounded-md border bg-muted/20 p-4">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <span className="text-sm font-medium">{t("settings.baostock")}</span>
-              <span className={`rounded-full px-2 py-0.5 text-xs ${dataSettings.baostock_supported ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}>
-                {dataSettings.baostock_supported ? t("settings.loaderAvailable") : t("settings.noProjectLoader")}
-              </span>
-            </div>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p>{dataSettings.baostock_message}</p>
-              <p>
-                {dataSettings.baostock_installed
-                  ? t("settings.pythonPackageInstalled")
-                  : t("settings.pythonPackageNotInstalled")}
-              </p>
-            </div>
-          </div>
+                </CardBody>
+              </Card>
+            </section>
+          )}
         </div>
-      </form>
-
-      <SourcePrioritySettings />
-    </div>
+      </div>
+    </Page>
   );
 }

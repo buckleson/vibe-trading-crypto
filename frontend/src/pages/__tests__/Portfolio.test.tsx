@@ -169,7 +169,7 @@ describe("Portfolio page", () => {
     expect(amounts[0].textContent).toContain("1,000");
     expect(amounts[1].textContent).toMatch(/^-.*500\.00$/);
     expect(amounts[1]).toHaveClass("text-danger");
-    expect(within(details).getAllByText(i18n.t("portfolio.accounts.cashWithdrawable"))[0].nextElementSibling).toHaveTextContent("—");
+    expect(within(details).getAllByText(i18n.t("portfolio.accounts.cashWithdrawable"))[0].nextElementSibling).toHaveTextContent("-");
     expect(within(details).getByText("Remaining financing").nextElementSibling).toHaveTextContent("0.00");
   });
 
@@ -482,7 +482,7 @@ describe("Portfolio page", () => {
     mocked.getPortfolio.mockResolvedValue({ status: "ok", snapshot: { ...snapshot, fx: undefined } });
     render(<Portfolio />);
     const row = (await screen.findByText("AAPL")).closest("tr")!;
-    expect(within(row).getAllByRole("cell")[7]).toHaveTextContent("—");
+    expect(within(row).getAllByRole("cell")[7]).toHaveTextContent("-");
   });
 
 });

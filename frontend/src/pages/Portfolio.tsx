@@ -1,21 +1,19 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { RebalanceProposal } from "@/components/portfolio/RebalanceProposal";
 import { useTranslation } from "react-i18next";
 import {
   AlertTriangle,
   CheckCircle2,
-  Clock3,
-  Database,
   Download,
-  KeyRound,
   Loader2,
   RefreshCw,
   Search,
   Settings2,
-  ShieldCheck,
   WalletCards,
   WifiOff,
 } from "lucide-react";
+import { Badge, Button, Card, CardBody, CardHeader, EmptyState, Input, Page, PageHeader, Stat, Table, TBody, TD, TH, THead, TR } from "@/components/ui";
+import { Skeleton } from "@/components/common/Skeleton";
 import { PortfolioSourceEditor } from "@/components/portfolio/PortfolioSourceEditor";
 import { PortfolioCompatibilityBadge } from "@/components/portfolio/PortfolioCompatibilityBadge";
 import {
@@ -31,17 +29,6 @@ import { echarts } from "@/lib/echarts";
 import { getChartTheme } from "@/lib/chart-theme";
 import { useThemeDark } from "@/lib/theme-store";
 import i18n from "@/i18n";
-
-const BROKER_COLORS: Record<string, string> = {
-  IBKR: "#f05a47",
-  LONGBRIDGE: "#4f6edb",
-  BINANCE: "#f3ba2f",
-};
-
-const HOLDING_COLORS = [
-  "#4f6edb", "#f3ba2f", "#45a67d", "#8b6fd6", "#ef8354",
-  "#2d9cdb", "#d96c9d", "#7f8c8d", "#b5c83b", "#f05a47",
-];
 
 // Backend OAuth workers time out after 330 seconds. Keep a slightly longer
 // client-side guard so a lost polling response can never spin forever.
@@ -59,7 +46,7 @@ function uiLocale(): string {
 }
 
 function money(value: number | null | undefined, currency: string = "USD") {
-  if (value == null || !Number.isFinite(value)) return "—";
+  if (value == null || !Number.isFinite(value)) return "-";
   return new Intl.NumberFormat(uiLocale(), {
     style: "currency",
     currency,
@@ -80,12 +67,12 @@ function displayValue(
 }
 
 function quantity(value: number | null | undefined) {
-  if (value == null || !Number.isFinite(value)) return "—";
+  if (value == null || !Number.isFinite(value)) return "-";
   return new Intl.NumberFormat(uiLocale(), { maximumFractionDigits: 8 }).format(value);
 }
 
 function price(value: number | undefined | null) {
-  if (value == null || !Number.isFinite(value)) return "—";
+  if (value == null || !Number.isFinite(value)) return "-";
   return new Intl.NumberFormat(uiLocale(), {
     minimumFractionDigits: value >= 1 ? 2 : 4,
     maximumFractionDigits: value >= 100 ? 2 : value >= 1 ? 4 : 8,
@@ -93,7 +80,7 @@ function price(value: number | undefined | null) {
 }
 
 function percentage(value: number | null | undefined) {
-  if (value == null || !Number.isFinite(value)) return "—";
+  if (value == null || !Number.isFinite(value)) return "-";
   return new Intl.NumberFormat(uiLocale(), {
     style: "percent",
     minimumFractionDigits: 1,
@@ -117,7 +104,7 @@ function compactMoney(value: number, currency: string = "USD") {
 }
 
 function dateTime(value: string | undefined) {
-  return value ? new Date(value).toLocaleString(uiLocale()) : "—";
+  return value ? new Date(value).toLocaleString(uiLocale()) : "-";
 }
 
 function dayKey(value: string) {
@@ -344,153 +331,184 @@ export function Portfolio() {
   const totalDisplay = displayValue(snapshot?.totals.usd, snapshot?.totals.cny, displayCurrency, snapshot?.fx);
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-6">
-        <header className="flex flex-col gap-4 border-b pb-6 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-xs text-muted-foreground">
-              <ShieldCheck className="h-3.5 w-3.5 text-positive" />
-              {t("portfolio.page.badge")}
-            </div>
-            <h1 className="text-3xl font-semibold tracking-tight">{t("portfolio.page.title")}</h1>
-            <p className="mt-2 text-sm text-muted-foreground">{t("portfolio.page.subtitle")}</p>
-            {snapshot?.fx && Number.isFinite(snapshot.fx.usd_cny) ? (
-              <p className="mt-2 text-xs text-muted-foreground">
-                {t(snapshot.fx.stale ? "portfolio.page.fxCached" : "portfolio.page.fxFresh", { rate: snapshot.fx.usd_cny.toFixed(4) })}{snapshot.fx.as_of ? ` · ${snapshot.fx.as_of}` : ""}
-              </p>
-            ) : null}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button onClick={() => setEditorOpen(true)} className="inline-flex items-center gap-2 rounded-md border bg-card px-4 py-2 text-sm">
-              <Settings2 className="h-4 w-4" />{t("portfolio.page.manageAccounts")}
-            </button>
-            <button onClick={() => void download()} disabled={!snapshot} className="inline-flex items-center gap-2 rounded-md border bg-card px-4 py-2 text-sm disabled:opacity-50">
-              <Download className="h-4 w-4" />{t("portfolio.page.exportCsv")}
-            </button>
-            <button onClick={() => void downloadResearchSnapshot()} disabled={!snapshot} className="inline-flex items-center gap-2 rounded-md border bg-card px-4 py-2 text-sm disabled:opacity-50" title={t("portfolio.page.researchSnapshotHint")}>
-              <Download className="h-4 w-4" />{t("portfolio.page.exportResearch")}
-            </button>
-            <button onClick={() => void refresh()} disabled={refreshing || reconnectingSource !== null} className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50">
-              {refreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-              {refreshing ? t("portfolio.page.refreshing") : t("portfolio.page.refreshAll")}
-            </button>
-          </div>
-        </header>
-
-        {error ? <div className="flex items-start gap-2 rounded-lg border border-danger/30 bg-danger/5 p-4 text-sm text-danger"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />{error}</div> : null}
-        {refreshing && refreshState ? <RefreshProgress state={refreshState} settings={portfolioSettings} /> : null}
-        {loading ? <div className="flex h-56 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div> : null}
-
-        {!loading && !snapshot ? (
-          <section className="rounded-xl border border-dashed p-12 text-center">
-            <WalletCards className="mx-auto h-8 w-8 text-muted-foreground" />
-            <h2 className="mt-4 font-medium">{t("portfolio.page.emptyTitle")}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{t("portfolio.page.emptyBody")}</p>
-            <button onClick={() => setEditorOpen(true)} className="mt-5 inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"><Settings2 className="h-4 w-4" />{t("portfolio.page.emptyAction")}</button>
-          </section>
-        ) : null}
-
-        {snapshot ? (
+    <Page width="wide">
+      <PageHeader
+        title={t("portfolio.page.title")}
+        description={(
           <>
-            <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <Metric
+            {t("portfolio.page.subtitle")}
+            {snapshot?.fx && Number.isFinite(snapshot.fx.usd_cny) ? (
+              <span className="mt-1 block text-xs">
+                {t(snapshot.fx.stale ? "portfolio.page.fxCached" : "portfolio.page.fxFresh", { rate: snapshot.fx.usd_cny.toFixed(4) })}{snapshot.fx.as_of ? ` · ${snapshot.fx.as_of}` : ""}
+              </span>
+            ) : null}
+          </>
+        )}
+        actions={(
+          <>
+            <Button onClick={() => setEditorOpen(true)}>
+              <Settings2 className="h-4 w-4" aria-hidden="true" />{t("portfolio.page.manageAccounts")}
+            </Button>
+            <Button onClick={() => void download()} disabled={!snapshot}>
+              <Download className="h-4 w-4" aria-hidden="true" />{t("portfolio.page.exportCsv")}
+            </Button>
+            <Button onClick={() => void downloadResearchSnapshot()} disabled={!snapshot} title={t("portfolio.page.researchSnapshotHint")}>
+              <Download className="h-4 w-4" aria-hidden="true" />{t("portfolio.page.exportResearch")}
+            </Button>
+            <Button variant="primary" onClick={() => void refresh()} disabled={reconnectingSource !== null} loading={refreshing}>
+              {refreshing ? null : <RefreshCw className="h-4 w-4" aria-hidden="true" />}
+              {refreshing ? t("portfolio.page.refreshing") : t("portfolio.page.refreshAll")}
+            </Button>
+          </>
+        )}
+      />
+
+      {error ? <div role="alert" className="flex items-start gap-2 rounded-lg border border-danger/30 bg-danger/10 p-4 text-sm text-danger"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />{error}</div> : null}
+      {refreshing && refreshState ? <RefreshProgress state={refreshState} settings={portfolioSettings} /> : null}
+      {loading ? (
+        <div className="space-y-4" aria-busy="true">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {[0, 1, 2, 3].map((item) => <Skeleton key={item} className="h-24 w-full" />)}
+          </div>
+          <Skeleton className="h-64 w-full" />
+        </div>
+      ) : null}
+
+      {!loading && !snapshot ? (
+        <Card>
+          <EmptyState
+            icon={WalletCards}
+            title={t("portfolio.page.emptyTitle")}
+            description={t("portfolio.page.emptyBody")}
+            action={<Button variant="primary" onClick={() => setEditorOpen(true)}><Settings2 className="h-4 w-4" aria-hidden="true" />{t("portfolio.page.emptyAction")}</Button>}
+          />
+        </Card>
+      ) : null}
+
+      {snapshot ? (
+        <>
+          <Card>
+            <CardBody className="grid gap-x-6 gap-y-4 sm:grid-cols-2 xl:grid-cols-4">
+              <Stat
                 label={t("portfolio.metrics.total")}
                 value={money(totalDisplay, displayCurrency)}
-                note={displayCurrency === "USD" ? money(snapshot.totals.cny, "CNY") : money(snapshot.totals.usd)}
-                warningNote={failedAccounts.length ? t("portfolio.metrics.excluded", { count: failedAccounts.length }) : undefined}
-                icon={<WalletCards className="h-4 w-4" />}
+                hint={(
+                  <>
+                    {displayCurrency === "USD" ? money(snapshot.totals.cny, "CNY") : money(snapshot.totals.usd)}
+                    {failedAccounts.length ? <span className="block text-warning">{t("portfolio.metrics.excluded", { count: failedAccounts.length })}</span> : null}
+                  </>
+                )}
               />
-              <Metric
+              <Stat
                 label={t("portfolio.metrics.change")}
-                value={dailyChange == null ? "—" : `${dailyChange >= 0 ? "+" : ""}${money(dailyChange)}`}
-                note={t("portfolio.metrics.changeNote")}
-                tone={dailyChange == null ? undefined : dailyChange >= 0 ? "positive" : "danger"}
-                icon={<Clock3 className="h-4 w-4" />}
+                value={dailyChange == null ? "-" : `${dailyChange >= 0 ? "+" : ""}${money(dailyChange)}`}
+                hint={t("portfolio.metrics.changeNote")}
+                tone={dailyChange == null ? "neutral" : dailyChange >= 0 ? "success" : "danger"}
               />
-              <Metric
+              <Stat
                 label={t("portfolio.metrics.coverage")}
                 value={percentage(coverage)}
-                note={t("portfolio.metrics.coverageNote", { priced: money(snapshot.valuation?.priced_usd), cash: money(snapshot.valuation?.cash_usd) })}
-                icon={<Database className="h-4 w-4" />}
+                hint={t("portfolio.metrics.coverageNote", { priced: money(snapshot.valuation?.priced_usd), cash: money(snapshot.valuation?.cash_usd) })}
               />
-              <Metric
+              <Stat
                 label={t("portfolio.metrics.lastComplete")}
-                value={latestCompleteAt ? new Date(latestCompleteAt).toLocaleTimeString(uiLocale(), { hour: "2-digit", minute: "2-digit" }) : "—"}
-                note={dateTime(latestCompleteAt)}
-                tone={snapshot.complete ? "positive" : "warning"}
-                icon={snapshot.complete ? <CheckCircle2 className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
+                value={latestCompleteAt ? new Date(latestCompleteAt).toLocaleTimeString(uiLocale(), { hour: "2-digit", minute: "2-digit" }) : "-"}
+                hint={(
+                  <span className={snapshot.complete ? undefined : "text-warning"}>{dateTime(latestCompleteAt)}</span>
+                )}
               />
+            </CardBody>
+          </Card>
+
+          <section className="grid gap-4 xl:grid-cols-2">
+            <AllocationPie title={t("portfolio.allocation.byAccount")} data={brokerAllocation} centerLabel={money(totalDisplay, displayCurrency)} onSelect={(id) => setSourceFilter(id)} />
+            <AllocationPie title={t("portfolio.allocation.byHolding")} data={holdingAllocation} centerLabel={t("portfolio.allocation.center")} />
+          </section>
+
+          {snapshot.warnings.length ? (
+            <section className="rounded-lg border border-warning/30 bg-warning/10 p-4 text-sm">
+              <div className="mb-2 font-medium text-warning">{t("portfolio.page.warningsTitle")}</div>
+              <div className="space-y-1.5">{snapshot.warnings.map((warning) => <div key={warning} className="flex gap-2"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden="true" /><span>{warning}</span></div>)}</div>
             </section>
+          ) : null}
 
-            <section className="grid gap-4 xl:grid-cols-2">
-              <AllocationPie title={t("portfolio.allocation.byAccount")} data={brokerAllocation} centerLabel={money(totalDisplay, displayCurrency)} onSelect={(id) => setSourceFilter(id)} />
-              <AllocationPie title={t("portfolio.allocation.byHolding")} data={holdingAllocation} centerLabel={t("portfolio.allocation.center")} />
-            </section>
+          <section className="space-y-3">
+            <div className="flex items-end justify-between gap-3">
+              <div><h2 className="text-base font-semibold">{t("portfolio.accounts.title")}</h2><p className="text-[13px] text-muted-foreground">{t("portfolio.accounts.hint")}</p></div>
+              {sourceFilter !== "all" ? <Button variant="ghost" size="sm" onClick={() => setSourceFilter("all")}>{t("portfolio.accounts.clearFilter")}</Button> : null}
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {snapshot.accounts.map((account) => (
+                <AccountCard key={account.source_id ?? account.broker} account={account} active={sourceFilter === (account.source_id ?? account.broker)} displayCurrency={displayCurrency} fx={snapshot.fx} onClick={() => { const id = account.source_id ?? account.broker; setSourceFilter((current) => current === id ? "all" : id); }} onReconnect={account.reconnect_required && account.source_id ? () => void reconnectSource(account.source_id!) : undefined} onRetry={!account.reconnect_required ? () => void refresh() : undefined} busy={refreshing || reconnectingSource === (account.source_id ?? account.broker)} actionsDisabled={refreshing || reconnectingSource !== null} />
+              ))}
+            </div>
+          </section>
 
-            {snapshot.warnings.length ? (
-              <section className="rounded-lg border border-warning/30 bg-warning/5 p-4 text-sm">
-                <div className="mb-2 font-medium text-warning">{t("portfolio.page.warningsTitle")}</div>
-                <div className="space-y-1.5">{snapshot.warnings.map((warning) => <div key={warning} className="flex gap-2"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" /><span>{warning}</span></div>)}</div>
-              </section>
-            ) : null}
+          <Card>
+            <CardHeader
+              title={t("portfolio.holdings.title")}
+              description={t("portfolio.holdings.count", { count: positions.length })}
+              actions={(
+                <div className="relative w-full sm:w-64">
+                  <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                  <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("portfolio.holdings.search")} aria-label={t("portfolio.holdings.search")} className="pl-9" />
+                </div>
+              )}
+            />
+            <CardBody>
+              <Table className="min-w-[960px]">
+                <THead>
+                  <tr>
+                    <TH>{t("portfolio.holdings.colBroker")}</TH>
+                    <TH>{t("portfolio.holdings.colSymbol")}</TH>
+                    <TH>{t("portfolio.holdings.colType")}</TH>
+                    <TH numeric>{t("portfolio.holdings.colQuantity")}</TH>
+                    <TH numeric>{t("portfolio.holdings.colCostPrice")}</TH>
+                    <TH numeric>{t("portfolio.holdings.colValue")}</TH>
+                    <TH numeric>{t("portfolio.holdings.colWeight")}</TH>
+                    <TH numeric>{t("portfolio.holdings.colPnl")}</TH>
+                    <TH>{t("portfolio.holdings.colData")}</TH>
+                  </tr>
+                </THead>
+                <TBody>
+                  {positions.map((row) => {
+                    const weight = snapshot.totals.usd > 0 ? row.market_value_usd / snapshot.totals.usd : 0;
+                    const valueMain = row.priced ? money(displayValue(row.market_value_usd, row.market_value_cny, displayCurrency, snapshot.fx), displayCurrency) : "-";
+                    const valueAlt = row.priced ? (displayCurrency === "USD" ? money(row.market_value_cny, "CNY") : money(row.market_value_usd)) : t("portfolio.holdings.unpriced");
+                    const pnlDisplay = displayValue(row.unrealized_pnl_usd, undefined, displayCurrency, snapshot.fx);
+                    return (
+                      <TR key={`${row.source_id ?? row.broker}-${row.portfolio_id ?? ""}-${row.symbol}`}>
+                        <TD className="align-top"><div className="font-medium">{row.source_label ?? row.broker.toUpperCase()}</div><div className="text-xs text-muted-foreground">{row.broker}</div></TD>
+                        <TD className="align-top"><div className="font-medium">{row.symbol}</div><div className="max-w-52 truncate text-xs text-muted-foreground">{row.name}</div>{row.portfolio_id && <div className="text-xs text-muted-foreground">{row.portfolio_name} · {row.portfolio_id}</div>}{row.source_mtime && <div className="text-xs text-muted-foreground">{t("portfolio.imports.mtime", { time: dateTime(row.source_mtime) })}</div>}</TD>
+                        <TD className="align-top"><span className="capitalize text-muted-foreground">{row.asset_type}</span></TD>
+                        <TD numeric className="align-top">{quantity(row.quantity)}</TD>
+                        <TD numeric className="align-top"><div>{price(row.cost_price)}</div><div className="text-xs text-muted-foreground">{price(row.market_price)}</div>{row.price_as_of && <div className="text-xs text-muted-foreground">{t("portfolio.quoteAsOf", { time: dateTime(row.price_as_of) })}</div>}{row.price_error && <div className="ml-auto max-w-52 text-xs text-danger">{row.price_error}</div>}</TD>
+                        <TD numeric className="align-top"><div className="font-medium">{valueMain}</div><div className="text-xs text-muted-foreground">{valueAlt}</div></TD>
+                        <TD numeric className="align-top">{row.priced ? percentage(weight) : "-"}</TD>
+                        <TD numeric className="align-top"><span className={pnlDisplay == null ? "text-muted-foreground" : pnlDisplay >= 0 ? "text-success" : "text-danger"}>{pnlDisplay == null ? "-" : money(pnlDisplay, displayCurrency)}</span></TD>
+                        <TD className="align-top"><DataBadge priced={row.priced} /></TD>
+                      </TR>
+                    );
+                  })}
+                </TBody>
+              </Table>
+            </CardBody>
+          </Card>
 
-            <section>
-              <div className="mb-3 flex items-end justify-between gap-3">
-                <div><h2 className="font-semibold">{t("portfolio.accounts.title")}</h2><p className="mt-1 text-xs text-muted-foreground">{t("portfolio.accounts.hint")}</p></div>
-                {sourceFilter !== "all" ? <button className="text-xs text-primary" onClick={() => setSourceFilter("all")}>{t("portfolio.accounts.clearFilter")}</button> : null}
-              </div>
-              <div className="grid gap-3 lg:grid-cols-3">
-                {snapshot.accounts.map((account) => (
-                  <AccountCard key={account.source_id ?? account.broker} account={account} active={sourceFilter === (account.source_id ?? account.broker)} displayCurrency={displayCurrency} fx={snapshot.fx} onClick={() => { const id = account.source_id ?? account.broker; setSourceFilter((current) => current === id ? "all" : id); }} onReconnect={account.reconnect_required && account.source_id ? () => void reconnectSource(account.source_id!) : undefined} onRetry={!account.reconnect_required ? () => void refresh() : undefined} busy={refreshing || reconnectingSource === (account.source_id ?? account.broker)} actionsDisabled={refreshing || reconnectingSource !== null} />
-                ))}
-              </div>
-            </section>
+          <RebalanceProposal key={snapshot.snapshot_id} snapshot={snapshot} />
+          <HistoryChart history={history} currency={displayCurrency} />
 
-            <section className="overflow-hidden rounded-xl border bg-card">
-              <div className="flex flex-col gap-3 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
-                <div><h2 className="font-semibold">{t("portfolio.holdings.title")}</h2><p className="mt-1 text-xs text-muted-foreground">{t("portfolio.holdings.count", { count: positions.length })}</p></div>
-                <div className="relative w-full lg:w-72"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("portfolio.holdings.search")} aria-label={t("portfolio.holdings.search")} className="w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm" /></div>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[1050px] text-sm">
-                  <thead className="bg-muted/40 text-left text-xs text-muted-foreground"><tr><Th>{t("portfolio.holdings.colBroker")}</Th><Th>{t("portfolio.holdings.colSymbol")}</Th><Th>{t("portfolio.holdings.colType")}</Th><Th>{t("portfolio.holdings.colQuantity")}</Th><Th>{t("portfolio.holdings.colCostPrice")}</Th><Th>{t("portfolio.holdings.colValue")}</Th><Th>{t("portfolio.holdings.colWeight")}</Th><Th>{t("portfolio.holdings.colPnl")}</Th><Th>{t("portfolio.holdings.colData")}</Th></tr></thead>
-                  <tbody className="divide-y">
-                    {positions.map((row) => {
-                      const weight = snapshot.totals.usd > 0 ? row.market_value_usd / snapshot.totals.usd : 0;
-                      const valueMain = row.priced ? money(displayValue(row.market_value_usd, row.market_value_cny, displayCurrency, snapshot.fx), displayCurrency) : "—";
-                      const valueAlt = row.priced ? (displayCurrency === "USD" ? money(row.market_value_cny, "CNY") : money(row.market_value_usd)) : t("portfolio.holdings.unpriced");
-                      const pnlDisplay = displayValue(row.unrealized_pnl_usd, undefined, displayCurrency, snapshot.fx);
-                      return <tr key={`${row.source_id ?? row.broker}-${row.portfolio_id ?? ""}-${row.symbol}`} className="hover:bg-muted/20"><Td><div className="font-medium">{row.source_label ?? row.broker.toUpperCase()}</div><div className="mt-1 text-xs"><BrokerBadge broker={row.broker} /></div></Td><Td><div className="font-medium">{row.symbol}</div><div className="max-w-52 truncate text-xs text-muted-foreground">{row.name}</div>{row.portfolio_id && <div className="text-xs text-muted-foreground">{row.portfolio_name} · {row.portfolio_id}</div>}{row.source_mtime && <div className="text-xs text-muted-foreground">{t("portfolio.imports.mtime", { time: dateTime(row.source_mtime) })}</div>}</Td><Td><span className="capitalize text-muted-foreground">{row.asset_type}</span></Td><Td>{quantity(row.quantity)}</Td><Td><div>{price(row.cost_price)}</div><div className="text-xs text-muted-foreground">{price(row.market_price)}</div>{row.price_as_of && <div className="text-xs text-muted-foreground">{t("portfolio.quoteAsOf", { time: dateTime(row.price_as_of) })}</div>}{row.price_error && <div className="max-w-52 text-xs text-danger">{row.price_error}</div>}</Td><Td><div className="font-medium">{valueMain}</div><div className="text-xs text-muted-foreground">{valueAlt}</div></Td><Td>{row.priced ? percentage(weight) : "—"}</Td><Td><span className={pnlDisplay == null ? "text-muted-foreground" : pnlDisplay >= 0 ? "text-positive" : "text-danger"}>{pnlDisplay == null ? "—" : money(pnlDisplay, displayCurrency)}</span></Td><Td><DataBadge priced={row.priced} /></Td></tr>;
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <RebalanceProposal key={snapshot.snapshot_id} snapshot={snapshot} />
-            <HistoryChart history={history} currency={displayCurrency} />
-
-            <section className="rounded-xl border bg-card p-5">
-              <div className="mb-4 flex items-center gap-2"><KeyRound className="h-4 w-4 text-muted-foreground" /><h2 className="font-semibold">{t("portfolio.credentials.title")}</h2></div>
-              <div className="grid gap-3 lg:grid-cols-3">{snapshot.accounts.map((account) => <CredentialCard key={account.source_id ?? account.broker} account={account} />)}</div>
-            </section>
-          </>
-        ) : null}
-      </div>
+          <Card>
+            <CardHeader title={t("portfolio.credentials.title")} />
+            <CardBody className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {snapshot.accounts.map((account) => <CredentialCard key={account.source_id ?? account.broker} account={account} />)}
+            </CardBody>
+          </Card>
+        </>
+      ) : null}
       <PortfolioSourceEditor open={editorOpen} settings={portfolioSettings} catalog={sourceCatalog} saving={savingSettings} onClose={() => setEditorOpen(false)} onSave={savePortfolioSettings} onConnectionsChanged={reloadConnections} />
-    </div>
+    </Page>
   );
-}
-
-/** Headline figure tile; `warningNote` is the amber caveat under the value. */
-function Metric({ label, value, note, warningNote, icon, tone }: { label: string; value: string; note?: string; warningNote?: string; icon: ReactNode; tone?: "positive" | "danger" | "warning" }) {
-  const toneClass = tone === "positive" ? "text-positive" : tone === "danger" ? "text-danger" : tone === "warning" ? "text-warning" : "";
-  return <div className="rounded-xl border bg-card p-5">
-    <div className="flex items-center justify-between text-xs text-muted-foreground"><span>{label}</span>{icon}</div>
-    <div className={`mt-3 text-2xl font-semibold tracking-tight ${toneClass}`}>{value}</div>
-    {note ? <div className="mt-1 truncate text-xs text-muted-foreground" title={note}>{note}</div> : null}
-    {warningNote ? <div className="mt-1 flex items-start gap-1.5 text-xs text-warning"><AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" /><span>{warningNote}</span></div> : null}
-  </div>;
 }
 
 /**
@@ -527,20 +545,22 @@ function RefreshProgress({ state, settings }: { state: PortfolioRefreshState; se
       : status === "error"
         ? t("portfolio.status.failed")
         : t("portfolio.status.waiting");
-  return <section className="rounded-lg border bg-card p-4">
-    <div className="mb-3 flex items-center gap-2 text-sm font-medium"><Loader2 className="h-4 w-4 animate-spin text-primary" />{t("portfolio.status.title")}</div>
-    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{entries.map(([sourceId, item]) => {
-      const status = item.status ?? "pending";
-      return <div key={sourceId} className="flex items-center justify-between gap-3 rounded-md bg-muted/40 px-3 py-2 text-xs">
-        <span className="truncate font-medium" title={labels.get(sourceId) ?? sourceId}>{labels.get(sourceId) ?? sourceId}</span>
-        <span className={status === "ok" ? "text-positive" : status === "error" ? "text-danger" : "text-muted-foreground"}>{statusLabel(status)}</span>
-      </div>;
-    })}</div>
-  </section>;
+  return <Card role="status">
+    <CardBody>
+      <div className="mb-3 flex items-center gap-2 text-sm font-medium"><Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />{t("portfolio.status.title")}</div>
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{entries.map(([sourceId, item]) => {
+        const status = item.status ?? "pending";
+        return <div key={sourceId} className="flex items-center justify-between gap-3 rounded-md bg-muted px-3 py-2 text-[13px]">
+          <span className="truncate font-medium" title={labels.get(sourceId) ?? sourceId}>{labels.get(sourceId) ?? sourceId}</span>
+          <Badge tone={status === "ok" ? "success" : status === "error" ? "danger" : "neutral"}>{statusLabel(status)}</Badge>
+        </div>;
+      })}</div>
+    </CardBody>
+  </Card>;
 }
 
 /**
- * One account tile. A source with `status === "error"` has no totals at all —
+ * One account tile. A source with `status === "error"` has no totals at all:
  * it renders the failure, the error text and the last successful read time
  * instead of a value, so nothing on the card suggests it is part of the total.
  */
@@ -551,10 +571,10 @@ function AccountCard({ account, active, displayCurrency, fx, onClick, onReconnec
   const accountError = account.error_code === "binance_restricted_location"
     ? t("portfolio.accounts.binanceRestrictedLocation")
     : account.error;
-  return <div role="button" tabIndex={0} onClick={onClick} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") onClick(); }} className={`cursor-pointer rounded-xl border bg-card p-5 transition ${active ? "border-primary ring-1 ring-primary/20" : "hover:border-primary/40"}`}>
+  return <div role="button" tabIndex={0} onClick={onClick} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") onClick(); }} className={`cursor-pointer rounded-lg border bg-card p-4 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${active ? "border-primary" : "border-border hover:bg-muted/40"}`}>
     <div className="flex items-center justify-between gap-3">
-      <div><div className="font-medium">{account.label ?? account.broker.toUpperCase()}</div><div className="mt-1 flex flex-wrap items-center gap-2 text-xs"><BrokerBadge broker={account.broker} /><PortfolioCompatibilityBadge compatibility={account.portfolio_compatibility} /></div></div>
-      {failed ? <WifiOff className="h-4 w-4 text-danger" /> : <CheckCircle2 className="h-4 w-4 text-positive" />}
+      <div><div className="text-sm font-medium">{account.label ?? account.broker.toUpperCase()}</div><div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><span>{account.broker}</span><PortfolioCompatibilityBadge compatibility={account.portfolio_compatibility} /></div></div>
+      {failed ? <WifiOff className="h-4 w-4 text-danger" aria-hidden="true" /> : <CheckCircle2 className="h-4 w-4 text-success" aria-hidden="true" />}
     </div>
     {failed ? (
       <>
@@ -563,15 +583,15 @@ function AccountCard({ account, active, displayCurrency, fx, onClick, onReconnec
       </>
     ) : (
       <>
-        <div className="mt-4 text-2xl font-semibold">{money(accountDisplay, displayCurrency)}</div>
+        <div className="mt-4 text-2xl font-semibold tabular-nums">{money(accountDisplay, displayCurrency)}</div>
         <div className="mt-1 text-xs text-muted-foreground">{displayCurrency === "USD" ? money(account.total_cny, "CNY") : money(account.total_usd)} · {t("portfolio.accounts.positions", { count: account.position_count ?? 0 })}</div>
         <AccountBalanceDetails balances={account.balance_details} />
-        <div className="mt-4 flex items-center justify-between border-t pt-3 text-xs"><span className="text-positive">{account.source_kind === "extraetf" ? t("portfolio.imports.source") : t("portfolio.accounts.fresh")}</span><span className="text-muted-foreground">{dateTime(account.import_metadata?.source_mtime ?? account.last_success_at)}</span></div>
+        <div className="mt-4 flex items-center justify-between gap-2 border-t border-border pt-3 text-xs"><span className="text-muted-foreground">{account.source_kind === "extraetf" ? t("portfolio.imports.source") : t("portfolio.accounts.fresh")}</span><span className="text-muted-foreground">{dateTime(account.import_metadata?.source_mtime ?? account.last_success_at)}</span></div>
       </>
     )}
     {failed && accountError ? <p className="mt-3 line-clamp-2 text-xs text-muted-foreground" title={accountError}>{accountError}</p> : null}
-    {failed && onReconnect ? <button onClick={(event) => { event.stopPropagation(); onReconnect(); }} disabled={actionsDisabled} className="mt-3 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs disabled:opacity-50">{busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}{t("portfolio.accounts.reconnect")}</button> : null}
-    {failed && onRetry ? <button onClick={(event) => { event.stopPropagation(); onRetry(); }} disabled={actionsDisabled} className="mt-3 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs disabled:opacity-50">{busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}{t("portfolio.accounts.retryRead")}</button> : null}
+    {failed && onReconnect ? <Button size="sm" className="mt-3" onClick={(event) => { event.stopPropagation(); onReconnect(); }} disabled={actionsDisabled} loading={busy}>{busy ? null : <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />}{t("portfolio.accounts.reconnect")}</Button> : null}
+    {failed && onRetry ? <Button size="sm" className="mt-3" onClick={(event) => { event.stopPropagation(); onRetry(); }} disabled={actionsDisabled} loading={busy}>{busy ? null : <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />}{t("portfolio.accounts.retryRead")}</Button> : null}
   </div>;
 }
 
@@ -579,24 +599,24 @@ function AccountBalanceDetails({ balances }: { balances: PortfolioAccount["balan
   const { t } = useTranslation();
   const visible = balances?.filter((balance) => balance.cash_infos.length || balance.max_finance_amount != null || balance.remaining_finance_amount != null);
   if (!visible?.length) return null;
-  const amount = (value: number | null, currency: string | null) => value == null ? "—" : currency ? money(value, currency) : value.toLocaleString();
-  return <details className="mt-4 border-t pt-3 text-xs" onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}>
+  const amount = (value: number | null, currency: string | null) => value == null ? "-" : currency ? money(value, currency) : value.toLocaleString();
+  return <details className="mt-4 border-t border-border pt-3 text-xs" onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}>
     <summary className="cursor-pointer font-medium">{t("portfolio.accounts.cashDetails")}</summary>
     {visible.map((balance, index) => <div key={index} className="mt-3 space-y-3">
-      <div className="text-muted-foreground">{t("portfolio.accounts.reportingCurrency")}: {balance.currency ?? "—"}</div>
+      <div className="text-muted-foreground">{t("portfolio.accounts.reportingCurrency")}: {balance.currency ?? "-"}</div>
       <dl className="grid grid-cols-2 gap-2">
-        <div><dt className="text-muted-foreground">{t("portfolio.accounts.financingLimit")}</dt><dd>{amount(balance.max_finance_amount, balance.currency)}</dd></div>
-        <div><dt className="text-muted-foreground">{t("portfolio.accounts.financingRemaining")}</dt><dd>{amount(balance.remaining_finance_amount, balance.currency)}</dd></div>
+        <div><dt className="text-muted-foreground">{t("portfolio.accounts.financingLimit")}</dt><dd className="tabular-nums">{amount(balance.max_finance_amount, balance.currency)}</dd></div>
+        <div><dt className="text-muted-foreground">{t("portfolio.accounts.financingRemaining")}</dt><dd className="tabular-nums">{amount(balance.remaining_finance_amount, balance.currency)}</dd></div>
       </dl>
-      {balance.cash_infos.map((cash, cashIndex) => <div key={cashIndex} className="rounded-lg bg-muted/50 p-3">
-        <div className="mb-2 font-medium">{cash.currency ?? "—"}</div>
+      {balance.cash_infos.map((cash, cashIndex) => <div key={cashIndex} className="rounded-md bg-muted p-3">
+        <div className="mb-2 font-medium">{cash.currency ?? "-"}</div>
         <dl className="grid grid-cols-2 gap-2">
           {([
             ["cashAvailable", cash.available_cash], ["cashWithdrawable", cash.withdraw_cash],
             ["cashFrozen", cash.frozen_cash], ["cashSettling", cash.settling_cash],
           ] as const).map(([key, value]) => <div key={key}>
             <dt className="text-muted-foreground">{t(`portfolio.accounts.${key}`)}</dt>
-            <dd className={value != null && value < 0 ? "text-danger" : ""}>{amount(value, cash.currency)}</dd>
+            <dd className={`tabular-nums ${value != null && value < 0 ? "text-danger" : ""}`}>{amount(value, cash.currency)}</dd>
           </div>)}
         </dl>
       </div>)}
@@ -604,33 +624,28 @@ function AccountBalanceDetails({ balances }: { balances: PortfolioAccount["balan
   </details>;
 }
 
-function BrokerBadge({ broker }: { broker: string }) {
-  const color = BROKER_COLORS[broker.toUpperCase()] ?? "#7c8493";
-  return <span className="inline-flex items-center gap-2 font-medium uppercase"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />{broker}</span>;
-}
-
 function DataBadge({ priced }: { priced: boolean }) {
   const { t } = useTranslation();
-  if (!priced) return <span className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">{t("portfolio.holdings.unpriced")}</span>;
-  return <span className="rounded-full bg-positive/10 px-2 py-1 text-xs text-positive">{t("portfolio.holdings.priced")}</span>;
+  if (!priced) return <Badge>{t("portfolio.holdings.unpriced")}</Badge>;
+  return <Badge tone="success">{t("portfolio.holdings.priced")}</Badge>;
 }
 
 function CredentialCard({ account }: { account: PortfolioAccount }) {
   const { t } = useTranslation();
   const auth = account.auth;
-  if (account.source_kind === "extraetf") return <div className="rounded-lg border p-4"><div className="font-medium">{account.label}</div><p className="mt-2 text-sm">{t("portfolio.imports.hint")}</p>{account.import_metadata && <><p className="mt-2 text-xs">{t("portfolio.imports.mtime", { time: dateTime(account.import_metadata.source_mtime) })}</p><p className="text-xs">{t("portfolio.imports.expires", { time: dateTime(account.import_metadata.expires_at) })}</p></>}</div>;
+  if (account.source_kind === "extraetf") return <div className="rounded-lg border border-border p-4"><div className="text-sm font-medium">{account.label}</div><p className="mt-2 text-[13px]">{t("portfolio.imports.hint")}</p>{account.import_metadata && <><p className="mt-2 text-xs text-muted-foreground">{t("portfolio.imports.mtime", { time: dateTime(account.import_metadata.source_mtime) })}</p><p className="text-xs text-muted-foreground">{t("portfolio.imports.expires", { time: dateTime(account.import_metadata.expires_at) })}</p></>}</div>;
   const renewal = auth?.renewal === "automatic"
     ? t("portfolio.credentials.renewalAutomatic")
     : auth?.renewal === "session"
       ? t("portfolio.credentials.renewalSession")
       : t("portfolio.credentials.renewalProvider");
-  return <div className="rounded-lg border p-4">
+  return <div className="rounded-lg border border-border p-4">
     <div className="flex items-center justify-between gap-3">
-      <div><span className="font-medium">{account.label ?? account.broker.toUpperCase()}</span><div className="mt-1 text-xs text-muted-foreground">{account.broker.toUpperCase()}</div></div>
-      <span className={`shrink-0 rounded-full px-2 py-1 text-xs ${auth?.readonly ? "bg-positive/10 text-positive" : "bg-warning/10 text-warning"}`}>{auth?.readonly ? t("portfolio.credentials.readOnlyProfile") : t("portfolio.credentials.writableProfile")}</span>
+      <div><span className="text-sm font-medium">{account.label ?? account.broker.toUpperCase()}</span><div className="mt-1 text-xs text-muted-foreground">{account.broker}</div></div>
+      <Badge tone={auth?.readonly ? "success" : "warning"} className="shrink-0">{auth?.readonly ? t("portfolio.credentials.readOnlyProfile") : t("portfolio.credentials.writableProfile")}</Badge>
     </div>
-    <div className="mt-3 text-sm">{auth?.method ?? "—"} · {renewal}</div>
-    <p className="mt-1 text-xs text-muted-foreground">{auth?.detail ?? "—"}</p>
+    <div className="mt-3 text-sm">{auth?.method ?? "-"} · {renewal}</div>
+    <p className="mt-1 text-xs text-muted-foreground">{auth?.detail ?? "-"}</p>
   </div>;
 }
 
@@ -644,11 +659,9 @@ function AllocationPie({ title, data, centerLabel, onSelect }: { title: string; 
     if (!ref.current || ref.current.clientWidth === 0) return;
     const theme = getChartTheme();
     const chart = echarts.init(ref.current);
-    const brokerPalette = data.map((item) => BROKER_COLORS[(item.connector ?? item.name).toUpperCase()]).filter(Boolean);
-    const palette = brokerPalette.length === data.length ? brokerPalette : HOLDING_COLORS;
     chart.setOption({
       backgroundColor: "transparent",
-      color: palette,
+      color: theme.seriesPalette,
       tooltip: {
         trigger: "item",
         backgroundColor: theme.tooltipBg,
@@ -666,7 +679,7 @@ function AllocationPie({ title, data, centerLabel, onSelect }: { title: string; 
     window.addEventListener("resize", resize);
     return () => { window.removeEventListener("resize", resize); chart.off("click", select); chart.dispose(); };
   }, [data, centerLabel, onSelect, dark, instance.language]);
-  return <div className="rounded-xl border bg-card p-5"><h2 className="font-semibold">{title}</h2><div ref={ref} className="h-80 w-full" /></div>;
+  return <Card><CardHeader title={title} /><CardBody><div ref={ref} className="h-72 w-full" /></CardBody></Card>;
 }
 
 function HistoryChart({ history, currency = "USD" }: { history: PortfolioHistoryPoint[]; currency?: string }) {
@@ -676,6 +689,7 @@ function HistoryChart({ history, currency = "USD" }: { history: PortfolioHistory
   useEffect(() => {
     if (!ref.current || ref.current.clientWidth === 0) return;
     const theme = getChartTheme();
+    const lineColor = theme.seriesPalette[0];
     const chart = echarts.init(ref.current);
     const rows = history.slice(-180);
     chart.setOption({
@@ -690,20 +704,20 @@ function HistoryChart({ history, currency = "USD" }: { history: PortfolioHistory
       },
       xAxis: { type: "category", boundaryGap: false, data: rows.map((row) => new Date(row.created_at).toLocaleString(uiLocale(), { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })), axisLabel: { color: theme.textColor, hideOverlap: true }, axisLine: { lineStyle: { color: theme.gridColor } } },
       yAxis: { type: "value", scale: true, axisLabel: { color: theme.textColor, formatter: (v: number) => compactMoney(v, currency) }, splitLine: { lineStyle: { color: theme.gridColor, opacity: 0.45 } } },
-      series: [{ type: "line", data: rows.map((row) => { const value = currency === "USD" ? row.total_usd : currency === "CNY" ? row.total_cny : currency === "HKD" ? row.total_hkd : currency === "EUR" ? row.total_eur : null; return value == null ? null : Number(value); }), smooth: true, symbol: rows.length < 30 ? "circle" : "none", lineStyle: { width: 2, color: "#4f6edb" }, itemStyle: { color: "#4f6edb" }, areaStyle: { color: "rgba(79,110,219,0.10)" } }],
+      series: [{ type: "line", data: rows.map((row) => { const value = currency === "USD" ? row.total_usd : currency === "CNY" ? row.total_cny : currency === "HKD" ? row.total_hkd : currency === "EUR" ? row.total_eur : null; return value == null ? null : Number(value); }), smooth: true, symbol: rows.length < 30 ? "circle" : "none", lineStyle: { width: 2, color: lineColor }, itemStyle: { color: lineColor }, areaStyle: { color: lineColor + "1A" } }],
     });
     const resize = () => chart.resize();
     window.addEventListener("resize", resize);
     return () => { window.removeEventListener("resize", resize); chart.dispose(); };
   }, [history, dark, instance.language, currency]);
-  return <section className="rounded-xl border bg-card p-5">
-    <div className="flex items-start justify-between gap-3">
-      <div><h2 className="font-semibold">{t("portfolio.history.title")}</h2><p className="mt-1 text-xs text-muted-foreground">{t("portfolio.history.hint")}</p></div>
-      <span className="rounded-full bg-positive/10 px-2 py-1 text-xs text-positive">{t("portfolio.history.count", { count: history.length })}</span>
-    </div>
-    {history.length ? <div ref={ref} className="mt-4 h-64 w-full" /> : <div className="flex h-44 items-center justify-center text-sm text-muted-foreground">{t("portfolio.history.empty")}</div>}
-  </section>;
+  return <Card>
+    <CardHeader
+      title={t("portfolio.history.title")}
+      description={t("portfolio.history.hint")}
+      actions={<Badge>{t("portfolio.history.count", { count: history.length })}</Badge>}
+    />
+    <CardBody>
+      {history.length ? <div ref={ref} className="h-64 w-full" /> : <EmptyState title={t("portfolio.history.empty")} />}
+    </CardBody>
+  </Card>;
 }
-
-function Th({ children }: { children: ReactNode }) { return <th className="whitespace-nowrap px-4 py-3 font-medium">{children}</th>; }
-function Td({ children }: { children: ReactNode }) { return <td className="px-4 py-3">{children}</td>; }

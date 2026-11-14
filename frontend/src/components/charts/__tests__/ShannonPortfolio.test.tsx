@@ -61,8 +61,8 @@ it("saturates heatmap colors without clipping values and preserves missing value
   expect(plusHigh.style.backgroundColor).toBe(plusLow.style.backgroundColor);
   expect(cells.find(cell => cell.title === "-3.9")!.style.backgroundColor).toBe(cells.find(cell => cell.title === "-2.4")!.style.backgroundColor);
   expect(cells.find(cell => cell.title === "-0.002")).toHaveTextContent("0.0");
-  expect(cells.filter(cell => cell.title === "数据缺失").every(cell => cell.textContent === "—")).toBe(true);
-  expect(table.textContent).not.toContain("-0.0");
+  expect(cells.filter(cell => cell.title === "数据缺失").every(cell => cell.textContent === "-")).toBe(true);
+  expect(cells.some(cell => cell.textContent === "-0.0")).toBe(false);
   expect(screen.getByText(/不是该股风险贡献的分解/)).toBeInTheDocument();
 });
 
@@ -80,8 +80,8 @@ it("does not fill missing or incomplete portfolio exposures with zero", async ()
   vi.mocked(shannon.diagnosis).mockResolvedValue({ ...diagnosis, meta: { ...diagnosis.meta, factor_coverage: { SIZE: { ratio: .5 } } } });
   await run();
   const style = screen.getByRole("region", { name: "组合风格暴露" });
-  expect(within(style).getByLabelText("市值: —")).toBeInTheDocument();
-  expect(within(style).getByLabelText("质量: —")).toBeInTheDocument();
+  expect(within(style).getByLabelText("市值: -")).toBeInTheDocument();
+  expect(within(style).getByLabelText("质量: -")).toBeInTheDocument();
   expect(within(style).getByLabelText("价值: 0.00")).toBeInTheDocument();
 });
 

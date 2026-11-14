@@ -6,7 +6,6 @@ import {
   KeyRound,
   Loader2,
   PlugZap,
-  Save,
   ShieldAlert,
   X,
   XCircle,
@@ -14,6 +13,8 @@ import {
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { Badge, Button } from "@/components/ui";
+import { controlClass } from "@/components/ui/Input";
 import {
   ApiError,
   api,
@@ -26,8 +27,8 @@ import {
 } from "@/lib/api";
 
 const fieldClass =
-  "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60";
-const labelClass = "text-sm font-medium";
+  controlClass;
+const labelClass = "text-[13px] font-medium";
 const hintClass = "text-xs text-muted-foreground";
 
 type FormValue = string | boolean | string[];
@@ -542,7 +543,7 @@ export function ChannelConfigPanel({
     if (field.type === "bool") {
       return (
         <div key={field.key} className="grid gap-2">
-          <label className="flex items-center justify-between gap-3 rounded-md border bg-muted/20 px-3 py-2">
+          <label className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/40 px-3 py-2">
             <span className={labelClass}>{text.label}</span>
             <input
               id={inputId}
@@ -567,7 +568,7 @@ export function ChannelConfigPanel({
             {items.map((item) => (
               <span
                 key={item}
-                className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs"
+                className="inline-flex items-center gap-1 rounded-sm bg-muted px-1.5 py-0.5 text-xs"
               >
                 {item}
                 <button
@@ -575,7 +576,7 @@ export function ChannelConfigPanel({
                   onClick={() => removeListValue(field.key, item)}
                   disabled={formDisabled}
                   aria-label={t("settings.channels.config.removeValue", { value: item })}
-                  className="rounded-full text-muted-foreground transition hover:text-foreground disabled:opacity-50"
+                  className="rounded-sm text-muted-foreground transition hover:text-foreground disabled:opacity-50"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -604,7 +605,7 @@ export function ChannelConfigPanel({
           <label className={labelClass} htmlFor={inputId}>
             {text.label}
             {field.required ? (
-              <span className="ms-1 text-destructive" aria-hidden="true">*</span>
+              <span className="ms-1 text-danger" aria-hidden="true">*</span>
             ) : null}
           </label>
           <select
@@ -638,7 +639,7 @@ export function ChannelConfigPanel({
         <label className={labelClass} htmlFor={inputId}>
           {text.label}
           {field.required ? (
-            <span className="ms-1 text-destructive" aria-hidden="true">*</span>
+            <span className="ms-1 text-danger" aria-hidden="true">*</span>
           ) : null}
         </label>
         <div className="relative">
@@ -691,13 +692,13 @@ export function ChannelConfigPanel({
   return (
     <div className="grid gap-4">
       {!writable ? (
-        <div className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning-foreground">
+        <div className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning">
           {t("settings.channels.config.notWritable", { path: configPath ?? "" })}
         </div>
       ) : null}
 
       {!entry.sdk_available ? (
-        <div className="inline-flex w-fit items-center gap-2 rounded-full bg-warning/10 px-2.5 py-1 text-xs text-warning-foreground">
+        <div className="inline-flex w-fit items-center gap-2 rounded-sm bg-warning/12 px-2 py-1 text-xs text-warning">
           <ShieldAlert className="h-3.5 w-3.5" />
           {entry.install_hint
             ? t("settings.channels.config.sdkMissing", { hint: entry.install_hint })
@@ -705,15 +706,15 @@ export function ChannelConfigPanel({
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border bg-muted/20 px-3 py-2">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-muted/40 px-3 py-2">
         <div>
           <div className={labelClass}>{t("settings.channels.config.enable")}</div>
           <div className={hintClass}>{t("settings.channels.config.enableHint")}</div>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`rounded-full px-2 py-0.5 text-xs ${enabled ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+          <Badge tone={enabled ? "success" : "neutral"}>
             {enabled ? t("settings.channels.enabled") : t("settings.channels.disabled")}
-          </span>
+          </Badge>
           {toggling ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : null}
           <input
             type="checkbox"
@@ -727,13 +728,13 @@ export function ChannelConfigPanel({
       </div>
 
       {enableAnyway ? (
-        <div className="flex flex-wrap items-center gap-3 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+        <div className="flex flex-wrap items-center gap-3 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
           <span className="min-w-0 flex-1">{error}</span>
           <button
             type="button"
             onClick={() => void setEnabled(true, { skipVerify: true })}
             disabled={toggling}
-            className="inline-flex shrink-0 items-center gap-2 rounded-md border border-destructive/40 px-3 py-1.5 text-sm transition hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex shrink-0 items-center gap-2 rounded-md border border-danger/40 px-3 py-1.5 text-sm transition hover:bg-danger/10 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {t("settings.channels.config.enableAnyway")}
           </button>
@@ -745,7 +746,7 @@ export function ChannelConfigPanel({
           <span className="w-full text-xs">{t("settings.channels.config.enableAnywayHint")}</span>
         </div>
       ) : error ? (
-        <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+        <div className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
           <div>{error}</div>
           {errorDetail ? (
             <div className="mt-1 text-xs">
@@ -759,7 +760,7 @@ export function ChannelConfigPanel({
         <div
           role="status"
           className={`rounded-md border px-3 py-2 text-sm ${applyResult.reset_reason
-            ? "border-warning/40 bg-warning/10 text-warning-foreground"
+            ? "border-warning/40 bg-warning/10 text-warning"
             : "border-success/30 bg-success/5 text-success"}`}
         >
           <div>{applyMessage(applyResult)}</div>
@@ -777,23 +778,22 @@ export function ChannelConfigPanel({
         )}
 
         <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
+          <Button
             onClick={() => void runTest()}
             disabled={!entry.supports_test || busy}
-            className="inline-flex items-center justify-center gap-2 rounded-md border px-4 py-2 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+            loading={testing}
           >
-            {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlugZap className="h-4 w-4" />}
+            {testing ? null : <PlugZap className="h-4 w-4" aria-hidden="true" />}
             {testing ? t("settings.channels.config.testing") : t("settings.channels.config.test")}
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
+            variant="primary"
             disabled={formDisabled || !isDirty}
-            className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+            loading={saving}
           >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {saving ? t("settings.saving") : t("settings.channels.config.save")}
-          </button>
+          </Button>
           <span className={hintClass}>{t("settings.channels.config.hotApply")}</span>
         </div>
       </form>
@@ -804,7 +804,7 @@ export function ChannelConfigPanel({
           className={`rounded-md border px-3 py-2 text-sm ${
             testResult.ok
               ? "border-success/30 bg-success/5 text-success"
-              : "border-warning/40 bg-warning/10 text-warning-foreground"
+              : "border-warning/40 bg-warning/10 text-warning"
           }`}
         >
           <div className="flex items-center gap-2">

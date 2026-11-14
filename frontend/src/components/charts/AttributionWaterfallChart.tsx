@@ -66,7 +66,7 @@ export function AttributionWaterfallChart({ brinson, height = 300 }: Props) {
         show: true,
         position: bar.value >= 0 ? "top" : "bottom",
         formatter: fmtSignedPct(bar.value),
-        fontSize: 10,
+        fontSize: 12,
         color: bar.kind === "level" ? t.textColor : bar.value >= 0 ? pnl.profit : pnl.loss,
       },
     }));
@@ -77,8 +77,8 @@ export function AttributionWaterfallChart({ brinson, height = 300 }: Props) {
         trigger: "axis",
         axisPointer: { type: "shadow" },
         backgroundColor: t.tooltipBg,
-        borderColor: t.tooltipBorder,
-        textStyle: { color: t.tooltipText, fontSize: 11 },
+        borderColor: t.tooltipBorder, borderWidth: 1, extraCssText: "box-shadow:none;",
+        textStyle: { color: t.tooltipText, fontSize: 12 },
         formatter: (raw: unknown) => {
           const params = raw as Array<{ dataIndex?: number }>;
           if (!Array.isArray(params) || !params.length) return "";
@@ -93,12 +93,12 @@ export function AttributionWaterfallChart({ brinson, height = 300 }: Props) {
         type: "category",
         data: categories,
         axisLine: { lineStyle: { color: t.axisColor } },
-        axisLabel: { color: t.textColor, fontSize: 10 },
+        axisLabel: { color: t.textColor, fontSize: 12 },
       },
       yAxis: {
         type: "value",
         splitLine: { lineStyle: { color: t.gridColor } },
-        axisLabel: { color: t.textColor, fontSize: 10, formatter: "{value}%" },
+        axisLabel: { color: t.textColor, fontSize: 12, formatter: "{value}%" },
       },
       series: [
         {

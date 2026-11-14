@@ -18,10 +18,10 @@ function Bars({ rows }: {
     <thead className="text-xs text-muted-foreground"><tr><th className="pr-2 text-left font-normal">{t("shannon.colStock")}</th><th className="pr-2 text-right font-normal">{t("shannon.colAllocation")}</th><th className="text-center font-normal">{t("shannon.colContribution")}</th><th className="whitespace-pre-line pl-2 text-right font-normal" aria-label={t("shannon.colShareLabel")}>{t("shannon.colShare")}</th></tr></thead>
     <tbody>{rows.map((r, i) => <tr key={`${r.label}-${i}`}>
       <td className="break-words pr-2 align-middle text-xs sm:text-sm">{r.label}</td>
-      <td className="pr-2 text-right align-middle text-xs tabular-nums whitespace-nowrap">{r.weight ?? "—"}</td>
+      <td className="pr-2 text-right align-middle text-xs tabular-nums whitespace-nowrap">{r.weight ?? "-"}</td>
       <td className="align-middle"><div className="relative h-5 rounded bg-muted/60" aria-hidden="true">
         <span className={`absolute inset-y-0 ${signed ? "left-1/2" : "left-0"} w-px bg-muted-foreground/40`} />
-        <span className={`absolute inset-y-1 rounded-sm ${r.value >= 0 ? "bg-rose-500/70" : "bg-teal-500/75"}`} style={{ left: `${signed ? r.value < 0 ? 50 - Math.abs(r.value) / max * 50 : 50 : 0}%`, width: `${Math.abs(r.value) / max * (signed ? 50 : 100)}%` }} />
+        <span className={`absolute inset-y-1 rounded-sm ${r.value >= 0 ? "bg-danger/70" : "bg-success/70"}`} style={{ left: `${signed ? r.value < 0 ? 50 - Math.abs(r.value) / max * 50 : 50 : 0}%`, width: `${Math.abs(r.value) / max * (signed ? 50 : 100)}%` }} />
       </div></td>
       <td className="break-words pl-2 text-right align-middle text-xs tabular-nums"><span className="block">{r.text}</span>{r.detail && <span className="mt-0.5 block text-muted-foreground">{r.detail}</span>}</td>
     </tr>)}</tbody>
@@ -90,7 +90,7 @@ export function ShannonPortfolio() {
 
   return <section className="space-y-6" aria-label={t("shannon.regionLabel")}>
     <header className="space-y-2"><h2 className="text-xl font-semibold">{t("shannon.title")}</h2><p className="text-sm text-muted-foreground">{t("shannon.intro")}</p></header>
-    {configured === false ? <div className="rounded-xl border p-5 text-sm">{t("shannon.notConfigured")}</div> : <div className="grid gap-5 rounded-xl border bg-card p-5 md:grid-cols-[1fr_17rem]">
+    {configured === false ? <div className="rounded-lg border border-border bg-card p-5 text-sm">{t("shannon.notConfigured")}</div> : <div className="grid gap-5 rounded-lg border bg-card p-5 md:grid-cols-[1fr_17rem]">
       <div><label htmlFor="shannon-holdings" className="text-sm font-medium">{t("shannon.holdingsLabel")}</label><textarea id="shannon-holdings" className="mt-2 min-h-36 w-full rounded-lg border bg-background p-3 font-mono text-sm" value={text} onChange={e => { invalidate(); setText(e.target.value); }} placeholder={"600519.SH 40%\n300750.SZ 30%\n600036.SH 30%"} />
         <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{t("shannon.holdingsHint")}</p>
         {text && !holdings && <p role="alert" className="mt-2 text-sm text-warning">{t("shannon.holdingsInvalid")}</p>}</div>
@@ -107,10 +107,10 @@ export function ShannonPortfolio() {
       {analysis.requested_date !== effective && <p role="status" className="rounded-lg border border-warning/40 p-3 text-sm">{t("shannon.dateFallback", { requested: analysis.requested_date, actual: effective })}</p>}
       {partial && <p role="alert" className="rounded-lg border border-warning/40 p-3 text-sm">{t("shannon.partial")} {t("shannon.coveredWeight", { weight: percent(coveredWeight) })} {(analysis.data.missing ?? []).map((m, i) => <span className="ml-1" key={i}>{typeof m === "string" ? m : typeof m === "object" && m && "ts_code" in m ? String(m.ts_code) : typeof m === "object" && m && "code" in m ? String(m.code) : ""}</span>)}</p>}
       {!!analysis.warnings?.length && <p role="status" className="text-sm text-warning">{t("shannon.sourceLimitations")}</p>}
-      <section className="space-y-4 rounded-xl border p-4 sm:p-5" aria-label={t("shannon.styleTitle")}>
-        <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="font-semibold">{t("shannon.styleTitle")}</h3><span className="text-xs text-muted-foreground">{t("shannon.styleAxis")}</span></div>
-        <div className="space-y-2">{style.map(row => <div key={row.key} className="grid grid-cols-[5.5rem_minmax(0,1fr)_3.5rem] items-center gap-2 text-xs sm:text-sm" aria-label={`${label(row.key)}: ${finite(row.value) ? exposureText(row.value, 2) : "—"}`}>
-          <span>{label(row.key)}</span><div className="relative h-5 rounded bg-muted/60" aria-hidden="true"><span className="absolute inset-y-0 left-1/2 w-px bg-muted-foreground/40" />{finite(row.value) && <span className={`absolute inset-y-1 rounded-sm ${row.value >= 0 ? "bg-rose-400" : "bg-emerald-500/70"}`} style={{ left: `${row.value >= 0 ? 50 : 50 - Math.abs(row.value) / styleMax * 50}%`, width: `${Math.abs(row.value) / styleMax * 50}%` }} />}</div><span className="text-right font-mono tabular-nums">{finite(row.value) ? exposureText(row.value, 2) : "—"}</span>
+      <section className="space-y-4 rounded-lg border border-border bg-card p-4 sm:p-5" aria-label={t("shannon.styleTitle")}>
+        <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-semibold">{t("shannon.styleTitle")}</h3><span className="text-xs text-muted-foreground">{t("shannon.styleAxis")}</span></div>
+        <div className="space-y-2">{style.map(row => <div key={row.key} className="grid grid-cols-[5.5rem_minmax(0,1fr)_3.5rem] items-center gap-2 text-xs sm:text-sm" aria-label={`${label(row.key)}: ${finite(row.value) ? exposureText(row.value, 2) : "-"}`}>
+          <span>{label(row.key)}</span><div className="relative h-5 rounded bg-muted/60" aria-hidden="true"><span className="absolute inset-y-0 left-1/2 w-px bg-muted-foreground/40" />{finite(row.value) && <span className={`absolute inset-y-1 rounded-sm ${row.value >= 0 ? "bg-danger" : "bg-success/70"}`} style={{ left: `${row.value >= 0 ? 50 : 50 - Math.abs(row.value) / styleMax * 50}%`, width: `${Math.abs(row.value) / styleMax * 50}%` }} />}</div><span className="text-right tabular-nums">{finite(row.value) ? exposureText(row.value, 2) : "-"}</span>
         </div>)}</div>
         <p className="text-xs leading-relaxed text-muted-foreground">{t("shannon.styleNote")}</p>
         <details className="border-t pt-3"><summary className="cursor-pointer text-sm font-medium">{t("shannon.viewStockStyles")}</summary>
@@ -119,13 +119,13 @@ export function ShannonPortfolio() {
             <thead><tr><th className="sticky left-0 z-10 min-w-36 bg-card p-3 text-left">{t("shannon.colStock")}</th>{style.map(row => <th key={row.key} className="whitespace-nowrap px-2 py-3 font-medium">{label(row.key)}</th>)}</tr></thead>
             <tbody>{analysis.data.holdings?.map(holding => <tr key={holding.ts_code}><th scope="row" className="sticky left-0 z-10 bg-card p-3 text-left font-normal"><span className="block">{holding.name || holding.ts_code}</span><span className="mt-1 block text-muted-foreground">{holding.ts_code}</span></th>{style.map(row => {
               const value = holding.exposures?.[row.key];
-              const color = finite(value) && value !== 0 ? `rgba(${value > 0 ? "244, 63, 94" : "16, 145, 112"}, ${.08 + .52 * Math.min(Math.abs(value) / 2, 1)})` : undefined;
-              return <td key={row.key} className="rounded bg-muted/30 px-2 py-4 text-center font-mono tabular-nums" style={{ backgroundColor: color }} title={finite(value) ? String(value) : t("shannon.missingData")}>{finite(value) ? exposureText(value, 1) : "—"}</td>;
+              const color = finite(value) && value !== 0 ? `hsl(var(${value > 0 ? "--danger" : "--success"}) / ${(.08 + .52 * Math.min(Math.abs(value) / 2, 1)).toFixed(2)})` : undefined;
+              return <td key={row.key} className="rounded bg-muted/30 px-2 py-4 text-center tabular-nums" style={{ backgroundColor: color }} title={finite(value) ? String(value) : t("shannon.missingData")}>{finite(value) ? exposureText(value, 1) : "-"}</td>;
             })}</tr>)}</tbody>
           </table></div>{!analysis.data.holdings?.some(holding => Object.values(holding.exposures ?? {}).some(finite)) && <p className="text-sm text-muted-foreground">{t("shannon.noStockStyle")}</p>}</div>
         </details>
       </section>
-        <section className="space-y-4 rounded-xl border p-5"><h3 className="font-semibold">{t("shannon.riskTitle")}</h3>{mainContributor && <p className="text-sm">{t("shannon.mainContributor", { name: name(mainContributor[0]) })}</p>}<p className="text-xs text-muted-foreground">{t("shannon.riskNote")}</p><Bars rows={contributions.slice(0, 5).map(([code, value]) => {
+        <section className="space-y-4 rounded-lg border border-border bg-card p-5"><h3 className="text-sm font-semibold">{t("shannon.riskTitle")}</h3>{mainContributor && <p className="text-sm">{t("shannon.mainContributor", { name: name(mainContributor[0]) })}</p>}<p className="text-xs text-muted-foreground">{t("shannon.riskNote")}</p><Bars rows={contributions.slice(0, 5).map(([code, value]) => {
           const holding = snapshot?.holdings.find(h => h.code === code);
           const weight = holding ? holding.weight ?? 1 / requested : undefined;
           const total = analysis.data.risk_attribution?.total_risk;

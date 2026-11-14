@@ -122,7 +122,7 @@ describe("Scheduled page", () => {
     render(<Scheduled />);
 
     expect(await screen.findByText("Mon–Fri at 23:30")).toBeInTheDocument();
-    const row = screen.getByRole("listitem");
+    const row = screen.getAllByRole("row")[1];
     expect(within(row).getByText("Pacific/Auckland")).toBeInTheDocument();
     expect(within(row).getByText("pre-open scan of NZX names")).toBeInTheDocument();
   });
@@ -132,7 +132,7 @@ describe("Scheduled page", () => {
     render(<Scheduled />);
 
     expect(await screen.findByText("Daily at 09:00")).toBeInTheDocument();
-    expect(within(screen.getByRole("listitem")).getByText("UTC")).toBeInTheDocument();
+    expect(within(screen.getAllByRole("row")[1]).getByText("UTC")).toBeInTheDocument();
   });
 
   it("creates a job from the wall-clock composer", async () => {
@@ -346,7 +346,7 @@ describe("briefing delivery", () => {
     fireEvent.change(screen.getByLabelText(/prompt/i), {
       target: { value: "pre-open scan" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /schedule|create/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Schedule run/ }));
 
     await waitFor(() => expect(mocked.createScheduledRun).toHaveBeenCalled());
     const body = mocked.createScheduledRun.mock.calls[0][0];
@@ -364,7 +364,7 @@ describe("briefing delivery", () => {
     fireEvent.change(channel, {
       target: { value: "telegram" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /schedule|create/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Schedule run/ }));
 
     expect(await screen.findByRole("alert")).toBeInTheDocument();
     expect(mocked.createScheduledRun).not.toHaveBeenCalled();
@@ -383,7 +383,7 @@ describe("briefing delivery", () => {
     fireEvent.change(await screen.findByLabelText(/^chat$/i), {
       target: { value: " chat-9 " },
     });
-    fireEvent.click(screen.getByRole("button", { name: /schedule|create/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Schedule run/ }));
 
     await waitFor(() => expect(mocked.createScheduledRun).toHaveBeenCalled());
     const body = mocked.createScheduledRun.mock.calls[0][0];
@@ -409,7 +409,7 @@ describe("briefing delivery", () => {
     fireEvent.change(screen.getByLabelText(/email report format/i), {
       target: { value: "pdf" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /schedule|create/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Schedule run/ }));
 
     await waitFor(() => expect(mocked.createScheduledRun).toHaveBeenCalled());
     const body = mocked.createScheduledRun.mock.calls[0][0];
@@ -487,7 +487,7 @@ describe("Scheduled page verdict cell", () => {
     mocked.listScheduledRuns.mockResolvedValue([run({ last_verdict: verdict({ parse: "no_verdict_section", items: [] }) })]);
     render(<Scheduled />);
 
-    await screen.findByRole("listitem");
+    await screen.findByText("Mon–Fri at 23:30");
     expect(screen.queryByText(/No verdict yet/)).not.toBeInTheDocument();
     expect(screen.queryByTestId("verdict-line-auckland-scan")).toBeNull();
   });

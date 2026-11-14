@@ -1,6 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button, Card, CardBody, CardHeader } from "@/components/ui";
+import { controlClass } from "@/components/ui/Input";
 import {
   buildPayoffRequest,
   MAX_OPTION_LEGS,
@@ -19,8 +21,7 @@ interface Props {
   onParamsChange: (params: OptionsLabParams) => void;
 }
 
-const INPUT_CLS =
-  "w-full rounded-md border border-border/60 bg-background px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-primary/40";
+const INPUT_CLS = controlClass;
 
 export function StrategyBuilder({
   legs,
@@ -59,8 +60,9 @@ export function StrategyBuilder({
   const inputsValid = buildPayoffRequest(legs, params) !== null;
 
   return (
-    <section className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-      <div className="mb-3 text-sm font-semibold">{t("options.builder.title")}</div>
+    <Card>
+      <CardHeader title={t("options.builder.title")} />
+      <CardBody>
 
       {/* Presets */}
       <div className="mb-1 text-xs font-medium text-muted-foreground">{t("options.presets.label")}</div>
@@ -71,10 +73,10 @@ export function StrategyBuilder({
             type="button"
             onClick={() => onApplyPreset(preset.id)}
             className={cn(
-              "rounded border px-2.5 py-1 text-xs transition-colors",
+              "rounded-md border px-2.5 py-1 text-xs transition-colors",
               activePresetId === preset.id
                 ? "border-primary bg-primary text-primary-foreground"
-                : "border-muted-foreground/30 text-muted-foreground hover:border-primary hover:text-foreground",
+                : "border-border text-muted-foreground hover:border-primary hover:text-foreground",
             )}
           >
             {t(preset.nameKey as never)}
@@ -85,7 +87,7 @@ export function StrategyBuilder({
       {/* Legs table */}
       <div className="mb-1 flex items-center justify-between">
         <span className="text-xs font-medium text-muted-foreground">{t("options.builder.legs")}</span>
-        <span className="text-[10px] text-muted-foreground/70">{t("options.builder.qtyHint")}</span>
+        <span className="text-xs text-muted-foreground">{t("options.builder.qtyHint")}</span>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -167,24 +169,18 @@ export function StrategyBuilder({
         </table>
       </div>
       <div className="mt-2 flex items-center justify-between gap-2">
-        <button
-          type="button"
-          onClick={addLeg}
-          disabled={legs.length >= MAX_OPTION_LEGS}
-          title={t("options.builder.legLimit", { count: MAX_OPTION_LEGS })}
-          className="flex items-center gap-1 rounded-md border border-dashed border-muted-foreground/40 px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-primary hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed"
-        >
+        <Button size="sm" onClick={addLeg} disabled={legs.length >= MAX_OPTION_LEGS} title={t("options.builder.legLimit", { count: MAX_OPTION_LEGS })}>
           <Plus className="h-3 w-3" />
           {t("options.builder.addLeg")}
-        </button>
-        <span className="text-[10px] text-muted-foreground/70">{t("options.builder.premiumHint")}</span>
+        </Button>
+        <span className="text-xs text-muted-foreground">{t("options.builder.premiumHint")}</span>
       </div>
 
       {/* Parameters */}
       <div className="mt-4 mb-2 text-xs font-medium text-muted-foreground">{t("options.builder.parameters")}</div>
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1">
-          <label htmlFor="option-entry_spot" className="text-[11px] text-muted-foreground">{t("options.builder.entrySpot")}</label>
+          <label htmlFor="option-entry_spot" className="text-xs text-muted-foreground">{t("options.builder.entrySpot")}</label>
           <input
             type="number"
             min={0}
@@ -196,7 +192,7 @@ export function StrategyBuilder({
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label htmlFor="option-expiry_days" className="text-[11px] text-muted-foreground">{t("options.builder.expiryDays")}</label>
+          <label htmlFor="option-expiry_days" className="text-xs text-muted-foreground">{t("options.builder.expiryDays")}</label>
           <input
             type="number"
             min={0}
@@ -208,7 +204,7 @@ export function StrategyBuilder({
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label htmlFor="option-volatility_pct" className="text-[11px] text-muted-foreground">{t("options.builder.volatility")}</label>
+          <label htmlFor="option-volatility_pct" className="text-xs text-muted-foreground">{t("options.builder.volatility")}</label>
           <input
             type="number"
             min={0}
@@ -224,7 +220,7 @@ export function StrategyBuilder({
         <summary className="cursor-pointer text-xs text-muted-foreground">{t("analysis.advancedParameters")}</summary>
         <div className="mt-3 grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1">
-          <label htmlFor="option-risk_free_rate_pct" className="text-[11px] text-muted-foreground">{t("options.builder.riskFreeRate")}</label>
+          <label htmlFor="option-risk_free_rate_pct" className="text-xs text-muted-foreground">{t("options.builder.riskFreeRate")}</label>
           <input
             type="number"
             step="any"
@@ -235,7 +231,7 @@ export function StrategyBuilder({
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label htmlFor="option-multiplier" className="text-[11px] text-muted-foreground">{t("options.builder.multiplier")}</label>
+          <label htmlFor="option-multiplier" className="text-xs text-muted-foreground">{t("options.builder.multiplier")}</label>
           <input
             type="number"
             min={0}
@@ -245,18 +241,18 @@ export function StrategyBuilder({
             onChange={(e) => setParam({ multiplier: parseFloat(e.target.value) })}
             className={cn(INPUT_CLS, "tabular-nums")}
           />
-          <span className="text-[10px] text-muted-foreground/70">{t("options.builder.multiplierHint")}</span>
+          <span className="text-xs text-muted-foreground">{t("options.builder.multiplierHint")}</span>
         </div>
         <div className="flex flex-col gap-1">
-          <label htmlFor="option-underlying_qty" className="text-[11px] text-muted-foreground">{t("options.builder.underlyingQty")}</label>
+          <label htmlFor="option-underlying_qty" className="text-xs text-muted-foreground">{t("options.builder.underlyingQty")}</label>
           <input type="number" step="any" id="option-underlying_qty"
             value={Number.isFinite(params.underlying_qty ?? 0) ? params.underlying_qty ?? 0 : ""}
             onChange={(e) => setParam({ underlying_qty: parseFloat(e.target.value) })}
             className={cn(INPUT_CLS, "tabular-nums")} />
-          <span className="text-[10px] text-muted-foreground/70">{t("options.builder.underlyingQtyHint")}</span>
+          <span className="text-xs text-muted-foreground">{t("options.builder.underlyingQtyHint")}</span>
         </div>
         <div className="flex flex-col gap-1">
-          <label htmlFor="option-commission_rate_pct" className="text-[11px] text-muted-foreground">{t("options.builder.commissionRate")}</label>
+          <label htmlFor="option-commission_rate_pct" className="text-xs text-muted-foreground">{t("options.builder.commissionRate")}</label>
           <input
             type="number"
             min={0}
@@ -279,10 +275,11 @@ export function StrategyBuilder({
       </div>
 
       {!inputsValid && (
-        <p className="mt-3 rounded border border-warning/30 bg-warning/5 p-2 text-xs text-warning">
+        <p className="mt-3 rounded-lg border border-warning/30 bg-warning/5 p-2 text-xs text-warning">
           {t("options.builder.invalidHint")}
         </p>
       )}
-    </section>
+      </CardBody>
+    </Card>
   );
 }

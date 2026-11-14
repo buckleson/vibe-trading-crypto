@@ -54,19 +54,19 @@ export function DistributionChart({
       tooltip: {
         trigger: "axis",
         backgroundColor: t.tooltipBg,
-        borderColor: t.tooltipBorder,
-        textStyle: { color: t.tooltipText, fontSize: 11 },
+        borderColor: t.tooltipBorder, borderWidth: 1, extraCssText: "box-shadow:none;",
+        textStyle: { color: t.tooltipText, fontSize: 12 },
       },
       xAxis: {
         type: "category",
         data: labels,
         axisLine: { lineStyle: { color: t.axisColor } },
-        axisLabel: { color: t.textColor, fontSize: 10, interval: Math.max(1, Math.ceil(binCount / 8)) },
+        axisLabel: { color: t.textColor, fontSize: 12, interval: Math.max(1, Math.ceil(binCount / 8)) },
       },
       yAxis: {
         type: "value",
         splitLine: { lineStyle: { color: t.gridColor } },
-        axisLabel: { color: t.textColor, fontSize: 10 },
+        axisLabel: { color: t.textColor, fontSize: 12 },
       },
       series: [{
         type: "bar",
@@ -78,7 +78,7 @@ export function DistributionChart({
           symbol: "none",
           data: [{
             xAxis: toIndex(markerValue),
-            label: { formatter: markerLabel, color: t.warningColor, fontSize: 10, position: "insideEndTop" },
+            label: { formatter: markerLabel, color: t.warningColor, fontSize: 12, position: "insideEndTop" },
           }],
           lineStyle: { color: t.warningColor, width: 2 },
         },
@@ -86,7 +86,7 @@ export function DistributionChart({
           markArea: {
             silent: true,
             itemStyle: { color: t.infoColor + "14" },
-            label: { color: t.textColor, fontSize: 10 },
+            label: { color: t.textColor, fontSize: 12 },
             data: [[
               { xAxis: toIndex(bandFrom), ...(bandLabel ? { name: bandLabel } : {}) },
               { xAxis: toIndex(bandTo) },

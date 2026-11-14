@@ -1,14 +1,8 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ChevronRight,
-  Loader2,
-  MessageSquareMore,
-  Play,
-  RefreshCw,
-  Square,
-} from "lucide-react";
+import { ChevronRight, Loader2, Play, RefreshCw, Square } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { Badge, Button, Card, CardBody, CardHeader, EmptyState, Stat, Table, TBody, TD, TH, THead, TR } from "@/components/ui";
 import { ChannelConfigPanel } from "@/components/settings/ChannelConfigPanel";
 import {
   api,
@@ -146,92 +140,61 @@ export function ChannelSettings() {
   };
 
   return (
-    <section className="rounded-lg border bg-card p-5 shadow-sm">
-      <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <MessageSquareMore className="h-4 w-4 text-primary" />
-            <h2 className="text-base font-semibold">{t("settings.channels.title")}</h2>
+    <Card>
+      <CardHeader
+        title={(
+          <span className="inline-flex flex-wrap items-center gap-2">
+            {t("settings.channels.title")}
             {channelsConfig && !channelsConfig.writable ? (
-              <span className="rounded-full bg-warning/10 px-2 py-0.5 text-xs text-warning-foreground">
-                {t("settings.channels.config.notWritableChip")}
-              </span>
+              <Badge tone="warning">{t("settings.channels.config.notWritableChip")}</Badge>
             ) : null}
             {configFailed ? (
-              <span className="rounded-full bg-warning/10 px-2 py-0.5 text-xs text-warning-foreground">
-                {t("settings.channels.config.loadFailed")}
-              </span>
+              <Badge tone="warning">{t("settings.channels.config.loadFailed")}</Badge>
             ) : null}
+          </span>
+        )}
+        description={t("settings.channels.description")}
+        actions={(
+          <>
+            <Button size="sm" onClick={() => void refreshChannelStatus()} disabled={channelBusy} loading={channelRefreshing}>
+              {channelRefreshing ? null : <RefreshCw className="h-4 w-4" aria-hidden="true" />}
+              {t("settings.channels.refresh")}
+            </Button>
+            <Button size="sm" variant="primary" onClick={() => void setChannelsRunning("start")} disabled={channelBusy || !channelStatus} loading={channelAction === "start"}>
+              {channelAction === "start" ? null : <Play className="h-4 w-4" aria-hidden="true" />}
+              {t("settings.channels.start")}
+            </Button>
+            <Button size="sm" onClick={() => void setChannelsRunning("stop")} disabled={channelBusy || !channelStatus} loading={channelAction === "stop"}>
+              {channelAction === "stop" ? null : <Square className="h-4 w-4" aria-hidden="true" />}
+              {t("settings.channels.stop")}
+            </Button>
+          </>
+        )}
+      />
+      <CardBody className="space-y-4">
+        {loading ? (
+          <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            {t("settings.loading")}
           </div>
-          <p className="max-w-3xl text-sm text-muted-foreground">{t("settings.channels.description")}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => void refreshChannelStatus()}
-            disabled={channelBusy}
-            className="inline-flex items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {channelRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-            {t("settings.channels.refresh")}
-          </button>
-          <button
-            type="button"
-            onClick={() => void setChannelsRunning("start")}
-            disabled={channelBusy || !channelStatus}
-            className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {channelAction === "start" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-            {t("settings.channels.start")}
-          </button>
-          <button
-            type="button"
-            onClick={() => void setChannelsRunning("stop")}
-            disabled={channelBusy || !channelStatus}
-            className="inline-flex items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {channelAction === "stop" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Square className="h-4 w-4" />}
-            {t("settings.channels.stop")}
-          </button>
-        </div>
-      </div>
+        ) : channelStatus ? (
+          <>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              <Stat label={t("settings.channels.runtime")} value={<span className="text-sm">{channelStatus.running ? t("settings.channels.running") : t("settings.channels.stopped")}</span>} />
+              <Stat label={t("settings.channels.enabled")} value={<span className="text-sm">{channelEnabledCount}</span>} />
+              <Stat label={t("settings.channels.loaded")} value={<span className="text-sm">{channelLoadedCount}</span>} />
+              <Stat label={t("settings.channels.unavailable")} value={<span className="text-sm">{channelUnavailableCount}</span>} />
+            </div>
 
-      {loading ? (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          {t("settings.loading")}
-        </div>
-      ) : channelStatus ? (
-        <>
-          <div className="mb-4 grid gap-3 md:grid-cols-4">
-            <div className="rounded-md border bg-muted/20 px-3 py-2">
-              <div className="text-xs text-muted-foreground">{t("settings.channels.runtime")}</div>
-              <div className="text-sm font-medium">{channelStatus.running ? t("settings.channels.running") : t("settings.channels.stopped")}</div>
-            </div>
-            <div className="rounded-md border bg-muted/20 px-3 py-2">
-              <div className="text-xs text-muted-foreground">{t("settings.channels.enabled")}</div>
-              <div className="text-sm font-medium">{channelEnabledCount}</div>
-            </div>
-            <div className="rounded-md border bg-muted/20 px-3 py-2">
-              <div className="text-xs text-muted-foreground">{t("settings.channels.loaded")}</div>
-              <div className="text-sm font-medium">{channelLoadedCount}</div>
-            </div>
-            <div className="rounded-md border bg-muted/20 px-3 py-2">
-              <div className="text-xs text-muted-foreground">{t("settings.channels.unavailable")}</div>
-              <div className="text-sm font-medium">{channelUnavailableCount}</div>
-            </div>
-          </div>
-
-          <div className="overflow-hidden rounded-md border">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/40 text-xs text-muted-foreground">
+            <Table>
+              <THead>
                 <tr>
-                  <th className="px-3 py-2 text-start font-medium">{t("settings.channels.channel")}</th>
-                  <th className="px-3 py-2 text-start font-medium">{t("settings.channels.state")}</th>
-                  <th className="px-3 py-2 text-start font-medium">{t("settings.channels.recovery")}</th>
+                  <TH>{t("settings.channels.channel")}</TH>
+                  <TH>{t("settings.channels.state")}</TH>
+                  <TH>{t("settings.channels.recovery")}</TH>
                 </tr>
-              </thead>
-              <tbody>
+              </THead>
+              <TBody>
                 {rows.map(({ name, status: item, entry }) => {
                   const displayName = item?.display_name || entry?.display_name || name;
                   const isExpanded = Boolean(expanded[name]);
@@ -244,43 +207,44 @@ export function ChannelSettings() {
                     || t("settings.channels.noRecovery");
                   return (
                     <Fragment key={name}>
-                      <tr className="border-t">
-                        <td className="px-3 py-2 align-top">
+                      <TR>
+                        <TD className="align-top">
                           <button
                             type="button"
                             onClick={() => toggleExpanded(name)}
                             aria-expanded={isExpanded}
                             aria-label={t("settings.channels.config.toggleConfig", { name: displayName })}
-                            className="flex items-start gap-2 text-start"
+                            className="flex items-start gap-2 rounded-sm text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                           >
                             <ChevronRight
-                              className={`mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform ${isExpanded ? "rotate-90" : ""}`}
+                              className={`mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-150 ${isExpanded ? "rotate-90" : ""}`}
+                              aria-hidden="true"
                             />
                             <span>
                               <span className="block font-medium">{displayName}</span>
                               <span className="block text-xs text-muted-foreground">{name}</span>
                             </span>
                           </button>
-                        </td>
-                        <td className="px-3 py-2 align-top">
+                        </TD>
+                        <TD className="align-top">
                           <div className="flex flex-wrap gap-1.5">
-                            <span className={`rounded-full px-2 py-0.5 text-xs ${enabled ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                            <Badge tone={enabled ? "info" : "neutral"}>
                               {enabled ? t("settings.channels.enabled") : t("settings.channels.disabled")}
-                            </span>
-                            <span className={`rounded-full px-2 py-0.5 text-xs ${loaded ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+                            </Badge>
+                            <Badge tone={loaded ? "success" : "neutral"}>
                               {loaded ? t("settings.channels.loaded") : t("settings.channels.notLoaded")}
-                            </span>
-                            <span className={`rounded-full px-2 py-0.5 text-xs ${running ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+                            </Badge>
+                            <Badge tone={running ? "success" : "neutral"}>
                               {running ? t("settings.channels.running") : t("settings.channels.stopped")}
-                            </span>
+                            </Badge>
                           </div>
-                        </td>
-                        <td className="max-w-md px-3 py-2 align-top text-xs text-muted-foreground">
+                        </TD>
+                        <TD className="min-w-[200px] max-w-md align-top text-xs text-muted-foreground">
                           {recovery}
-                        </td>
-                      </tr>
+                        </TD>
+                      </TR>
                       {isExpanded ? (
-                        <tr className="border-t bg-muted/10">
+                        <tr className="bg-muted/30">
                           <td colSpan={3} className="px-3 py-4">
                             {entry ? (
                               <ChannelConfigPanel
@@ -291,7 +255,7 @@ export function ChannelSettings() {
                                 onChanged={refreshAfterChange}
                               />
                             ) : (
-                              <p className="text-sm text-muted-foreground">
+                              <p className="text-[13px] text-muted-foreground">
                                 {t("settings.channels.config.loadFailed")}
                               </p>
                             )}
@@ -301,15 +265,13 @@ export function ChannelSettings() {
                     </Fragment>
                   );
                 })}
-              </tbody>
-            </table>
-          </div>
-        </>
-      ) : (
-        <div className="rounded-md border bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
-          {t("settings.channels.refreshFailed")}
-        </div>
-      )}
-    </section>
+              </TBody>
+            </Table>
+          </>
+        ) : (
+          <EmptyState title={t("settings.channels.refreshFailed")} />
+        )}
+      </CardBody>
+    </Card>
   );
 }

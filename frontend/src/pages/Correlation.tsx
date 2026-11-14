@@ -1,6 +1,6 @@
 import i18n from '@/i18n';
 import { useEffect, useRef, useState } from "react";
-import { BarChart3 } from "lucide-react";
+import { Badge, Button, Card, CardBody, CardHeader, Input, Page, PageHeader, Tabs } from "@/components/ui";
 import { CorrelationMatrix } from "@/components/charts/CorrelationMatrix";
 import { RegimeTimeline } from "@/components/charts/RegimeTimeline";
 import { api, type CorrelationAnalysisResponse } from "@/lib/api";
@@ -33,11 +33,12 @@ export function Correlation() {
     };
   }, []);
   return <>
-    {available && <div className="mx-auto flex max-w-5xl gap-2 px-6 pt-6" role="tablist" aria-label={i18n.t("correlation.title")}>
-      {[["correlation", i18n.t("correlation.title")], ["shannon", i18n.t("gildata.shannon")]].map(([key, label]) => <button key={key} role="tab" aria-selected={tab === key} onClick={() => setTab(key)} className={`rounded-lg border px-4 py-2 text-sm ${tab === key ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}>{label}</button>)}
-    </div>}
+    {available && <Page className="pb-0 md:pb-0">
+      <Tabs aria-label={i18n.t("correlation.title")} value={tab} onChange={setTab}
+        tabs={[{ id: "correlation", label: i18n.t("correlation.title") }, { id: "shannon", label: i18n.t("gildata.shannon") }]} />
+    </Page>}
     <div hidden={tab !== "correlation"}><CorrelationAnalysis /></div>
-    {tab === "shannon" && <div className="mx-auto max-w-5xl p-6"><ShannonPortfolio /></div>}
+    {tab === "shannon" && <Page><ShannonPortfolio /></Page>}
   </>;
 }
 
@@ -96,118 +97,109 @@ function CorrelationAnalysis() {
     }
   };
 
+  const chip = "h-8 rounded-md border px-3 text-[13px] transition-colors";
+  const chipOn = "border-primary bg-primary text-primary-foreground";
+  const chipOff = "border-border text-muted-foreground hover:border-primary hover:text-foreground";
   return (
-    <div className="flex flex-col gap-6 p-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <BarChart3 className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold">{i18n.t("correlation.title")}</h1>
-      </div>
+    <Page>
+      <PageHeader title={i18n.t("correlation.title")} />
 
-      {/* Controls */}
-      <div className="flex flex-col gap-4 border rounded-lg p-4">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="correlation-codes" className="text-sm font-medium">{i18n.t("correlation.assetCodes")}</label>
-          <input
-            id="correlation-codes"
-            type="text"
-            value={codes}
-            onChange={(e) => {
-              invalidateResult();
-              setCodes(e.target.value);
-            }}
-            placeholder="000001.SZ,600519.SH,000858.SZ"
-            className="w-full px-3 py-2 rounded-md border bg-background text-sm"
-          />
-          <p className="text-xs text-muted-foreground">
-            {i18n.t("correlation.assetCodesHint")}
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-4">
+      <Card>
+        <CardBody className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium">{i18n.t("analysis.windowObservations")}</label>
-            <div className="flex gap-1.5">
-              {WINDOWS.map((w) => (
-                <button
-                  key={w}
-                  onClick={() => {
-                    invalidateResult();
-                    setDays(w);
-                  }}
-                  className={`px-3 py-1.5 rounded text-sm border transition-colors ${
-                    days === w
-                      ? "bg-primary text-primary-foreground"
-                      : "border-muted-foreground/30 hover:border-primary"
-                  }`}
-                >
-                  {w}d
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium">{i18n.t("correlation.method")}</label>
-            <div className="flex gap-1.5">
-              {(["pearson", "spearman"] as const).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => {
-                    invalidateResult();
-                    setMethod(m);
-                  }}
-                  className={`px-3 py-1.5 rounded text-sm border transition-colors capitalize ${
-                    method === m
-                      ? "bg-primary text-primary-foreground"
-                      : "border-muted-foreground/30 hover:border-primary"
-                  }`}
-                >
-                  {i18n.t(`correlation.method_${m}`)}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
-            <input
-              type="checkbox"
-              checked={showRegime}
+            <label htmlFor="correlation-codes" className="text-[13px] font-medium">{i18n.t("correlation.assetCodes")}</label>
+            <Input
+              id="correlation-codes"
+              type="text"
+              value={codes}
               onChange={(e) => {
                 invalidateResult();
-                setShowRegime(e.target.checked);
+                setCodes(e.target.value);
               }}
-              className="h-4 w-4"
+              placeholder="000001.SZ,600519.SH,000858.SZ"
             />
-            {i18n.t("correlation.regimeTimeline")}
-          </label>
-          {showRegime && (
+            {parsedCodes.length > 0 && (
+              <div className="flex flex-wrap gap-1.5" aria-hidden="true">
+                {parsedCodes.map((code, index) => <Badge key={`${code}-${index}`}>{code}</Badge>)}
+              </div>
+            )}
             <p className="text-xs text-muted-foreground">
-              {i18n.t("correlation.regimeTimelineHint")}
+              {i18n.t("correlation.assetCodesHint")}
             </p>
-          )}
-        </div>
+          </div>
 
-        <button
-          onClick={compute}
-          disabled={loading || !inputValid}
-          className="self-start px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
-        >
-          {loading ? i18n.t("correlation.loading") : i18n.t("correlation.compute")}
-        </button>
-        {!inputValid && <p role="alert" className="text-sm text-warning">{i18n.t("analysis.assetsValidation")}</p>}
-      </div>
+          <div className="flex flex-wrap gap-4">
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[13px] font-medium">{i18n.t("analysis.windowObservations")}</span>
+              <div className="flex gap-1.5">
+                {WINDOWS.map((w) => (
+                  <button
+                    key={w}
+                    onClick={() => {
+                      invalidateResult();
+                      setDays(w);
+                    }}
+                    className={`${chip} ${days === w ? chipOn : chipOff}`}
+                  >
+                    {w}d
+                  </button>
+                ))}
+              </div>
+            </div>
 
-      {/* Error */}
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[13px] font-medium">{i18n.t("correlation.method")}</span>
+              <div className="flex gap-1.5">
+                {(["pearson", "spearman"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => {
+                      invalidateResult();
+                      setMethod(m);
+                    }}
+                    className={`${chip} ${method === m ? chipOn : chipOff}`}
+                  >
+                    {i18n.t(`correlation.method_${m}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="flex cursor-pointer items-center gap-2 text-[13px] font-medium">
+              <input
+                type="checkbox"
+                checked={showRegime}
+                onChange={(e) => {
+                  invalidateResult();
+                  setShowRegime(e.target.checked);
+                }}
+                className="h-4 w-4 accent-primary"
+              />
+              {i18n.t("correlation.regimeTimeline")}
+            </label>
+            {showRegime && (
+              <p className="text-xs text-muted-foreground">
+                {i18n.t("correlation.regimeTimelineHint")}
+              </p>
+            )}
+          </div>
+
+          <Button variant="primary" className="self-start" onClick={compute} disabled={loading || !inputValid}>
+            {loading ? i18n.t("correlation.loading") : i18n.t("correlation.compute")}
+          </Button>
+          {!inputValid && <p role="alert" className="text-sm text-warning">{i18n.t("analysis.assetsValidation")}</p>}
+        </CardBody>
+      </Card>
+
       {error && (
-        <div className="text-sm text-danger border border-danger/30 rounded p-3 bg-danger/5">
+        <div className="rounded-lg border border-danger/30 bg-danger/5 p-3 text-sm text-danger">
           {error}
         </div>
       )}
 
-      {result && <div className="space-y-2 rounded-lg border bg-card p-3 text-sm" role="status">
+      {result && <Card><CardBody className="space-y-2 text-sm" role="status">
         <p>{fresh ? i18n.t("analysis.updated") : i18n.t("analysis.previousResult")} · {i18n.t("analysis.lastComputed", { time: new Date(computedAt).toLocaleTimeString() })}</p>
         <p className="text-muted-foreground">{i18n.t("analysis.coverage", { count: result.coverage.observations, start: result.coverage.first_date ?? "–", end: result.coverage.last_date ?? "–" })}</p>
         <p className="text-xs">{i18n.t("analysis.usedAssets", { assets: labels.join(", ") || "–" })}</p>
@@ -215,13 +207,17 @@ function CorrelationAnalysis() {
         {result.coverage.missing.map((code) => <p key={code} className="text-xs text-muted-foreground">{code}: {result.coverage.diagnostics[code]?.attempts.map((a) => `${a.source}: ${i18n.t(`analysis.${a.reason}`)}`).join("; ")}</p>)}
         {Object.entries(result.errors).map(([section, message]) => <p role="alert" key={section} className="text-danger">{i18n.t(section === "regime" ? "correlation.regimeTimeline" : "correlation.title")}: {message}</p>)}
         {regime && <p className="text-xs text-muted-foreground">{i18n.t("analysis.regimeMethod")}</p>}
-      </div>}
+      </CardBody></Card>}
 
-      {/* Regime timeline (above the matrix when enabled) */}
-      {regime && <RegimeTimeline data={regime} height={260} />}
+      {regime && <Card>
+        <CardHeader title={i18n.t("correlation.regimeTimeline")} />
+        <CardBody><RegimeTimeline data={regime} height={260} /></CardBody>
+      </Card>}
 
-      {/* Chart */}
-      {labels.length > 0 && <CorrelationMatrix labels={labels} matrix={matrix} height={520} />}
-    </div>
+      {labels.length > 0 && <Card>
+        <CardHeader title={i18n.t("correlation.title")} />
+        <CardBody className="overflow-x-auto"><div className="min-w-[420px]"><CorrelationMatrix labels={labels} matrix={matrix} height={520} /></div></CardBody>
+      </Card>}
+    </Page>
   );
 }

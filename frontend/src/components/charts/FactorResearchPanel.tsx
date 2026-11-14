@@ -9,7 +9,6 @@ import type { FactorReportPayload, FactorResult } from "@/lib/api";
 import { RunCardPanel, RunCardStat } from "@/components/run/RunCard";
 import { CorrelationMatrix } from "./CorrelationMatrix";
 
-const SLATE = "#8f98a6";
 const IC_MA_WINDOW = 20;
 const MAX_CHART_POINTS = 500;
 
@@ -21,17 +20,17 @@ function num(value: unknown): number | null {
 
 function fixed(value: unknown, digits = 4): string {
   const parsed = num(value);
-  return parsed == null ? "—" : parsed.toFixed(digits);
+  return parsed == null ? "-" : parsed.toFixed(digits);
 }
 
 function pct(value: unknown, digits = 2): string {
   const parsed = num(value);
-  return parsed == null ? "—" : `${(parsed * 100).toFixed(digits)}%`;
+  return parsed == null ? "-" : `${(parsed * 100).toFixed(digits)}%`;
 }
 
 function signedPct(value: unknown, digits = 2): string {
   const parsed = num(value);
-  return parsed == null ? "—" : `${parsed > 0 ? "+" : ""}${(parsed * 100).toFixed(digits)}%`;
+  return parsed == null ? "-" : `${parsed > 0 ? "+" : ""}${(parsed * 100).toFixed(digits)}%`;
 }
 
 function signTone(value: unknown): "normal" | "positive" | "negative" {
@@ -114,7 +113,7 @@ export function FactorResearchPanel({ report }: { report: FactorReportPayload })
     const theme = getChartTheme();
     const axis = {
       axisLine: { lineStyle: { color: theme.axisColor } },
-      axisLabel: { color: theme.textColor, fontSize: 10 },
+      axisLabel: { color: theme.textColor, fontSize: 12 },
       splitLine: { lineStyle: { color: theme.gridColor } },
     };
     const charts: ReturnType<typeof echarts.init>[] = [];
@@ -124,8 +123,8 @@ export function FactorResearchPanel({ report }: { report: FactorReportPayload })
       const icChart = echarts.init(icRef.current);
       icChart.setOption({
         backgroundColor: "transparent",
-        tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
-        legend: { top: 0, right: 4, textStyle: { color: theme.textColor, fontSize: 10 } },
+        tooltip: { trigger: "axis", backgroundColor: theme.tooltipBg, borderColor: theme.tooltipBorder, borderWidth: 1, extraCssText: "box-shadow:none;", textStyle: { color: theme.tooltipText, fontSize: 12 }, axisPointer: { type: "shadow" } },
+        legend: { top: 0, left: 0, textStyle: { color: theme.textColor, fontSize: 12 } },
         grid: { left: 18, right: 22, top: 32, bottom: 18, containLabel: true },
         xAxis: { ...axis, type: "category", data: icRows.map((row) => row.date) },
         yAxis: { ...axis, type: "value" },
@@ -135,7 +134,7 @@ export function FactorResearchPanel({ report }: { report: FactorReportPayload })
             type: "bar",
             barMaxWidth: 8,
             // Neutral series color drives the legend swatch; per-point itemStyle below keeps sign coloring.
-            color: SLATE,
+            color: theme.seriesPalette[4],
             data: icRows.map((row) => ({
               value: row.ic,
               itemStyle: { color: row.ic >= 0 ? theme.upColor : theme.downColor },
@@ -167,15 +166,15 @@ export function FactorResearchPanel({ report }: { report: FactorReportPayload })
       const equityChart = echarts.init(equityRef.current);
       equityChart.setOption({
         backgroundColor: "transparent",
-        tooltip: { trigger: "axis" },
-        legend: { top: 0, right: 4, textStyle: { color: theme.textColor, fontSize: 10 } },
+        tooltip: { trigger: "axis", backgroundColor: theme.tooltipBg, borderColor: theme.tooltipBorder, borderWidth: 1, extraCssText: "box-shadow:none;", textStyle: { color: theme.tooltipText, fontSize: 12 } },
+        legend: { top: 0, left: 0, textStyle: { color: theme.textColor, fontSize: 12 } },
         grid: { left: 18, right: 22, top: 32, bottom: 18, containLabel: true },
         xAxis: { ...axis, type: "category", data: equityData.rows.map((row) => row.date), boundaryGap: false },
         yAxis: { ...axis, type: "value", scale: true },
         series: equityData.columns.map((col, index) => {
           const isTop = index === equityData.columns.length - 1;
           const isBottom = index === 0 && equityData.columns.length > 1;
-          const color = isTop ? theme.upColor : isBottom ? theme.downColor : SLATE;
+          const color = isTop ? theme.upColor : isBottom ? theme.downColor : theme.seriesPalette[4];
           return {
             name: col,
             type: "line",
@@ -216,8 +215,8 @@ export function FactorResearchPanel({ report }: { report: FactorReportPayload })
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-lg font-semibold tracking-tight">{t("factor.title")}</h2>
-          <p data-testid="factor-selected" className="mt-0.5 truncate font-mono text-xs text-muted-foreground">{selected.name}</p>
+          <h2 className="text-sm font-semibold">{t("factor.title")}</h2>
+          <p data-testid="factor-selected" className="mt-0.5 truncate text-xs text-muted-foreground">{selected.name}</p>
         </div>
         {factors.length >= 2 && (
           <div className="flex flex-wrap items-center gap-1">
@@ -247,9 +246,9 @@ export function FactorResearchPanel({ report }: { report: FactorReportPayload })
           <RunCardStat label={t("factor.icStd")} value={fixed(stats?.ic_std)} />
           <RunCardStat label={t("factor.ir")} value={fixed(stats?.ir)} tone={signTone(stats?.ir)} />
           <RunCardStat label={t("factor.icPositiveRatio")} value={pct(stats?.ic_positive_ratio)} />
-          <RunCardStat label={t("factor.icCount")} value={stats?.ic_count != null ? String(stats.ic_count) : "—"} />
+          <RunCardStat label={t("factor.icCount")} value={stats?.ic_count != null ? String(stats.ic_count) : "-"} />
           <RunCardStat label={t("factor.longShortSpread")} value={signedPct(selected.long_short_spread)} tone={signTone(selected.long_short_spread)} />
-          <RunCardStat label={t("factor.nGroups")} value={selected.n_groups ? String(selected.n_groups) : "—"} />
+          <RunCardStat label={t("factor.nGroups")} value={selected.n_groups ? String(selected.n_groups) : "-"} />
         </div>
       </RunCardPanel>
 

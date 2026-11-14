@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ArrowDown, ArrowUp, Plus, Save, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Plus, Trash2, X } from "lucide-react";
+import { Button, Input, Select } from "@/components/ui";
 import { ExtraEtfImport } from "@/components/portfolio/ExtraEtfImport";
 import { ConnectionCenter } from "@/components/portfolio/ConnectionCenter";
 import type {
@@ -19,11 +20,9 @@ interface Props {
   onConnectionsChanged: () => Promise<void>;
 }
 
-const fieldClass = "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20";
-
 /**
  * Drawer that edits which local read-only connections feed the portfolio and
- * how they are displayed. It never collects or stores credentials — those live
+ * how they are displayed. It never collects or stores credentials; those live
  * in the connection center and, ultimately, in the OS credential vault.
  */
 export function PortfolioSourceEditor({ open, settings, catalog, saving, onClose, onSave, onConnectionsChanged }: Props) {
@@ -93,41 +92,41 @@ export function PortfolioSourceEditor({ open, settings, catalog, saving, onClose
   };
 
   return <div className="fixed inset-0 z-50 flex justify-end bg-black/35" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-    <section className="flex h-full w-full max-w-xl flex-col border-l bg-background shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="portfolio-source-editor-title">
-      <header className="flex items-start justify-between border-b p-5">
-        <div><h2 id="portfolio-source-editor-title" className="text-lg font-semibold">{t("portfolio.editor.title")}</h2><p className="mt-1 text-xs text-muted-foreground">{t("portfolio.editor.subtitle")}</p></div>
-        <button type="button" onClick={onClose} className="rounded-md p-2 hover:bg-muted" aria-label={t("portfolio.editor.close")}><X className="h-4 w-4" /></button>
+    <section className="flex h-full w-full max-w-xl flex-col border-l border-border bg-background shadow-lg" role="dialog" aria-modal="true" aria-labelledby="portfolio-source-editor-title">
+      <header className="flex items-start justify-between border-b border-border p-5">
+        <div><h2 id="portfolio-source-editor-title" className="text-base font-semibold">{t("portfolio.editor.title")}</h2><p className="mt-1 text-xs text-muted-foreground">{t("portfolio.editor.subtitle")}</p></div>
+        <Button variant="ghost" size="icon" onClick={onClose} aria-label={t("portfolio.editor.close")}><X className="h-4 w-4" aria-hidden="true" /></Button>
       </header>
 
       <div className="flex-1 space-y-6 overflow-y-auto p-5">
-        <fieldset><legend className="text-sm font-medium">{t("portfolio.editor.currency")}</legend><div className="mt-2 grid grid-cols-4 gap-2">{(["USD", "CNY", "HKD", "EUR"] as const).map((currency) => <button key={currency} type="button" onClick={() => setDraft({ ...draft, display_currency: currency })} className={`rounded-md border px-3 py-2 text-sm ${draft.display_currency === currency ? "border-primary bg-primary/5 text-primary" : "bg-card"}`}>{currency}</button>)}</div></fieldset>
+        <fieldset><legend className="text-[13px] font-medium">{t("portfolio.editor.currency")}</legend><div className="mt-2 grid grid-cols-4 gap-2">{(["USD", "CNY", "HKD", "EUR"] as const).map((currency) => <button key={currency} type="button" onClick={() => setDraft({ ...draft, display_currency: currency })} aria-pressed={draft.display_currency === currency} className={`h-9 rounded-md border text-sm transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${draft.display_currency === currency ? "border-primary bg-primary/10 text-primary" : "border-border bg-card hover:bg-muted"}`}>{currency}</button>)}</div></fieldset>
 
         <section>
-          <div className="flex items-end justify-between gap-3"><div><h3 className="text-sm font-medium">{t("portfolio.editor.selected")}</h3><p className="mt-1 text-xs text-muted-foreground">{t("portfolio.editor.selectedHint")}</p></div><span className="text-xs text-muted-foreground">{draft.sources.length}</span></div>
+          <div className="flex items-end justify-between gap-3"><div><h3 className="text-sm font-semibold">{t("portfolio.editor.selected")}</h3><p className="mt-1 text-xs text-muted-foreground">{t("portfolio.editor.selectedHint")}</p></div><span className="text-xs text-muted-foreground">{draft.sources.length}</span></div>
           <div className="mt-3 space-y-3">
             {draft.sources.map((source, index) => {
               const connection = catalog.find((item) => item.connection_id === source.connection_id);
-              return <article key={source.connection_id} className="rounded-lg border bg-card p-4">
+              return <article key={source.connection_id} className="rounded-lg border border-border bg-card p-4">
                 <div className="flex items-start gap-3">
                   <input type="checkbox" checked={source.enabled} onChange={(event) => updateSource(index, { enabled: event.target.checked })} className="mt-2 h-4 w-4 accent-primary" aria-label={t("portfolio.editor.enableAccount")} />
-                  <div className="min-w-0 flex-1"><input value={source.label} onChange={(event) => updateSource(index, { label: event.target.value })} className={fieldClass} aria-label={t("portfolio.editor.accountLabel")} /><div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground"><span>{connection?.connector.toUpperCase()}</span><span>·</span><span>{source.source_kind === "extraetf" ? t("portfolio.imports.source") : connection?.environment === "live" ? t("portfolio.env.live") : t("portfolio.env.paper")}</span><span>·</span><span>{connection?.transport}</span></div></div>
-                  <div className="flex gap-1"><button type="button" onClick={() => move(index, -1)} disabled={index === 0} className="rounded p-1.5 hover:bg-muted disabled:opacity-30" aria-label={t("portfolio.editor.moveUp")}><ArrowUp className="h-4 w-4" /></button><button type="button" onClick={() => move(index, 1)} disabled={index === draft.sources.length - 1} className="rounded p-1.5 hover:bg-muted disabled:opacity-30" aria-label={t("portfolio.editor.moveDown")}><ArrowDown className="h-4 w-4" /></button><button type="button" onClick={() => remove(index)} className="rounded p-1.5 text-danger hover:bg-danger/10" aria-label={t("portfolio.editor.removeAccount")}><Trash2 className="h-4 w-4" /></button></div>
+                  <div className="min-w-0 flex-1"><Input value={source.label} onChange={(event) => updateSource(index, { label: event.target.value })} aria-label={t("portfolio.editor.accountLabel")} /><div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground"><span>{connection?.connector.toUpperCase()}</span><span>·</span><span>{source.source_kind === "extraetf" ? t("portfolio.imports.source") : connection?.environment === "live" ? t("portfolio.env.live") : t("portfolio.env.paper")}</span><span>·</span><span>{connection?.transport}</span></div></div>
+                  <div className="flex gap-1"><Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => move(index, -1)} disabled={index === 0} aria-label={t("portfolio.editor.moveUp")}><ArrowUp className="h-4 w-4" aria-hidden="true" /></Button><Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => move(index, 1)} disabled={index === draft.sources.length - 1} aria-label={t("portfolio.editor.moveDown")}><ArrowDown className="h-4 w-4" aria-hidden="true" /></Button><Button variant="ghost" size="icon" className="h-8 w-8 text-danger" onClick={() => remove(index)} aria-label={t("portfolio.editor.removeAccount")}><Trash2 className="h-4 w-4" aria-hidden="true" /></Button></div>
                 </div>
                 {source.source_kind !== "extraetf" && <label className="mt-3 flex items-center gap-2 text-xs text-muted-foreground"><input type="checkbox" checked={source.include_cash} onChange={(event) => updateSource(index, { include_cash: event.target.checked })} className="h-4 w-4 accent-primary" />{t("portfolio.editor.includeCash")}</label>}
               </article>;
             })}
-            {!draft.sources.length ? <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">{t("portfolio.editor.noAccounts")}</div> : null}
+            {!draft.sources.length ? <div className="rounded-lg border border-dashed border-border p-8 text-center text-[13px] text-muted-foreground">{t("portfolio.editor.noAccounts")}</div> : null}
           </div>
         </section>
 
         <section>
-          <div className="flex items-end justify-between gap-3"><div><h3 className="text-sm font-medium">{t("portfolio.editor.addTitle")}</h3><p className="mt-1 text-xs text-muted-foreground">{t("portfolio.editor.addHint")}</p></div><button type="button" onClick={() => setConnectionCenterOpen(true)} className="shrink-0 text-xs text-primary">{t("portfolio.editor.openConnections")}</button></div>
-          <div className="mt-3 flex gap-2"><select value={connectionToAdd} onChange={(event) => setConnectionToAdd(event.target.value)} className={fieldClass} aria-label={t("portfolio.editor.addTitle")} disabled={!available.length}><option value="">{available.length ? t("portfolio.editor.chooseConnection") : t("portfolio.editor.noConnections")}</option>{available.map((connection) => <option key={connection.connection_id} value={connection.connection_id}>{connection.label}</option>)}</select><button type="button" onClick={add} disabled={!available.length} className="inline-flex shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm disabled:opacity-40"><Plus className="h-4 w-4" />{t("portfolio.editor.add")}</button></div>
+          <div className="flex items-end justify-between gap-3"><div><h3 className="text-sm font-semibold">{t("portfolio.editor.addTitle")}</h3><p className="mt-1 text-xs text-muted-foreground">{t("portfolio.editor.addHint")}</p></div><Button size="sm" onClick={() => setConnectionCenterOpen(true)}>{t("portfolio.editor.openConnections")}</Button></div>
+          <div className="mt-3 flex gap-2"><Select value={connectionToAdd} onChange={(event) => setConnectionToAdd(event.target.value)} aria-label={t("portfolio.editor.addTitle")} disabled={!available.length}><option value="">{available.length ? t("portfolio.editor.chooseConnection") : t("portfolio.editor.noConnections")}</option>{available.map((connection) => <option key={connection.connection_id} value={connection.connection_id}>{connection.label}</option>)}</Select><Button onClick={add} disabled={!available.length}><Plus className="h-4 w-4" aria-hidden="true" />{t("portfolio.editor.add")}</Button></div>
         </section>
         <ExtraEtfImport onImported={onConnectionsChanged} />
       </div>
 
-      <footer className="flex items-center justify-between gap-3 border-t p-5"><p className="text-xs text-muted-foreground">{t("portfolio.editor.footerHint")}</p><div className="flex gap-2"><button type="button" onClick={onClose} className="rounded-md border px-4 py-2 text-sm">{t("portfolio.editor.cancel")}</button><button type="button" disabled={saving} onClick={() => void onSave({ ...draft, sources: draft.sources.map((source, order) => ({ ...source, order })) })} className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"><Save className="h-4 w-4" />{saving ? t("portfolio.editor.saving") : t("portfolio.editor.save")}</button></div></footer>
+      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border p-5"><p className="text-xs text-muted-foreground">{t("portfolio.editor.footerHint")}</p><div className="flex gap-2"><Button onClick={onClose}>{t("portfolio.editor.cancel")}</Button><Button variant="primary" loading={saving} onClick={() => void onSave({ ...draft, sources: draft.sources.map((source, order) => ({ ...source, order })) })}>{saving ? t("portfolio.editor.saving") : t("portfolio.editor.save")}</Button></div></footer>
     </section>
     <ConnectionCenter open={connectionCenterOpen} onClose={() => setConnectionCenterOpen(false)} onChanged={onConnectionsChanged} />
   </div>;

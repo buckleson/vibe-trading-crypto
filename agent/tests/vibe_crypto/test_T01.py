@@ -214,6 +214,11 @@ def test_old_mcp_command_only_as_legacy_alias():
         for h in _hits(re.compile(r"vibe-trading-mcp"))
         if h[0] != "CHANGELOG.md"
         and not (h[0] == "pyproject.toml" and h[2].startswith("vibe-trading-mcp ="))
+        # T11: the desktop resolver keeps the legacy name as a fallback (ADR 0005).
+        and h[0] not in {
+            "desktop/electron/src/backend-manager.ts",
+            "desktop/electron/scripts/test-backend-resolution.mjs",
+        }
     ]
     assert not bad, _fmt(bad)
 
@@ -775,7 +780,9 @@ def test_frontend_package_and_lock_names():
     assert lock["packages"][""]["name"] == "vibe-crypto-frontend"
     base = json.loads(_baseline("frontend/package.json"))
     assert pkg["version"] == base["version"]
-    assert pkg["dependencies"] == base["dependencies"]
+    # T11 added the embedded terminal packages.
+    added = {"@xterm/xterm", "@xterm/addon-fit"}
+    assert {k: v for k, v in pkg["dependencies"].items() if k not in added} == base["dependencies"]
 
 
 @pytest.mark.parametrize("svg", ["logo.svg", "favicon.svg"])
@@ -874,10 +881,12 @@ def test_electron_package_identity(electron_pkg):
 
 def test_electron_package_unchanged_fields(electron_pkg):
     base = json.loads(_baseline("desktop/electron/package.json"))
-    assert electron_pkg["scripts"] == base["scripts"]
+    # T11 added cross-platform scripts and made `start` independent of the Windows prepare step.
+    base_scripts = {k: v for k, v in base["scripts"].items() if k != "start"}
+    assert {k: electron_pkg["scripts"].get(k) for k in base_scripts} == base_scripts
     assert electron_pkg["version"] == base["version"]
     assert electron_pkg["build"]["win"]["icon"] == base["build"]["win"]["icon"]
-    assert electron_pkg["devDependencies"] == base["devDependencies"]
+    assert {k: electron_pkg["devDependencies"].get(k) for k in base["devDependencies"]} == base["devDependencies"]
     lock = json.loads((ELECTRON / "package-lock.json").read_text(encoding="utf-8"))
     assert lock["name"] in {base["name"], electron_pkg["name"]}
 
@@ -893,7 +902,7 @@ def test_electron_artifact_name_matches_installer_filters(electron_pkg):
         js_re = m.group(1)
         assert re.fullmatch(js_re, art), (script, js_re, art)
         assert not re.fullmatch(js_re, art.replace("Vibe-Crypto", "Vibe-Trading"))
-    wf = (REPO / ".github" / "workflows" / "desktop-windows.yml").read_text(encoding="utf-8")
+    wf = (REPO / ".github" / "workflows" / "desktop.yml").read_text(encoding="utf-8")
     filt = re.search(r"-Filter '([^']+)'", wf)
     assert filt
     import fnmatch

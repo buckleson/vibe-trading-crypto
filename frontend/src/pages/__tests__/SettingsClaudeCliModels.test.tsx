@@ -88,7 +88,7 @@ const modelList = {
 };
 
 function effortSelect(): HTMLSelectElement {
-  return screen.getByText("Reasoning Effort").closest("label")!.querySelector("select")!;
+  return screen.getByLabelText("Reasoning Effort") as HTMLSelectElement;
 }
 
 function effortOptions(): string[] {

@@ -1,4 +1,5 @@
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import {
   app,
@@ -9,7 +10,8 @@ import {
   nativeTheme,
   shell,
 } from "electron";
-import { BackendManager } from "./backend-manager";
+import { BackendManager, resolveBackend, resolveMcpCommand } from "./backend-manager";
+import { buildMcpConfig, ClaudeTerminal } from "./terminal-manager";
 import {
   DesktopLocale,
   getDesktopMessages,
@@ -27,6 +29,7 @@ let desktopMessages = getDesktopMessages(desktopLocale);
 const productName = "Vibe Crypto";
 const testUserData = process.env.VIBE_TRADING_DESKTOP_TEST_USER_DATA;
 let credentialStore: SecureCredentialStore | undefined;
+const claudeTerminal = new ClaudeTerminal();
 
 if (testUserData) app.setPath("userData", path.resolve(testUserData));
 app.setName(productName);
@@ -68,7 +71,7 @@ function createWindow(): void {
     minWidth: 960,
     minHeight: 640,
     show: false,
-    backgroundColor: "#0b0f14",
+    backgroundColor: "#0E1016",
     title: productName,
     autoHideMenuBar: true,
     webPreferences: {
@@ -87,6 +90,7 @@ function createWindow(): void {
     mainWindow.once("ready-to-show", () => mainWindow?.show());
   }
   mainWindow.on("close", (event) => {
+    claudeTerminal.kill();
     if (quitting) return;
     event.preventDefault();
     void shutdownAndQuit();
@@ -104,6 +108,7 @@ function createWindow(): void {
 }
 
 function registerIpc(): void {
+  registerTerminalIpc();
   ipcMain.on("desktop:retry", (event) => {
     assertMainWindowSender(event.sender);
     void boot();
@@ -129,6 +134,66 @@ function registerIpc(): void {
     const store = requireCredentialStore();
     await store.set(name, value);
     return store.status();
+  });
+}
+
+function terminalMcpConfigPath(): string | undefined {
+  try {
+    const found = resolveBackend({
+      appPath: app.getAppPath(),
+      resourcesPath: process.resourcesPath,
+      moduleDirectory: __dirname,
+      allowSourceDiscovery: !app.isPackaged,
+      executableOverride: process.env.VIBE_TRADING_EXECUTABLE,
+      pathEnvironment: process.env.PATH,
+    });
+    const config = buildMcpConfig(found ? resolveMcpCommand(found) : undefined);
+    if (!config) return undefined;
+    const target = path.join(app.getPath("userData"), "claude-mcp.json");
+    mkdirSync(path.dirname(target), { recursive: true });
+    writeFileSync(target, JSON.stringify(config, null, 2), "utf8");
+    return target;
+  } catch {
+    return undefined;
+  }
+}
+
+function isDimension(value: unknown): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value > 0 && value <= 1000;
+}
+
+function registerTerminalIpc(): void {
+  ipcMain.handle("terminal:start", (event, cols: unknown, rows: unknown) => {
+    assertMainWindowSender(event.sender);
+    if (!isDimension(cols) || !isDimension(rows)) throw new Error("Invalid terminal size");
+    const mcpConfigPath = terminalMcpConfigPath();
+    return claudeTerminal.start({
+      cols,
+      rows,
+      mcpConfigPath,
+      cwd: os.homedir(),
+      env: process.env,
+      onData: (chunk) => {
+        if (!mainWindow?.isDestroyed()) mainWindow?.webContents.send("terminal:data", chunk);
+      },
+      onExit: (exitCode) => {
+        if (!mainWindow?.isDestroyed()) mainWindow?.webContents.send("terminal:exit", { exitCode });
+      },
+    });
+  });
+  ipcMain.on("terminal:write", (event, data: unknown) => {
+    assertMainWindowSender(event.sender);
+    if (typeof data !== "string" || data.length > 65_536) return;
+    claudeTerminal.write(data);
+  });
+  ipcMain.on("terminal:resize", (event, cols: unknown, rows: unknown) => {
+    assertMainWindowSender(event.sender);
+    if (!isDimension(cols) || !isDimension(rows)) return;
+    claudeTerminal.resize(cols, rows);
+  });
+  ipcMain.handle("terminal:kill", (event) => {
+    assertMainWindowSender(event.sender);
+    claudeTerminal.kill();
   });
 }
 
@@ -173,7 +238,10 @@ async function bootInternal(): Promise<void> {
     writeParentDeathSmokeRecord(url);
   } catch (error) {
     await backend.stop();
-    await reportBootError(errorText(error));
+    const missing = errorText(error) === desktopMessages.backendNotFound;
+    await reportBootError(
+      missing && process.platform !== "win32" ? desktopMessages.backendMissingPosix : errorText(error),
+    );
   }
 }
 
@@ -235,6 +303,7 @@ function requireCredentialStore(): SecureCredentialStore {
 async function shutdownAndQuit(): Promise<void> {
   if (quitting) return;
   quitting = true;
+  claudeTerminal.kill();
   mainWindow?.webContents.send("desktop:status", desktopMessages.closingService);
   await backend?.stop();
   app.quit();

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
+import { Badge, Button, Input, Select, Table, TBody, TD, TH, THead, TR } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { useAnalysisState } from "@/hooks/useAnalysisState";
@@ -63,65 +64,37 @@ function WingTable({ title, rows, atmStrike, showAll }: WingTableProps) {
 
   return (
     <div>
-      <div className="mb-1.5 text-xs font-semibold text-muted-foreground">{title}</div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-xs text-muted-foreground">
-              {headers.map((h, i) => (
-                <th
-                  key={h}
-                  className={cn(
-                    "border-b border-border/60 pb-1.5 pe-3 font-medium whitespace-nowrap",
-                    i === 0 ? "text-start" : "text-end",
-                  )}
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((row) => {
-              const isAtm = atmStrike !== null && row.strike === atmStrike;
-              return (
-                <tr
-                  key={row.contract_symbol}
-                  className={cn(
-                    "border-b border-border/30 transition-colors",
-                    isAtm ? "bg-primary/10" : "hover:bg-muted/40",
-                  )}
-                >
-                  <td className="py-1.5 pe-3 text-start font-medium tabular-nums whitespace-nowrap">
-                    {fmt(row.strike)}
-                    {isAtm && (
-                      <span className="ms-1.5 rounded bg-primary/15 px-1 py-0.5 text-[10px] font-medium text-primary">
-                        {t("options.chain.atm")}
-                      </span>
-                    )}
-                  </td>
-                  <td className="py-1.5 pe-3 text-end tabular-nums">{fmt(row.last_price)}</td>
-                  <td className="py-1.5 pe-3 text-end tabular-nums">{fmt(row.bid)}</td>
-                  <td className="py-1.5 pe-3 text-end tabular-nums">{fmt(row.ask)}</td>
-                  <td className="py-1.5 pe-3 text-end tabular-nums text-muted-foreground">
-                    {fmtSpread(row.bid, row.ask)}
-                  </td>
-                  <td className="py-1.5 pe-3 text-end tabular-nums">{fmtInt(row.volume)}</td>
-                  <td className="py-1.5 pe-3 text-end tabular-nums">{fmtInt(row.open_interest)}</td>
-                  <td className="py-1.5 pe-3 text-end tabular-nums">{fmtIv(row.implied_volatility)}</td>
-                  <td className="py-1.5 text-end">
-                    {row.in_the_money && (
-                      <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                        {t("options.chain.itm")}
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      <div className="mb-2 text-[13px] font-semibold">{title}</div>
+      <Table>
+        <THead>
+          <TR>
+            {headers.map((h, i) => (
+              <TH key={h} numeric={i !== 0} className="whitespace-nowrap">{h}</TH>
+            ))}
+          </TR>
+        </THead>
+        <TBody>
+          {sorted.map((row) => {
+            const isAtm = atmStrike !== null && row.strike === atmStrike;
+            return (
+              <TR key={row.contract_symbol} className={cn(isAtm ? "bg-primary/10" : row.in_the_money && "bg-muted/40")}>
+                <TD className="whitespace-nowrap font-medium tabular-nums">
+                  {fmt(row.strike)}
+                  {isAtm && <Badge tone="info" className="ms-1.5">{t("options.chain.atm")}</Badge>}
+                </TD>
+                <TD numeric>{fmt(row.last_price)}</TD>
+                <TD numeric>{fmt(row.bid)}</TD>
+                <TD numeric>{fmt(row.ask)}</TD>
+                <TD numeric className="text-muted-foreground">{fmtSpread(row.bid, row.ask)}</TD>
+                <TD numeric>{fmtInt(row.volume)}</TD>
+                <TD numeric>{fmtInt(row.open_interest)}</TD>
+                <TD numeric>{fmtIv(row.implied_volatility)}</TD>
+                <TD numeric>{row.in_the_money && <Badge>{t("options.chain.itm")}</Badge>}</TD>
+              </TR>
+            );
+          })}
+        </TBody>
+      </Table>
     </div>
   );
 }
@@ -130,7 +103,7 @@ function SkeletonRows() {
   return (
     <div className="space-y-1.5 py-2">
       {[1, 2, 3, 4, 5, 6].map((i) => (
-        <div key={i} className="h-6 rounded bg-muted/50 animate-pulse" />
+        <div key={i} className="h-6 rounded bg-muted/50" />
       ))}
     </div>
   );
@@ -190,19 +163,19 @@ export function OptionsChainTable() {
     && data.atm_strike > 0 ? data.atm_strike : null;
 
   return (
-    <section className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+    <section>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <div className="text-sm font-semibold">{t("options.chain.title")}</div>
         <form onSubmit={onSubmit} className="flex flex-wrap items-center gap-2">
-          <input
+          <Input
             type="text"
             value={tickerInput}
             onChange={(e) => setTickerInput(e.target.value)}
             placeholder={DEFAULT_TICKER}
             aria-label={t("options.chain.ticker")}
-            className="w-24 rounded-md border border-border/60 bg-background px-2 py-1.5 text-sm uppercase outline-none focus:ring-2 focus:ring-primary/40"
+            className="w-28"
           />
-          <select
+          <Select
             value={data?.expiration ?? ""}
             onChange={(e) => {
               const exp = e.target.value === "" ? undefined : Number(e.target.value);
@@ -210,42 +183,34 @@ export function OptionsChainTable() {
             }}
             disabled={!data || loading}
             aria-label={t("options.chain.expiration")}
-            className="rounded-md border border-border/60 bg-background px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
+            className="w-auto"
           >
             {(data?.expirations ?? []).map((exp) => (
               <option key={exp} value={exp}>
                 {expirationLabel(exp)}
               </option>
             ))}
-          </select>
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-          >
+          </Select>
+          <Button type="submit" variant="primary" disabled={loading}>
             {t("options.chain.load")}
-          </button>
+          </Button>
         </form>
       </div>
 
       {data && <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
         <span>{t("analysis.chainQuote", { ticker: data.ticker, price: fmt(data.underlying_price ?? null) })}</span>
         <span>{t("analysis.lastFetched", { time: fetchedAt ? new Date(fetchedAt).toLocaleString() : "–" })}</span>
-        {atmStrike !== null && <button type="button" className="text-primary underline" onClick={() => setDraft((d) => ({ ...d, showAll: !d.showAll }))}>{t(showAll ? "analysis.nearAtm" : "analysis.allStrikes")}</button>}
+        {atmStrike !== null && <Button variant="ghost" size="sm" onClick={() => setDraft((d) => ({ ...d, showAll: !d.showAll }))}>{t(showAll ? "analysis.nearAtm" : "analysis.allStrikes")}</Button>}
       </div>}
 
       {error && (
-        <div className="mb-3 flex items-center justify-between gap-3 rounded border border-danger/30 bg-danger/5 p-3 text-sm text-danger">
+        <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-danger/30 bg-danger/5 p-3 text-sm text-danger">
           <span>
             <b>{t("options.chain.errorTitle")}.</b> {error}
           </span>
-          <button
-            type="button"
-            onClick={() => void load(lastRequest.current.ticker, lastRequest.current.expiration)}
-            className="shrink-0 rounded border border-danger/40 px-2.5 py-1 text-xs font-medium transition-colors hover:bg-danger/10"
-          >
+          <Button size="sm" onClick={() => void load(lastRequest.current.ticker, lastRequest.current.expiration)}>
             {t("options.chain.retry")}
-          </button>
+          </Button>
         </div>
       )}
 

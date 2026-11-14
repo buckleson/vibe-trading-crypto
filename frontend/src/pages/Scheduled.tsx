@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { CalendarClock, Loader2, Pencil, Plus, Save, Trash2, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Badge, Button, Card, CardBody, CardHeader, EmptyState, Field, Input, Page, PageHeader, Select, Table, TBody, TD, TH, THead, TR, Textarea } from "@/components/ui";
 import { api, ApiError, type ChannelAdapterStatus, type ScheduledRun } from "@/lib/api";
 import {
   describeCadence,
@@ -10,9 +10,6 @@ import {
   formatWeekdays,
 } from "@/lib/cadence";
 
-const fieldClass =
-  "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60";
-const labelClass = "text-sm font-medium";
 const hintClass = "text-xs text-muted-foreground";
 
 const POLL_MS = 15_000;
@@ -61,7 +58,7 @@ function displayZone(run: ScheduledRun): string {
 
 function formatInZone(epochMs: number, zone: string, locale: string): string {
   const date = new Date(epochMs);
-  if (Number.isNaN(date.getTime())) return "—";
+  if (Number.isNaN(date.getTime())) return "-";
   try {
     return new Intl.DateTimeFormat(locale, {
       timeZone: zone,
@@ -74,19 +71,7 @@ function formatInZone(epochMs: number, zone: string, locale: string): string {
 }
 
 function StatusPill({ label, tone }: { label: string; tone: "success" | "danger" | "warning" | "neutral" }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded px-2 py-0.5 text-xs font-medium",
-        tone === "success" && "bg-success/10 text-success",
-        tone === "danger" && "bg-danger/10 text-danger",
-        tone === "warning" && "bg-warning/10 text-warning",
-        tone === "neutral" && "bg-muted text-muted-foreground",
-      )}
-    >
-      {label}
-    </span>
-  );
+  return <Badge tone={tone}>{label}</Badge>;
 }
 
 export function Scheduled() {
@@ -101,6 +86,7 @@ export function Scheduled() {
   const [channelStatus, setChannelStatus] = useState<Record<string, ChannelAdapterStatus>>({});
   const [channelLoadError, setChannelLoadError] = useState(false);
 
+  const promptRef = useRef<HTMLTextAreaElement>(null);
   const [prompt, setPrompt] = useState("");
   const [mode, setMode] = useState<ComposerMode>("time");
   const [time, setTime] = useState("09:00");
@@ -408,452 +394,424 @@ export function Scheduled() {
   const targetSuggestions = selectedChannel?.delivery_target_suggestions ?? [];
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-6">
-      <header className="flex items-center gap-3">
-        <CalendarClock className="h-6 w-6 text-primary" aria-hidden />
-        <div>
-          <h1 className="text-xl font-semibold">{t("scheduled.title")}</h1>
-          <p className={hintClass}>{t("scheduled.subtitle")}</p>
-        </div>
-      </header>
-
-      <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border bg-card p-4">
-        {editingId && (
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-muted/40 px-3 py-2">
-            <p className="text-sm">{t("scheduled.editingHint")}</p>
-            <button
-              type="button"
-              onClick={resetComposer}
-              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition hover:text-foreground"
-            >
-              <X className="h-3.5 w-3.5" aria-hidden />
-              {t("scheduled.cancelEdit")}
-            </button>
-          </div>
-        )}
-        <div className="space-y-1.5">
-          <label htmlFor="scheduled-prompt" className={labelClass}>
-            {t("scheduled.promptLabel")}
-          </label>
-          <textarea
-            id="scheduled-prompt"
-            required
-            rows={2}
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder={t("scheduled.promptPlaceholder")}
-            className={fieldClass}
-          />
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="space-y-1.5">
-            <label htmlFor="scheduled-mode" className={labelClass}>
-              {t("scheduled.modeLabel")}
-            </label>
-            <select
-              id="scheduled-mode"
-              value={mode}
-              onChange={(e) => setMode(e.target.value as ComposerMode)}
-              className={fieldClass}
-            >
-              <option value="time">{t("scheduled.modeTime")}</option>
-              <option value="advanced">{t("scheduled.modeAdvanced")}</option>
-            </select>
-          </div>
-
-          {mode === "time" ? (
-            <>
-              <div className="space-y-1.5">
-                <label htmlFor="scheduled-time" className={labelClass}>
-                  {t("scheduled.timeLabel")}
-                </label>
-                <input
-                  id="scheduled-time"
-                  type="time"
-                  required
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className={fieldClass}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label htmlFor="scheduled-days" className={labelClass}>
-                  {t("scheduled.daysLabel")}
-                </label>
-                <select
-                  id="scheduled-days"
-                  value={days}
-                  onChange={(e) => setDays(e.target.value as DaysChoice)}
-                  className={fieldClass}
-                >
-                  <option value="weekdays">{t("scheduled.daysWeekdays")}</option>
-                  <option value="every">{t("scheduled.daysEveryDay")}</option>
-                </select>
-              </div>
-            </>
-          ) : (
-            <div className="space-y-1.5 sm:col-span-2">
-              <label htmlFor="scheduled-advanced" className={labelClass}>
-                {t("scheduled.scheduleLabel")}
-              </label>
-              <input
-                id="scheduled-advanced"
-                required
-                value={advanced}
-                onChange={(e) => setAdvanced(e.target.value)}
-                placeholder="30 23 * * 1-5"
-                className={cn(fieldClass, "font-mono")}
-              />
-              <p className={hintClass}>{t("scheduled.advancedHint")}</p>
-            </div>
-          )}
-
-          <div className="space-y-1.5">
-            <label htmlFor="scheduled-timezone" className={labelClass}>
-              {t("scheduled.timezoneLabel")}
-            </label>
-            <select
-              id="scheduled-timezone"
-              value={timezone}
-              onChange={(e) => setTimezone(e.target.value)}
-              className={fieldClass}
-            >
-              {zonesRef.current.map((zone) => (
-                <option key={zone} value={zone}>
-                  {zone}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <label htmlFor="scheduled-delivery-channel" className={labelClass}>
-              {t("scheduled.deliveryChannelLabel")}
-            </label>
-            <select
-              id="scheduled-delivery-channel"
-              value={deliveryChannel}
-              onChange={(e) => {
-                const nextChannel = e.target.value;
-                if (nextChannel !== deliveryChannel) {
-                  setDeliveryTarget("");
-                  setDeliveryTargetRef(null);
-                }
-                setDeliveryChannel(nextChannel);
-                if (nextChannel !== "email") {
-                  setDeliveryFormat("");
-                  setProtectPdf(false);
-                }
-              }}
-              className={fieldClass}
-            >
-              <option value="">{t("scheduled.deliveryInApp")}</option>
-              {deliveryChannel && !selectedChannelIsAvailable && (
-                <option value={deliveryChannel}>
-                  {t("scheduled.deliveryChannelUnavailable", {
-                    channel: selectedChannel?.display_name || deliveryChannel,
-                  })}
-                </option>
-              )}
-              {configuredDeliveryChannels.map((channel) => (
-                <option key={channel.name} value={channel.name}>
-                  {channel.display_name}
-                </option>
-              ))}
-            </select>
-            {channelLoadError ? (
-              <p className="text-xs text-danger">{t("scheduled.deliveryChannelsLoadFailed")}</p>
-            ) : configuredDeliveryChannels.length === 0 && !deliveryChannel ? (
-              <p className={hintClass}>{t("scheduled.deliveryNoChannels")}</p>
-            ) : (
-              <p className={hintClass}>{t("scheduled.deliveryHint")}</p>
-            )}
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="scheduled-delivery-target" className={labelClass}>
-              {targetLabel}
-            </label>
-            <input
-              id="scheduled-delivery-target"
-              type={targetInputType}
-              disabled={!deliveryChannel}
-              value={deliveryTarget}
-              onChange={(e) => {
-                setDeliveryTarget(e.target.value);
-                setDeliveryTargetRef(null);
-              }}
-              placeholder={
-                deliveryChannel
-                  ? targetPlaceholder
-                  : t("scheduled.deliveryTargetDisabled")
-              }
-              className={fieldClass}
-            />
-            {deliveryChannel && targetSuggestions.length > 0 && (
-              <select
-                aria-label={t("scheduled.deliveryKnownTargetLabel")}
-                value=""
-                onChange={(e) => {
-                  if (!e.target.value) return;
-                  setDeliveryTarget(e.target.value);
-                  setDeliveryTargetRef(null);
-                }}
-                className={fieldClass}
-              >
-                <option value="">{t("scheduled.deliveryKnownTargetPlaceholder")}</option>
-                {targetSuggestions.map((suggestion) => {
-                  const label = suggestion.kind
-                    ? t(`scheduled.deliverySuggestionKind_${suggestion.kind}`, {
-                        defaultValue: suggestion.label || suggestion.target,
-                      })
-                    : suggestion.label || suggestion.target;
-                  return (
-                    <option
-                      key={`${suggestion.kind || "target"}:${suggestion.target}`}
-                      value={suggestion.target}
-                    >
-                      {label} · {maskDeliveryTarget(suggestion.target)}
-                    </option>
-                  );
-                })}
-              </select>
-            )}
-          </div>
-          {deliveryChannel.trim() === "email" && (
-            <div className="space-y-1.5 sm:col-span-2">
-              <label htmlFor="scheduled-delivery-format" className={labelClass}>
-                {t("scheduled.deliveryFormatLabel")}
-              </label>
-              <select
-                id="scheduled-delivery-format"
-                value={deliveryFormat}
-                onChange={(e) => {
-                  const nextFormat = e.target.value as EmailDeliveryFormat;
-                  setDeliveryFormat(nextFormat);
-                  if (nextFormat !== "pdf") setProtectPdf(false);
-                }}
-                className={fieldClass}
-              >
-                <option value="">{t("scheduled.deliveryFormatDefault")}</option>
-                <option value="html">{t("scheduled.deliveryFormatHtml")}</option>
-                <option value="pdf">{t("scheduled.deliveryFormatPdf")}</option>
-              </select>
-              <p className={hintClass}>
-                {deliveryFormat === "html"
-                  ? t("scheduled.deliveryFormatHtmlHint")
-                  : deliveryFormat === "pdf"
-                    ? t("scheduled.deliveryFormatPdfHint")
-                    : t("scheduled.deliveryFormatDefaultHint")}
-              </p>
-              {deliveryFormat === "pdf" && (
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={protectPdf}
-                    disabled={!emailPdfPasswordConfigured && !protectPdf}
-                    onChange={(e) => setProtectPdf(e.target.checked)}
-                  />
-                  <span>{t("scheduled.deliveryProtectPdf")}</span>
-                </label>
-              )}
-              {deliveryFormat === "pdf" && !emailPdfPasswordConfigured && !protectPdf && (
-                <p className={hintClass}>{t("scheduled.deliveryProtectPdfUnavailable")}</p>
-              )}
-            </div>
-          )}
-        </div>
-
-        {composerError && (
-          <p role="alert" className="text-sm text-danger">
-            {composerError}
-          </p>
-        )}
-
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="submit"
-            disabled={saving}
-            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+    <Page width="wide">
+      <PageHeader
+        title={t("scheduled.title")}
+        description={t("scheduled.subtitle")}
+        actions={(
+          <Button
+            variant="primary"
+            onClick={() => {
+              resetComposer();
+              promptRef.current?.focus();
+            }}
           >
-            {saving ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-            ) : editingId ? (
-              <Save className="h-4 w-4" aria-hidden />
-            ) : (
-              <Plus className="h-4 w-4" aria-hidden />
-            )}
-            {editingId ? t("scheduled.saveChanges") : t("scheduled.create")}
-          </button>
-          {editingId && (
-            <button
-              type="button"
-              disabled={saving}
-              onClick={resetComposer}
-              className="rounded-md border px-3 py-2 text-sm text-muted-foreground transition hover:bg-muted disabled:opacity-60"
-            >
-              {t("scheduled.cancelEdit")}
-            </button>
-          )}
-          <p className={hintClass}>{t("scheduled.executorHint")}</p>
-        </div>
-      </form>
-
-      <section aria-label={t("scheduled.listTitle")} className="rounded-lg border bg-card">
-        {loading ? (
-          <div className="flex items-center justify-center gap-2 p-8 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-            {t("scheduled.loading")}
-          </div>
-        ) : listError && runs.length === 0 ? (
-          <div className="space-y-2 p-6 text-sm">
-            <p className="text-danger">{listError}</p>
-            <button
-              type="button"
-              onClick={() => void refresh()}
-              className="rounded-md border px-3 py-1.5 text-sm transition hover:bg-muted"
-            >
-              {t("scheduled.retry")}
-            </button>
-          </div>
-        ) : runs.length === 0 ? (
-          <p className="p-8 text-center text-sm text-muted-foreground">{t("scheduled.empty")}</p>
-        ) : (
-          <>
-          {listError && (
-            <p role="alert" className="border-b px-4 py-2 text-xs text-danger">
-              {listError}
-            </p>
-          )}
-          <ul className="divide-y">
-            {runs.map((run) => {
-              const status = statusLabel(run);
-              const zone = displayZone(run);
-              return (
-                <li key={run.id} className="flex flex-wrap items-start gap-3 p-4">
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      {run.title && <span className="font-semibold">{run.title}</span>}
-                      <span className="font-medium">{cadenceLabel(run)}</span>
-                      <span className={hintClass}>{zone}</span>
-                      <StatusPill label={status.label} tone={status.tone} />
-                    </div>
-                    <p className="line-clamp-2 break-words text-sm text-muted-foreground">{run.prompt}</p>
-                    <p className={hintClass}>
-                      {run.status === "expired"
-                        ? t("scheduled.noFurtherRuns", { defaultValue: "No further runs" })
-                        : t("scheduled.nextRun", {
-                            when: formatInZone(run.next_run_at, zone, locale),
-                          })}
-                    </p>
-                    {run.end_at && (
-                      <p className={hintClass}>
-                        {t("scheduled.endsAt", {
-                          defaultValue: "Ends {{when}}",
-                          when: formatInZone(run.end_at, zone, locale),
-                        })}
-                      </p>
-                    )}
-                    {run.last_error && (
-                      <p className="break-words text-xs text-danger">
-                        {t("scheduled.lastError", { error: run.last_error })}
-                      </p>
-                    )}
-                    {run.delivery_channel && (
-                      <>
-                        <p className={hintClass}>
-                          {t("scheduled.deliverySummary", {
-                            channel:
-                              channelStatus[run.delivery_channel]?.display_name ||
-                              run.delivery_channel,
-                            target:
-                              run.delivery_target_label ||
-                              run.delivery_target ||
-                              t("scheduled.deliveryUnknownTarget"),
-                          })}
-                        </p>
-                        <p
-                          className={
-                            run.delivery_status === "failed"
-                              ? "break-words text-xs text-danger"
-                              : hintClass
-                          }
-                        >
-                          {t(`scheduled.delivery_${run.delivery_status}`, {
-                            channel:
-                              channelStatus[run.delivery_channel]?.display_name ||
-                              run.delivery_channel,
-                            defaultValue: t("scheduled.delivery_none", {
-                              channel:
-                                channelStatus[run.delivery_channel]?.display_name ||
-                                run.delivery_channel,
-                            }),
-                          })}
-                          {run.delivery_status === "failed" && run.delivery_error
-                            ? ` — ${run.delivery_error}`
-                            : ""}
-                        </p>
-                      </>
-                    )}
-                    {verdictCell(run)}
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => beginEdit(run)}
-                      disabled={(run.status === "running" || run.delivery_status === "sending")}
-                      aria-label={t("scheduled.editAria", { prompt: run.prompt })}
-                      title={
-                        (run.status === "running" || run.delivery_status === "sending")
-                          ? t("scheduled.editRunningDisabled")
-                          : undefined
-                      }
-                      className="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <Pencil className="h-3.5 w-3.5" aria-hidden />
-                      {t("scheduled.edit")}
-                    </button>
-                    {pendingDelete === run.id ? (
-                      <>
-                        {/* Cancel first so an accidental double-click disarms instead of destroying. */}
-                        <button
-                          type="button"
-                          onClick={() => setPendingDelete(null)}
-                          className="rounded-md border px-2.5 py-1.5 text-xs text-muted-foreground transition hover:bg-muted"
-                        >
-                          {t("layout.cancel")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void handleConfirmedDelete(run.id)}
-                          aria-label={t("scheduled.confirmDeleteAria", { prompt: run.prompt })}
-                          className="inline-flex items-center gap-1.5 rounded-md border border-danger bg-danger/10 px-2.5 py-1.5 text-xs text-danger transition"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                          {t("scheduled.confirmDelete")}
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setPendingDelete(run.id)}
-                        aria-label={t("scheduled.deleteAria", { prompt: run.prompt })}
-                        className="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs text-muted-foreground transition hover:bg-muted"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                        {t("scheduled.delete")}
-                      </button>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-          </>
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            {t("scheduled.newSchedule", { defaultValue: "New schedule" })}
+          </Button>
         )}
-      </section>
-    </div>
+      />
+
+      <Card>
+        <form onSubmit={handleSubmit}>
+          <CardBody className="space-y-4">
+            {editingId && (
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-muted px-3 py-2">
+                <p className="text-[13px]">{t("scheduled.editingHint")}</p>
+                <Button variant="ghost" size="sm" onClick={resetComposer}>
+                  <X className="h-3.5 w-3.5" aria-hidden="true" />
+                  {t("scheduled.cancelEdit")}
+                </Button>
+              </div>
+            )}
+            <Field label={t("scheduled.promptLabel")} htmlFor="scheduled-prompt">
+              <Textarea
+                id="scheduled-prompt"
+                ref={promptRef}
+                required
+                rows={2}
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder={t("scheduled.promptPlaceholder")}
+              />
+            </Field>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Field label={t("scheduled.modeLabel")} htmlFor="scheduled-mode">
+                <Select
+                  id="scheduled-mode"
+                  value={mode}
+                  onChange={(e) => setMode(e.target.value as ComposerMode)}
+                >
+                  <option value="time">{t("scheduled.modeTime")}</option>
+                  <option value="advanced">{t("scheduled.modeAdvanced")}</option>
+                </Select>
+              </Field>
+
+              {mode === "time" ? (
+                <>
+                  <Field label={t("scheduled.timeLabel")} htmlFor="scheduled-time">
+                    <Input
+                      id="scheduled-time"
+                      type="time"
+                      required
+                      value={time}
+                      onChange={(e) => setTime(e.target.value)}
+                    />
+                  </Field>
+                  <Field label={t("scheduled.daysLabel")} htmlFor="scheduled-days">
+                    <Select
+                      id="scheduled-days"
+                      value={days}
+                      onChange={(e) => setDays(e.target.value as DaysChoice)}
+                    >
+                      <option value="weekdays">{t("scheduled.daysWeekdays")}</option>
+                      <option value="every">{t("scheduled.daysEveryDay")}</option>
+                    </Select>
+                  </Field>
+                </>
+              ) : (
+                <Field
+                  label={t("scheduled.scheduleLabel")}
+                  htmlFor="scheduled-advanced"
+                  hint={t("scheduled.advancedHint")}
+                  className="sm:col-span-2"
+                >
+                  <Input
+                    id="scheduled-advanced"
+                    required
+                    value={advanced}
+                    onChange={(e) => setAdvanced(e.target.value)}
+                    placeholder="30 23 * * 1-5"
+                    className="font-mono text-[13px]"
+                  />
+                </Field>
+              )}
+
+              <Field label={t("scheduled.timezoneLabel")} htmlFor="scheduled-timezone">
+                <Select
+                  id="scheduled-timezone"
+                  value={timezone}
+                  onChange={(e) => setTimezone(e.target.value)}
+                >
+                  {zonesRef.current.map((zone) => (
+                    <option key={zone} value={zone}>
+                      {zone}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field
+                label={t("scheduled.deliveryChannelLabel")}
+                htmlFor="scheduled-delivery-channel"
+                hint={channelLoadError
+                  ? undefined
+                  : configuredDeliveryChannels.length === 0 && !deliveryChannel
+                    ? t("scheduled.deliveryNoChannels")
+                    : t("scheduled.deliveryHint")}
+                error={channelLoadError ? t("scheduled.deliveryChannelsLoadFailed") : undefined}
+              >
+                <Select
+                  id="scheduled-delivery-channel"
+                  value={deliveryChannel}
+                  onChange={(e) => {
+                    const nextChannel = e.target.value;
+                    if (nextChannel !== deliveryChannel) {
+                      setDeliveryTarget("");
+                      setDeliveryTargetRef(null);
+                    }
+                    setDeliveryChannel(nextChannel);
+                    if (nextChannel !== "email") {
+                      setDeliveryFormat("");
+                      setProtectPdf(false);
+                    }
+                  }}
+                >
+                  <option value="">{t("scheduled.deliveryInApp")}</option>
+                  {deliveryChannel && !selectedChannelIsAvailable && (
+                    <option value={deliveryChannel}>
+                      {t("scheduled.deliveryChannelUnavailable", {
+                        channel: selectedChannel?.display_name || deliveryChannel,
+                      })}
+                    </option>
+                  )}
+                  {configuredDeliveryChannels.map((channel) => (
+                    <option key={channel.name} value={channel.name}>
+                      {channel.display_name}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label={targetLabel} htmlFor="scheduled-delivery-target">
+                <Input
+                  id="scheduled-delivery-target"
+                  type={targetInputType}
+                  disabled={!deliveryChannel}
+                  value={deliveryTarget}
+                  onChange={(e) => {
+                    setDeliveryTarget(e.target.value);
+                    setDeliveryTargetRef(null);
+                  }}
+                  placeholder={
+                    deliveryChannel
+                      ? targetPlaceholder
+                      : t("scheduled.deliveryTargetDisabled")
+                  }
+                />
+                {deliveryChannel && targetSuggestions.length > 0 && (
+                  <Select
+                    aria-label={t("scheduled.deliveryKnownTargetLabel")}
+                    value=""
+                    onChange={(e) => {
+                      if (!e.target.value) return;
+                      setDeliveryTarget(e.target.value);
+                      setDeliveryTargetRef(null);
+                    }}
+                  >
+                    <option value="">{t("scheduled.deliveryKnownTargetPlaceholder")}</option>
+                    {targetSuggestions.map((suggestion) => {
+                      const label = suggestion.kind
+                        ? t(`scheduled.deliverySuggestionKind_${suggestion.kind}`, {
+                            defaultValue: suggestion.label || suggestion.target,
+                          })
+                        : suggestion.label || suggestion.target;
+                      return (
+                        <option
+                          key={`${suggestion.kind || "target"}:${suggestion.target}`}
+                          value={suggestion.target}
+                        >
+                          {label} · {maskDeliveryTarget(suggestion.target)}
+                        </option>
+                      );
+                    })}
+                  </Select>
+                )}
+              </Field>
+              {deliveryChannel.trim() === "email" && (
+                <Field
+                  label={t("scheduled.deliveryFormatLabel")}
+                  htmlFor="scheduled-delivery-format"
+                  hint={deliveryFormat === "html"
+                    ? t("scheduled.deliveryFormatHtmlHint")
+                    : deliveryFormat === "pdf"
+                      ? t("scheduled.deliveryFormatPdfHint")
+                      : t("scheduled.deliveryFormatDefaultHint")}
+                  className="sm:col-span-2"
+                >
+                  <Select
+                    id="scheduled-delivery-format"
+                    value={deliveryFormat}
+                    onChange={(e) => {
+                      const nextFormat = e.target.value as EmailDeliveryFormat;
+                      setDeliveryFormat(nextFormat);
+                      if (nextFormat !== "pdf") setProtectPdf(false);
+                    }}
+                  >
+                    <option value="">{t("scheduled.deliveryFormatDefault")}</option>
+                    <option value="html">{t("scheduled.deliveryFormatHtml")}</option>
+                    <option value="pdf">{t("scheduled.deliveryFormatPdf")}</option>
+                  </Select>
+                  {deliveryFormat === "pdf" && (
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        className="accent-primary"
+                        checked={protectPdf}
+                        disabled={!emailPdfPasswordConfigured && !protectPdf}
+                        onChange={(e) => setProtectPdf(e.target.checked)}
+                      />
+                      <span>{t("scheduled.deliveryProtectPdf")}</span>
+                    </label>
+                  )}
+                  {deliveryFormat === "pdf" && !emailPdfPasswordConfigured && !protectPdf && (
+                    <p className={hintClass}>{t("scheduled.deliveryProtectPdfUnavailable")}</p>
+                  )}
+                </Field>
+              )}
+            </div>
+
+            {composerError && (
+              <p role="alert" className="text-[13px] text-danger">
+                {composerError}
+              </p>
+            )}
+
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+              <p className={hintClass}>{t("scheduled.executorHint")}</p>
+              <div className="flex items-center gap-2">
+                {editingId && (
+                  <Button disabled={saving} onClick={resetComposer}>
+                    {t("scheduled.cancelEdit")}
+                  </Button>
+                )}
+                <Button type="submit" variant="primary" loading={saving}>
+                  {editingId ? t("scheduled.saveChanges") : t("scheduled.create")}
+                </Button>
+              </div>
+            </div>
+          </CardBody>
+        </form>
+      </Card>
+
+      <Card aria-label={t("scheduled.listTitle")} role="region">
+        <CardHeader title={t("scheduled.listTitle")} />
+        <CardBody>
+          {loading ? (
+            <div className="flex items-center justify-center gap-2 p-8 text-[13px] text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              {t("scheduled.loading")}
+            </div>
+          ) : listError && runs.length === 0 ? (
+            <div className="space-y-2 text-sm">
+              <p role="alert" className="text-danger">{listError}</p>
+              <Button size="sm" onClick={() => void refresh()}>
+                {t("scheduled.retry")}
+              </Button>
+            </div>
+          ) : runs.length === 0 ? (
+            <EmptyState title={t("scheduled.empty")} />
+          ) : (
+            <div className="space-y-3">
+              {listError && (
+                <p role="alert" className="text-xs text-danger">
+                  {listError}
+                </p>
+              )}
+              <Table className="min-w-[860px]">
+                <THead>
+                  <tr>
+                    <TH>{t("scheduled.colSchedule", { defaultValue: "Schedule" })}</TH>
+                    <TH>{t("scheduled.colNextRun", { defaultValue: "Next run" })}</TH>
+                    <TH>{t("scheduled.colStatus", { defaultValue: "Last status" })}</TH>
+                    <TH align="right">{t("scheduled.colActions", { defaultValue: "Actions" })}</TH>
+                  </tr>
+                </THead>
+                <TBody>
+                  {runs.map((run) => {
+                    const status = statusLabel(run);
+                    const zone = displayZone(run);
+                    const deliveryName = run.delivery_channel
+                      ? channelStatus[run.delivery_channel]?.display_name || run.delivery_channel
+                      : "";
+                    const editDisabled = run.status === "running" || run.delivery_status === "sending";
+                    return (
+                      <TR key={run.id} className="align-top">
+                        <TD className="min-w-0 max-w-md space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            {run.title && <span className="font-semibold">{run.title}</span>}
+                            <span className="font-medium">{cadenceLabel(run)}</span>
+                            <span className={hintClass}>{zone}</span>
+                          </div>
+                          <p className="line-clamp-2 break-words text-[13px] text-muted-foreground">{run.prompt}</p>
+                          {run.delivery_channel && (
+                            <>
+                              <p className={hintClass}>
+                                {t("scheduled.deliverySummary", {
+                                  channel: deliveryName,
+                                  target:
+                                    run.delivery_target_label ||
+                                    run.delivery_target ||
+                                    t("scheduled.deliveryUnknownTarget"),
+                                })}
+                              </p>
+                              <p
+                                className={
+                                  run.delivery_status === "failed"
+                                    ? "break-words text-xs text-danger"
+                                    : hintClass
+                                }
+                              >
+                                {t(`scheduled.delivery_${run.delivery_status}`, {
+                                  channel: deliveryName,
+                                  defaultValue: t("scheduled.delivery_none", {
+                                    channel: deliveryName,
+                                  }),
+                                })}
+                                {run.delivery_status === "failed" && run.delivery_error
+                                  ? `: ${run.delivery_error}`
+                                  : ""}
+                              </p>
+                            </>
+                          )}
+                        </TD>
+                        <TD className="whitespace-nowrap text-[13px]">
+                          <p>
+                            {run.status === "expired"
+                              ? t("scheduled.noFurtherRuns", { defaultValue: "No further runs" })
+                              : t("scheduled.nextRun", {
+                                  when: formatInZone(run.next_run_at, zone, locale),
+                                })}
+                          </p>
+                          {run.end_at && (
+                            <p className={hintClass}>
+                              {t("scheduled.endsAt", {
+                                defaultValue: "Ends {{when}}",
+                                when: formatInZone(run.end_at, zone, locale),
+                              })}
+                            </p>
+                          )}
+                        </TD>
+                        <TD className="max-w-xs space-y-1">
+                          <StatusPill label={status.label} tone={status.tone} />
+                          {run.last_error && (
+                            <p className="break-words text-xs text-danger">
+                              {t("scheduled.lastError", { error: run.last_error })}
+                            </p>
+                          )}
+                          {verdictCell(run)}
+                        </TD>
+                        <TD align="right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              size="sm"
+                              onClick={() => beginEdit(run)}
+                              disabled={editDisabled}
+                              aria-label={t("scheduled.editAria", { prompt: run.prompt })}
+                              title={editDisabled ? t("scheduled.editRunningDisabled") : undefined}
+                            >
+                              <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                              {t("scheduled.edit")}
+                            </Button>
+                            {pendingDelete === run.id ? (
+                              <>
+                                {/* Cancel first so an accidental double-click disarms instead of destroying. */}
+                                <Button size="sm" onClick={() => setPendingDelete(null)}>
+                                  {t("layout.cancel")}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="danger"
+                                  onClick={() => void handleConfirmedDelete(run.id)}
+                                  aria-label={t("scheduled.confirmDeleteAria", { prompt: run.prompt })}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                                  {t("scheduled.confirmDelete")}
+                                </Button>
+                              </>
+                            ) : (
+                              <Button
+                                size="sm"
+                                onClick={() => setPendingDelete(run.id)}
+                                aria-label={t("scheduled.deleteAria", { prompt: run.prompt })}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                                {t("scheduled.delete")}
+                              </Button>
+                            )}
+                          </div>
+                        </TD>
+                      </TR>
+                    );
+                  })}
+                </TBody>
+              </Table>
+            </div>
+          )}
+        </CardBody>
+      </Card>
+    </Page>
   );
 }

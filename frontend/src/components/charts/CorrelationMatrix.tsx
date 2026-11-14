@@ -3,6 +3,7 @@ import i18n from "@/i18n";
 import { getChartTheme } from "@/lib/chart-theme";
 import { escapeHtml } from "@/lib/escapeHtml";
 import { useChartLifecycle } from "@/hooks/useChartLifecycle";
+import { contrastText, mixRgb, rgbCss, tokenRgb, type RGB } from "./chartTokens";
 
 interface Props {
   labels: string[];
@@ -10,21 +11,18 @@ interface Props {
   height?: number;
 }
 
-const RDBU_STOPS = ["#2166ac", "#4393c3", "#92c5de", "#d1e5f0", "#f7f7f7", "#fddbc7", "#f4a582", "#d6604d", "#b2182b"];
-
-function hexToRgb(hex: string): [number, number, number] {
-  const n = parseInt(hex.slice(1), 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+/** Diverging scale: danger hue at -1, muted neutral at 0, primary hue at +1. */
+function divergingStops(): RGB[] {
+  return [
+    tokenRgb("--danger", [197, 32, 32]),
+    tokenRgb("--muted", [237, 239, 242]),
+    tokenRgb("--primary", [21, 85, 224]),
+  ];
 }
 
-function cellTextColor(value: number): string {
-  const pos = Math.min(1, Math.max(0, (value + 1) / 2)) * (RDBU_STOPS.length - 1);
-  const idx = Math.min(RDBU_STOPS.length - 2, Math.floor(pos));
-  const frac = pos - idx;
-  const [r1, g1, b1] = hexToRgb(RDBU_STOPS[idx]);
-  const [r2, g2, b2] = hexToRgb(RDBU_STOPS[idx + 1]);
-  const luminance = (0.299 * (r1 + (r2 - r1) * frac) + 0.587 * (g1 + (g2 - g1) * frac) + 0.114 * (b1 + (b2 - b1) * frac)) / 255;
-  return luminance > 0.55 ? "#1f2937" : "#ffffff";
+function cellRgb(value: number, stops: RGB[]): RGB {
+  const v = Math.min(1, Math.max(-1, value));
+  return v < 0 ? mixRgb(stops[1], stops[0], -v) : mixRgb(stops[1], stops[2], v);
 }
 
 export function CorrelationMatrix({ labels, matrix, height = 500 }: Props) {
@@ -32,10 +30,11 @@ export function CorrelationMatrix({ labels, matrix, height = 500 }: Props) {
 
   useChartLifecycle(ref, () => {
     const t = getChartTheme();
+    const stops = divergingStops();
 
     // Build heatmap data: [xIdx, yIdx, value] with per-cell label color for readability on saturated cells.
-    // Undefined pairs (null — zero-variance leg such as a halted series) are missing
-    // evidence, not 0.0: render them as a muted "—" cell instead of cooling the
+    // Undefined pairs (null - zero-variance leg such as a halted series) are missing
+    // evidence, not 0.0: render them as a muted "-" cell instead of cooling the
     // heatmap with a fabricated "no linear relationship" reading.
     const data: { value: [number, number, number]; label: { color: string }; itemStyle?: { color: string; opacity: number } }[] = [];
     for (let i = 0; i < labels.length; i++) {
@@ -46,7 +45,7 @@ export function CorrelationMatrix({ labels, matrix, height = 500 }: Props) {
           continue;
         }
         const val = parseFloat(raw.toFixed(4));
-        data.push({ value: [j, i, val], label: { color: cellTextColor(val) } });
+        data.push({ value: [j, i, val], label: { color: contrastText(cellRgb(val, stops)) } });
       }
     }
 
@@ -59,6 +58,8 @@ export function CorrelationMatrix({ labels, matrix, height = 500 }: Props) {
         position: "top",
         backgroundColor: t.tooltipBg,
         borderColor: t.tooltipBorder,
+        borderWidth: 1,
+        extraCssText: "box-shadow:none;",
         textStyle: { color: t.tooltipText, fontSize: 12 },
         formatter: (params: unknown) => {
           const p = params as { data: { value: [number, number, number] } };
@@ -74,7 +75,7 @@ export function CorrelationMatrix({ labels, matrix, height = 500 }: Props) {
         data: labels,
         axisLabel: {
           color: t.textColor,
-          fontSize: 11,
+          fontSize: 12,
           rotate: 30,
           interval: 0,
         },
@@ -84,7 +85,7 @@ export function CorrelationMatrix({ labels, matrix, height = 500 }: Props) {
       yAxis: {
         type: "category",
         data: labels,
-        axisLabel: { color: t.textColor, fontSize: 11, interval: 0 },
+        axisLabel: { color: t.textColor, fontSize: 12, interval: 0 },
         axisLine: { lineStyle: { color: t.axisColor } },
         splitArea: { show: false },
       },
@@ -96,9 +97,9 @@ export function CorrelationMatrix({ labels, matrix, height = 500 }: Props) {
         orient: "vertical",
         right: 8,
         top: "center",
-        textStyle: { color: t.textColor, fontSize: 11 },
+        textStyle: { color: t.textColor, fontSize: 12 },
         inRange: {
-          color: RDBU_STOPS,
+          color: stops.map((c) => rgbCss(c)),
         },
       },
       series: [
@@ -108,16 +109,16 @@ export function CorrelationMatrix({ labels, matrix, height = 500 }: Props) {
           data,
           label: {
             show: labels.length <= 8,
-            fontSize: 10,
+            fontSize: 12,
             formatter: (params: unknown) => {
               const p = params as { value: [number, number, number] };
               const [x, y] = p.value;
               const rawCell = matrix[y]?.[x] ?? null;
-              return rawCell === null ? "—" : p.value[2].toFixed(2);
+              return rawCell === null ? "-" : p.value[2].toFixed(2);
             },
           },
           emphasis: {
-            itemStyle: { shadowBlur: 10, shadowColor: "rgba(0, 0, 0, 0.5)" },
+            itemStyle: { borderColor: t.textColor, borderWidth: 1 },
           },
         },
       ],

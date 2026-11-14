@@ -28,7 +28,7 @@ export function RegimeTimeline({ data, height = 260 }: Props) {
       {
         name: fusedLabel,
         xAxis: e.start,
-        label: { color: t.downColor, fontSize: 10, position: "insideTop" },
+        label: { color: t.downColor, fontSize: 12, position: "insideTop" },
       },
       { xAxis: e.end ?? lastDate },
     ]);
@@ -38,14 +38,14 @@ export function RegimeTimeline({ data, height = 260 }: Props) {
       tooltip: {
         trigger: "axis",
         backgroundColor: t.tooltipBg,
-        borderColor: t.tooltipBorder,
-        textStyle: { color: t.tooltipText, fontSize: 11 },
+        borderColor: t.tooltipBorder, borderWidth: 1, extraCssText: "box-shadow:none;",
+        textStyle: { color: t.tooltipText, fontSize: 12 },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         formatter: (params_: any) => {
           if (!Array.isArray(params_) || !params_.length) return "";
           let html = `<b>${params_[0].axisValue}</b>`;
           for (const p of params_) {
-            const val = p.value === null || p.value === undefined ? "—" : Number(p.value).toFixed(4);
+            const val = p.value === null || p.value === undefined ? "-" : Number(p.value).toFixed(4);
             html += `<br/>${p.marker} ${p.seriesName}: <b>${val}</b>`;
           }
           return html;
@@ -53,23 +53,23 @@ export function RegimeTimeline({ data, height = 260 }: Props) {
       },
       legend: {
         data: [densityName, smoothedName],
-        textStyle: { color: t.textColor, fontSize: 11 },
-        right: 8,
-        top: 4,
+        textStyle: { color: t.textColor, fontSize: 12 },
+        left: 0,
+        top: 0,
       },
       grid: { left: 8, right: 8, top: 32, bottom: 8, containLabel: true },
       xAxis: {
         type: "category",
         data: dates,
         axisLine: { lineStyle: { color: t.axisColor } },
-        axisLabel: { color: t.textColor, fontSize: 10 },
+        axisLabel: { color: t.textColor, fontSize: 12 },
       },
       yAxis: {
         type: "value",
         min: 0,
         max: 1,
         splitLine: { lineStyle: { color: t.gridColor } },
-        axisLabel: { color: t.textColor, fontSize: 10 },
+        axisLabel: { color: t.textColor, fontSize: 12 },
       },
       series: [
         {
@@ -104,7 +104,7 @@ export function RegimeTimeline({ data, height = 260 }: Props) {
                 label: {
                   formatter: `${i18n.t("correlation.regimeEnterThreshold")}: ${params.enter_threshold}`,
                   position: "insideEndTop",
-                  fontSize: 10,
+                  fontSize: 12,
                   color: t.textColor,
                 },
               },
@@ -113,7 +113,7 @@ export function RegimeTimeline({ data, height = 260 }: Props) {
                 label: {
                   formatter: `${i18n.t("correlation.regimeExitThreshold")}: ${params.exit_threshold}`,
                   position: "insideEndBottom",
-                  fontSize: 10,
+                  fontSize: 12,
                   color: t.textColor,
                 },
               },

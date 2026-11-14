@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CandlestickChart, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { Badge, Button, Card, CardBody, CardHeader, Page, PageHeader, Stat, Table, TBody, TD, TH, THead, TR } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 import {
@@ -37,24 +38,13 @@ function MetricCard({
   badgeTone?: "debit" | "credit" | "neutral";
   valueTone?: "positive" | "negative" | "neutral";
 }) {
-  const badgeCls =
-    badgeTone === "debit"
-      ? "bg-danger/10 text-danger"
-      : badgeTone === "credit"
-        ? "bg-success/10 text-success"
-        : "bg-muted text-muted-foreground";
-  const valueCls =
-    valueTone === "positive" ? "text-success" : valueTone === "negative" ? "text-danger" : "";
+  const tone = valueTone === "positive" ? "success" : valueTone === "negative" ? "danger" : "neutral";
+  const badgeTn = badgeTone === "debit" ? "danger" : badgeTone === "credit" ? "success" : "neutral";
   return (
-    <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-      <div className="flex items-center justify-between gap-2">
-        <div className="text-xs text-muted-foreground">{label}</div>
-        {badge && (
-          <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-medium", badgeCls)}>{badge}</span>
-        )}
-      </div>
-      <div className={cn("mt-1 truncate text-sm font-semibold tabular-nums", valueCls)}>{value}</div>
-    </div>
+    <Card className="p-4">
+      <Stat label={<span className="flex items-center justify-between gap-2">{label}{badge && <Badge tone={badgeTn}>{badge}</Badge>}</span>}
+        value={<span className="block truncate text-lg">{value}</span>} tone={tone} />
+    </Card>
   );
 }
 
@@ -148,23 +138,16 @@ export function OptionsLab() {
     : dash;
 
   return (
-    <div className="flex w-full flex-col gap-4 p-6">
-      {/* Header */}
-      <div>
-        <div className="flex items-center gap-3">
-          <CandlestickChart className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">{t("options.title")}</h1>
-        </div>
-        <p className="mt-1 text-sm text-muted-foreground">{t("options.subtitle")}</p>
-      </div>
+    <Page>
+      <PageHeader title={t("options.title")} description={t("options.subtitle")} />
 
       {/* Builder + results */}
-      <div role="status" aria-live="polite" className="rounded-lg border bg-card px-3 py-2 text-sm">
+      <div role="status" aria-live="polite" className="rounded-lg border border-border bg-card px-3 py-2 text-sm">
         {!req ? t("analysis.invalid") : loading ? t("analysis.updating") : error ? t("analysis.failed") : fresh ? t("analysis.updated") : t("analysis.editing")}
         {result && !fresh && <span className="ms-2 text-warning">{t("analysis.previousResult")}</span>}
         {updatedAt && <span className="ms-2 text-xs text-muted-foreground">{t("analysis.lastComputed", { time: new Date(updatedAt).toLocaleTimeString() })}</span>}
       </div>
-      <div className="grid gap-4 xl:grid-cols-[minmax(26rem,2fr)_minmax(0,3fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(26rem,2fr)_minmax(0,3fr)]">
         <div className="min-w-0">
           <StrategyBuilder
             legs={legs}
@@ -176,7 +159,7 @@ export function OptionsLab() {
           />
         </div>
 
-        <div className="flex min-w-0 flex-col gap-4">
+        <div className="flex min-w-0 flex-col gap-6">
           {/* Key-metrics strip */}
           <div className={cn("grid grid-cols-2 gap-3 2xl:grid-cols-4", (loading || !fresh) && "opacity-60")}>
             <MetricCard
@@ -206,47 +189,48 @@ export function OptionsLab() {
 
           {/* Backend error banner */}
           {error && (
-            <div role="alert" className="flex items-center justify-between rounded border border-danger/30 bg-danger/5 p-3 text-sm text-danger">{error}<button onClick={() => setRetry((n) => n + 1)}>{t("connection.retry")}</button></div>
+            <div role="alert" className="flex items-center justify-between rounded-lg border border-danger/30 bg-danger/5 p-3 text-sm text-danger">{error}<Button size="sm" onClick={() => setRetry((n) => n + 1)}>{t("connection.retry")}</Button></div>
           )}
 
           {/* Payoff diagram */}
-          <section className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-            <div className="mb-2 flex items-center justify-between">
-              <div className="text-sm font-semibold">{t("options.payoff.title")}</div>
-              {loading && (
-                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  {t("options.builder.analyzing")}
-                </span>
-              )}
-            </div>
+          <Card>
+            <CardHeader title={t("options.payoff.title")} actions={loading ? (
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                {t("options.builder.analyzing")}
+              </span>
+            ) : undefined} />
+            <CardBody>
             <OptionsPayoffChart
               curve={result?.expiry_curve ?? { spot: [], pnl: [] }}
               entrySpot={resultRequest?.entry_spot ?? params.entry_spot}
               breakevens={summary?.breakevens ?? []}
             />
-          </section>
+            </CardBody>
+          </Card>
         </div>
       </div>
 
       {!!result?.expiry_scenarios?.length && (
-        <section className="overflow-x-auto rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-          <h2 className="mb-2 text-sm font-semibold">{t("options.expiryScenarios.title")}</h2>
-          <table className="w-full text-sm tabular-nums">
-            <thead><tr className="text-start text-muted-foreground">
-              <th className="p-2 text-start">{t("options.expiryScenarios.spot")}</th>
-              <th className="p-2 text-end">{t("options.expiryScenarios.pnl")}</th>
-              <th className="p-2 text-end">{t("options.expiryScenarios.return")}</th>
-            </tr></thead>
-            <tbody>{result.expiry_scenarios.map((row, index) => (
-              <tr key={index} className="border-t border-border/40">
-                <td className="p-2">{row.spot.toLocaleString()}</td>
-                <td className="p-2 text-end">{row.pnl.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
-                <td className="p-2 text-end">{row.return_percent == null ? "—" : `${row.return_percent.toFixed(2)}%`}</td>
-              </tr>
-            ))}</tbody>
-          </table>
-        </section>
+        <Card>
+          <CardHeader title={t("options.expiryScenarios.title")} />
+          <CardBody>
+            <Table>
+              <THead><TR>
+                <TH>{t("options.expiryScenarios.spot")}</TH>
+                <TH numeric>{t("options.expiryScenarios.pnl")}</TH>
+                <TH numeric>{t("options.expiryScenarios.return")}</TH>
+              </TR></THead>
+              <TBody>{result.expiry_scenarios.map((row, index) => (
+                <TR key={index}>
+                  <TD numeric>{row.spot.toLocaleString()}</TD>
+                  <TD numeric>{row.pnl.toLocaleString(undefined, { maximumFractionDigits: 2 })}</TD>
+                  <TD numeric>{row.return_percent == null ? "-" : `${row.return_percent.toFixed(2)}%`}</TD>
+                </TR>
+              ))}</TBody>
+            </Table>
+          </CardBody>
+        </Card>
       )}
 
       <PayoffComparisons
@@ -258,8 +242,9 @@ export function OptionsLab() {
       {result && <GreeksCards greeks={result.greeks} />}
 
       {/* Spot x IV scenario matrix */}
-      <section className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-        <div className="mb-2 text-sm font-semibold">{t("options.scenario.title")}</div>
+      <Card>
+        <CardHeader title={t("options.scenario.title")} />
+        <CardBody>
         <OptionsScenarioMatrix
           grid={result?.scenario_grid ?? { iv_values: [], spot: [], pnl: [] }}
         />
@@ -270,19 +255,20 @@ export function OptionsLab() {
             ))}
           </ul>
         )}
-      </section>
+        </CardBody>
+      </Card>
 
       {/* Observed and interpolated volatility surface */}
       <VolatilitySurfaceGrid />
 
       {/* Live US options chain */}
-      <details className="rounded-xl border bg-card p-4" onToggle={(e) => setChainOpen(e.currentTarget.open)}>
+      <details className="rounded-lg border border-border bg-card p-4" onToggle={(e) => setChainOpen(e.currentTarget.open)}>
         <summary className="cursor-pointer text-sm font-semibold">{t("options.chain.title")}</summary>
         <p className="my-2 text-xs text-muted-foreground">{t("analysis.chainOnDemand")}</p>
         {chainOpen && <OptionsChainTable />}
       </details>
 
       <p className="pb-2 text-xs text-muted-foreground">{t("options.disclaimer")}</p>
-    </div>
+    </Page>
   );
 }

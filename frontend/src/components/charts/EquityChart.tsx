@@ -31,8 +31,8 @@ export function EquityChart({ data, height = 300, drawdownZones }: Props) {
         trigger: "axis",
         axisPointer: { type: "cross" },
         backgroundColor: t.tooltipBg,
-        borderColor: t.tooltipBorder,
-        textStyle: { color: t.tooltipText, fontSize: 11 },
+        borderColor: t.tooltipBorder, borderWidth: 1, extraCssText: "box-shadow:none;",
+        textStyle: { color: t.tooltipText, fontSize: 12 },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         formatter: (params: any) => {
           if (!Array.isArray(params) || !params.length) return "";
@@ -54,25 +54,25 @@ export function EquityChart({ data, height = 300, drawdownZones }: Props) {
         right: 8, top: 0,
         iconStyle: { borderColor: t.textColor },
       },
-      legend: { data: ["Equity", "Drawdown%"], textStyle: { color: t.textColor, fontSize: 11 }, right: 60, top: 4 },
+      legend: { data: ["Equity", "Drawdown%"], textStyle: { color: t.textColor, fontSize: 12 }, left: 0, top: 0 },
       grid: [
         { left: 8, right: 8, top: 36, height: "56%", containLabel: true },
         { left: 8, right: 8, top: "68%", height: "20%", containLabel: true },
       ],
       xAxis: [
-        { type: "category", data: dates, gridIndex: 0, axisLine: { lineStyle: { color: t.axisColor } }, axisLabel: { color: t.textColor, fontSize: 10 } },
+        { type: "category", data: dates, gridIndex: 0, axisLine: { lineStyle: { color: t.axisColor } }, axisLabel: { color: t.textColor, fontSize: 12 } },
         { type: "category", data: dates, gridIndex: 1, axisLine: { lineStyle: { color: t.axisColor } }, axisLabel: { show: false } },
       ],
       yAxis: [
         {
           type: "value", gridIndex: 0,
           splitLine: { lineStyle: { color: t.gridColor } },
-          axisLabel: { color: t.textColor, fontSize: 10, formatter: (v: number) => abbreviateNum(v) },
+          axisLabel: { color: t.textColor, fontSize: 12, formatter: (v: number) => abbreviateNum(v) },
         },
         {
           type: "value", gridIndex: 1,
           splitLine: { lineStyle: { color: t.gridColor } },
-          axisLabel: { color: t.textColor, fontSize: 10, formatter: "{value}%" },
+          axisLabel: { color: t.textColor, fontSize: 12, formatter: "{value}%" },
         },
       ],
       dataZoom: [{ type: "inside", xAxisIndex: [0, 1] }],
@@ -80,10 +80,8 @@ export function EquityChart({ data, height = 300, drawdownZones }: Props) {
         {
           name: "Equity", type: "line", xAxisIndex: 0, yAxisIndex: 0,
           data: equity, smooth: false, symbol: "none",
-          lineStyle: { color: t.infoColor, width: 2 },
-          areaStyle: {
-            color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: t.infoColor + "40" }, { offset: 1, color: t.infoColor + "00" }] },
-          },
+          lineStyle: { color: t.seriesPalette[0], width: 2 },
+          areaStyle: { color: t.seriesPalette[0] + "1A" },
           ...(zones.length > 0 ? {
             markArea: {
               silent: true,
@@ -91,7 +89,7 @@ export function EquityChart({ data, height = 300, drawdownZones }: Props) {
                 {
                   xAxis: zone.startTime,
                   itemStyle: { color: t.downColor + "14" },
-                  label: { show: true, position: "insideTopLeft", formatter: `#${zone.rank}`, fontSize: 9, color: t.downColor },
+                  label: { show: true, position: "insideTopLeft", formatter: `#${zone.rank}`, fontSize: 12, color: t.downColor },
                 },
                 { xAxis: zone.endTime },
               ]),
@@ -102,10 +100,10 @@ export function EquityChart({ data, height = 300, drawdownZones }: Props) {
           name: "Drawdown%", type: "line", xAxisIndex: 1, yAxisIndex: 1,
           data: drawdown, smooth: false, symbol: "none",
           lineStyle: { color: t.downColor, width: 1 },
-          areaStyle: { color: t.downColor + "25" },
+          areaStyle: { color: t.downColor + "1A" },
           markLine: {
             silent: true, symbol: "none",
-            data: [{ yAxis: minDD, label: { formatter: `Max DD: ${minDD}%`, position: "insideEndTop", fontSize: 10, color: t.downColor } }],
+            data: [{ yAxis: minDD, label: { formatter: `Max DD: ${minDD}%`, position: "insideEndTop", fontSize: 12, color: t.downColor } }],
             lineStyle: { color: t.downColor, type: "dashed", width: 1 },
           },
         },

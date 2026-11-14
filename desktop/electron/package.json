@@ -8,7 +8,7 @@
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc && node scripts/copy-static.mjs",
-    "start": "npm run build && npm run prepare:electron && electron .",
+    "start": "npm run build && electron .",
     "test:locales": "npm run build && node scripts/test-locales.mjs",
     "test:backend-resolution": "npm run build && node scripts/test-backend-resolution.mjs",
     "test:update-safety": "npm run build && node scripts/test-update-safety.mjs",
@@ -19,9 +19,15 @@
     "smoke:credentials": "npm run build && npm run prepare:electron && electron scripts/smoke-credentials.cjs",
     "smoke:lifecycle": "npm run build && npm run prepare:electron && node scripts/test-packaging-preparation.mjs && node scripts/test-locales.mjs && node scripts/test-backend-resolution.mjs && node scripts/smoke-lifecycle.mjs && node scripts/smoke-parent-death.mjs",
     "pack:win": "npm run build && npm run prepare:electron && electron-builder --publish never --win dir",
+    "pack:mac": "npm run build && npm run prepare:electron && electron-builder --publish never --mac dir",
+    "pack:linux": "npm run build && npm run prepare:electron && electron-builder --publish never --linux dir",
+    "dist:mac": "npm run build && npm run prepare:electron && electron-builder --publish never --mac dmg zip",
+    "dist:linux": "npm run build && npm run prepare:electron && electron-builder --publish never --linux AppImage deb",
     "installer:win:review": "npm run runtime:win -- -Clean && npm run build && npm run prepare:electron && node scripts/build-review-installer.mjs",
     "installer:win:signed": "node scripts/build-signed-installer.mjs",
-    "sbom": "npm sbom --sbom-format cyclonedx"
+    "sbom": "npm sbom --sbom-format cyclonedx",
+    "rebuild:native": "electron-rebuild -f -w node-pty",
+    "test:terminal": "npm run build && node scripts/test-terminal.mjs"
   },
   "overrides": {
     "brace-expansion@^1.0.0": "^1.1.21",
@@ -33,6 +39,7 @@
   },
   "devDependencies": {
     "@electron-internal/extract-zip": "1.0.4",
+    "@electron/rebuild": "^4.2.1",
     "@types/node": "^24.10.0",
     "electron": "43.8.4",
     "electron-builder": "26.15.3",
@@ -63,10 +70,6 @@
     ],
     "extraResources": [
       {
-        "from": "runtime/backend",
-        "to": "backend"
-      },
-      {
         "from": "../../LICENSE",
         "to": "licenses/Vibe-Crypto-LICENSE.txt"
       },
@@ -84,6 +87,12 @@
             "x64"
           ]
         }
+      ],
+      "extraResources": [
+        {
+          "from": "runtime/backend",
+          "to": "backend"
+        }
       ]
     },
     "nsis": {
@@ -92,6 +101,29 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
-    }
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.finance",
+      "icon": "../../assets/icon.png"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Finance",
+      "icon": "../../assets/icon.png",
+      "maintainer": "Vibe Crypto contributors"
+    },
+    "asarUnpack": [
+      "node_modules/node-pty/**"
+    ]
+  },
+  "dependencies": {
+    "node-pty": "^1.1.0"
   }
 }

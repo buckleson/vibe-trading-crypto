@@ -52,8 +52,8 @@ export function MonthlyReturnsHeatmap({ data, annual, height = 300 }: Props) {
       tooltip: {
         trigger: "item",
         backgroundColor: t.tooltipBg,
-        borderColor: t.tooltipBorder,
-        textStyle: { color: t.tooltipText, fontSize: 11 },
+        borderColor: t.tooltipBorder, borderWidth: 1, extraCssText: "box-shadow:none;",
+        textStyle: { color: t.tooltipText, fontSize: 12 },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         formatter: (params: any) => {
           const value = params?.value as [number, number, number] | undefined;
@@ -70,7 +70,7 @@ export function MonthlyReturnsHeatmap({ data, annual, height = 300 }: Props) {
         data: xLabels,
         axisLine: { lineStyle: { color: t.axisColor } },
         axisTick: { show: false },
-        axisLabel: { color: t.textColor, fontSize: 10 },
+        axisLabel: { color: t.textColor, fontSize: 12 },
         splitArea: { show: false },
       },
       yAxis: {
@@ -78,7 +78,7 @@ export function MonthlyReturnsHeatmap({ data, annual, height = 300 }: Props) {
         data: yLabels,
         axisLine: { lineStyle: { color: t.axisColor } },
         axisTick: { show: false },
-        axisLabel: { color: t.textColor, fontSize: 10 },
+        axisLabel: { color: t.textColor, fontSize: 12 },
         splitArea: { show: false },
       },
       visualMap: {
@@ -86,7 +86,7 @@ export function MonthlyReturnsHeatmap({ data, annual, height = 300 }: Props) {
         type: "continuous",
         min: -maxAbs,
         max: maxAbs,
-        inRange: { color: [t.downColor, t.tooltipBorder || "#9ca3af", t.upColor] },
+        inRange: { color: [t.downColor, t.axisColor, t.upColor] },
       },
       series: [
         {
@@ -99,9 +99,8 @@ export function MonthlyReturnsHeatmap({ data, annual, height = 300 }: Props) {
               label: {
                 show: true,
                 formatter: fmtSignedPct(v),
-                fontSize: 10,
-                color: saturated ? "#ffffff" : t.textColor,
-                ...(saturated ? { textShadowColor: "rgba(0,0,0,0.45)", textShadowBlur: 2 } : {}),
+                fontSize: 12,
+                color: saturated ? "white" : t.textColor,
               },
             };
           }),

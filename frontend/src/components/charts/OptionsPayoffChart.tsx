@@ -34,8 +34,8 @@ export function OptionsPayoffChart({ curve, entrySpot, breakevens, height = 340 
         trigger: "axis",
         axisPointer: { type: "cross" },
         backgroundColor: t.tooltipBg,
-        borderColor: t.tooltipBorder,
-        textStyle: { color: t.tooltipText, fontSize: 11 },
+        borderColor: t.tooltipBorder, borderWidth: 1, extraCssText: "box-shadow:none;",
+        textStyle: { color: t.tooltipText, fontSize: 12 },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         formatter: (params: any) => {
           if (!Array.isArray(params) || !params.length) return "";
@@ -50,9 +50,9 @@ export function OptionsPayoffChart({ curve, entrySpot, breakevens, height = 340 
       },
       legend: {
         data: [pnlLabel],
-        textStyle: { color: t.textColor, fontSize: 11 },
-        right: 60,
-        top: 4,
+        textStyle: { color: t.textColor, fontSize: 12 },
+        left: 0,
+        top: 0,
       },
       toolbox: {
         feature: {
@@ -70,13 +70,13 @@ export function OptionsPayoffChart({ curve, entrySpot, breakevens, height = 340 
         min: "dataMin",
         max: "dataMax",
         name: i18n.t("options.payoff.spot"),
-        nameTextStyle: { color: t.textColor, fontSize: 10 },
+        nameTextStyle: { color: t.textColor, fontSize: 12 },
         nameLocation: "middle",
         nameGap: 26,
         axisLine: { lineStyle: { color: t.axisColor } },
         axisLabel: {
           color: t.textColor,
-          fontSize: 10,
+          fontSize: 12,
           formatter: (v: number) => v.toLocaleString(),
         },
         splitLine: { show: false },
@@ -84,7 +84,7 @@ export function OptionsPayoffChart({ curve, entrySpot, breakevens, height = 340 
       yAxis: {
         type: "value",
         splitLine: { lineStyle: { color: t.gridColor } },
-        axisLabel: { color: t.textColor, fontSize: 10, formatter: (v: number) => abbreviateNum(v) },
+        axisLabel: { color: t.textColor, fontSize: 12, formatter: (v: number) => abbreviateNum(v) },
       },
       series: [
         {
@@ -110,7 +110,7 @@ export function OptionsPayoffChart({ curve, entrySpot, breakevens, height = 340 
                 label: {
                   formatter: spotLabel,
                   position: "end",
-                  fontSize: 10,
+                  fontSize: 12,
                   color: t.textColor,
                 },
               },
@@ -120,7 +120,7 @@ export function OptionsPayoffChart({ curve, entrySpot, breakevens, height = 340 
                 label: {
                   formatter: `${beLabel} ${be.toLocaleString()}`,
                   position: "middle" as const,
-                  fontSize: 10,
+                  fontSize: 12,
                   color: t.warningColor,
                 },
               })),
@@ -134,7 +134,7 @@ export function OptionsPayoffChart({ curve, entrySpot, breakevens, height = 340 
           silent: true,
           symbol: "none",
           lineStyle: { width: 0 },
-          areaStyle: { origin: 0, color: pnlC.profit + "30" },
+          areaStyle: { origin: 0, color: pnlC.profit + "1F" },
           tooltip: { show: false },
         },
         {
@@ -144,7 +144,7 @@ export function OptionsPayoffChart({ curve, entrySpot, breakevens, height = 340 
           silent: true,
           symbol: "none",
           lineStyle: { width: 0 },
-          areaStyle: { origin: 0, color: pnlC.loss + "30" },
+          areaStyle: { origin: 0, color: pnlC.loss + "1F" },
           tooltip: { show: false },
         },
       ],

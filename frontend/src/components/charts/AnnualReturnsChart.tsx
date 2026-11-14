@@ -23,8 +23,8 @@ export function AnnualReturnsChart({ data, height = 260 }: Props) {
         trigger: "axis",
         axisPointer: { type: "shadow" },
         backgroundColor: t.tooltipBg,
-        borderColor: t.tooltipBorder,
-        textStyle: { color: t.tooltipText, fontSize: 11 },
+        borderColor: t.tooltipBorder, borderWidth: 1, extraCssText: "box-shadow:none;",
+        textStyle: { color: t.tooltipText, fontSize: 12 },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         formatter: (params: any) => {
           if (!Array.isArray(params) || !params.length) return "";
@@ -39,12 +39,12 @@ export function AnnualReturnsChart({ data, height = 260 }: Props) {
         type: "category",
         data: data.map((d) => String(d.year)),
         axisLine: { lineStyle: { color: t.axisColor } },
-        axisLabel: { color: t.textColor, fontSize: 10 },
+        axisLabel: { color: t.textColor, fontSize: 12 },
       },
       yAxis: {
         type: "value",
         splitLine: { lineStyle: { color: t.gridColor } },
-        axisLabel: { color: t.textColor, fontSize: 10, formatter: "{value}%" },
+        axisLabel: { color: t.textColor, fontSize: 12, formatter: "{value}%" },
       },
       series: [
         {
@@ -57,7 +57,7 @@ export function AnnualReturnsChart({ data, height = 260 }: Props) {
               show: true,
               position: d.ret >= 0 ? "top" : "bottom",
               formatter: `${d.ret > 0 ? "+" : ""}${(d.ret * 100).toFixed(1)}%`,
-              fontSize: 10,
+              fontSize: 12,
               color: t.textColor,
             },
           })),

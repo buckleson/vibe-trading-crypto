@@ -132,6 +132,7 @@ export class BackendManager {
       // read that path, but Windows cannot use an ASAR path as a process cwd.
       cwd: this.options.resourcesPath,
       windowsHide: true,
+      detached: process.platform !== "win32",
       env: childEnvironment,
       stdio: ["ignore", "pipe", "pipe", "ipc"],
     });
@@ -305,12 +306,38 @@ export class BackendManager {
 
 const sourceProjectName = "vibe-crypto";
 
-export function resolveBackend(options: BackendResolutionOptions): ResolvedBackend | undefined {
+export function backendExecutableNames(platform: NodeJS.Platform): {
+  cli: string[];
+  mcp: string[];
+  python: string[];
+  scriptsDir: string;
+} {
+  if (platform === "win32") {
+    return {
+      cli: ["vibe-crypto.exe", "vibe-trading.exe"],
+      mcp: ["vibe-crypto-mcp.exe", "vibe-trading-mcp.exe"],
+      python: ["python.exe"],
+      scriptsDir: "Scripts",
+    };
+  }
+  return {
+    cli: ["vibe-crypto", "vibe-trading"],
+    mcp: ["vibe-crypto-mcp", "vibe-trading-mcp"],
+    python: ["python3", "python"],
+    scriptsDir: "bin",
+  };
+}
+
+export function resolveBackend(
+  options: BackendResolutionOptions,
+  platform: NodeJS.Platform = process.platform,
+): ResolvedBackend | undefined {
+  const names = backendExecutableNames(platform);
   const configured = options.executableOverride;
   if (configured && existsSync(configured)) return commandBackend(configured);
 
   for (const root of trustedPackagedRoots(options.appPath, options.resourcesPath)) {
-    const resolved = resolvePackagedBackend(root);
+    const resolved = resolvePackagedBackend(root, platform);
     if (resolved) return resolved;
   }
 
@@ -322,16 +349,46 @@ export function resolveBackend(options: BackendResolutionOptions): ResolvedBacke
       if (sourceRoot) sourceRoots.add(sourceRoot);
     }
     for (const sourceRoot of sourceRoots) {
-      const candidate = path.join(sourceRoot, ".venv", "Scripts", "vibe-trading.exe");
-      if (existsSync(candidate)) return commandBackend(candidate);
+      for (const name of names.cli) {
+        const candidate = path.join(sourceRoot, ".venv", names.scriptsDir, name);
+        if (existsSync(candidate)) return commandBackend(candidate);
+      }
     }
   }
 
+  const pathExtensions = platform === "win32"
+    ? (process.env.PATHEXT ?? ".EXE;.CMD;.BAT").split(";").filter(Boolean)
+    : [];
   for (const rawEntry of (options.pathEnvironment ?? "").split(path.delimiter)) {
     const entry = rawEntry.replaceAll('"', "").trim();
     if (!entry) continue;
-    const candidate = path.join(entry, "vibe-trading.exe");
-    if (existsSync(candidate)) return commandBackend(candidate);
+    for (const name of names.cli) {
+      const variants = platform === "win32" && !/\.[a-z0-9]+$/iu.test(name)
+        ? [name, ...pathExtensions.map((extension) => name + extension.toLowerCase())]
+        : [name];
+      for (const variant of variants) {
+        const candidate = path.join(entry, variant);
+        if (existsSync(candidate)) return commandBackend(candidate);
+      }
+    }
+  }
+  return undefined;
+}
+
+export function resolveMcpCommand(
+  backend: ResolvedBackend,
+  platform: NodeJS.Platform = process.platform,
+): { command: string; args: string[] } | undefined {
+  if (backend.prefixArguments[0] === "-c") {
+    return {
+      command: backend.executable,
+      args: ["-c", "import mcp_server; raise SystemExit(mcp_server.main())"],
+    };
+  }
+  const directory = path.dirname(backend.executable);
+  for (const name of backendExecutableNames(platform).mcp) {
+    const candidate = path.join(directory, name);
+    if (existsSync(candidate)) return { command: candidate, args: [] };
   }
   return undefined;
 }
@@ -345,27 +402,34 @@ function trustedPackagedRoots(appPath: string, resourcesPath: string): string[] 
   ])];
 }
 
-function resolvePackagedBackend(root: string): ResolvedBackend | undefined {
-  for (const candidate of [
-    path.join(root, "backend", "python.exe"),
-    path.join(root, "runtime", "backend", "python.exe"),
-  ]) {
-    if (existsSync(candidate)) {
-      return {
-        executable: path.resolve(candidate),
-        prefixArguments: [
-          "-c",
-          "import api_server; raise SystemExit(api_server.serve_main())",
-        ],
-        includeServeCommand: false,
-      };
+function resolvePackagedBackend(root: string, platform: NodeJS.Platform): ResolvedBackend | undefined {
+  const names = backendExecutableNames(platform);
+  const pythonDirectories = platform === "win32"
+    ? [path.join(root, "backend"), path.join(root, "runtime", "backend")]
+    : [path.join(root, "backend", "bin"), path.join(root, "runtime", "backend", "bin")];
+  for (const directory of pythonDirectories) {
+    for (const name of names.python) {
+      const candidate = path.join(directory, name);
+      if (existsSync(candidate)) {
+        return {
+          executable: path.resolve(candidate),
+          prefixArguments: [
+            "-c",
+            "import api_server; raise SystemExit(api_server.serve_main())",
+          ],
+          includeServeCommand: false,
+        };
+      }
     }
   }
-  for (const candidate of [
-    path.join(root, "backend", "Scripts", "vibe-trading.exe"),
-    path.join(root, "runtime", "Scripts", "vibe-trading.exe"),
+  for (const directory of [
+    path.join(root, "backend", names.scriptsDir),
+    path.join(root, "runtime", names.scriptsDir),
   ]) {
-    if (existsSync(candidate)) return commandBackend(candidate);
+    for (const name of names.cli) {
+      const candidate = path.join(directory, name);
+      if (existsSync(candidate)) return commandBackend(candidate);
+    }
   }
   return undefined;
 }
@@ -517,10 +581,15 @@ async function listenerIsClosed(baseUrl: string): Promise<boolean> {
 
 function runTaskkill(pid: number): Promise<void> {
   if (process.platform !== "win32") {
+    // The watchdog is a process-group leader (spawned detached), so signal the group.
     try {
-      process.kill(pid, "SIGKILL");
+      process.kill(-pid, "SIGTERM");
     } catch {
-      // The watchdog has already exited.
+      try {
+        process.kill(pid, "SIGKILL");
+      } catch {
+        // The watchdog has already exited.
+      }
     }
     return Promise.resolve();
   }

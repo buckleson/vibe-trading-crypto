@@ -30,8 +30,8 @@ export function WalkForwardChart({ windows, height = 200 }: Props) {
       tooltip: {
         trigger: "axis",
         backgroundColor: t.tooltipBg,
-        borderColor: t.tooltipBorder,
-        textStyle: { color: t.tooltipText, fontSize: 11 },
+        borderColor: t.tooltipBorder, borderWidth: 1, extraCssText: "box-shadow:none;",
+        textStyle: { color: t.tooltipText, fontSize: 12 },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         formatter: (params: any) => {
           if (!Array.isArray(params) || !params.length) return "";
@@ -46,7 +46,8 @@ export function WalkForwardChart({ windows, height = 200 }: Props) {
       },
       legend: {
         data: [returnName, sharpeName],
-        textStyle: { color: t.textColor, fontSize: 11 },
+        textStyle: { color: t.textColor, fontSize: 12 },
+        left: 0,
         top: 0,
       },
       grid: { left: 8, right: 8, top: 30, bottom: 4, containLabel: true },
@@ -54,18 +55,18 @@ export function WalkForwardChart({ windows, height = 200 }: Props) {
         type: "category",
         data: windows.map((w) => `W${w.window}`),
         axisLine: { lineStyle: { color: t.axisColor } },
-        axisLabel: { color: t.textColor, fontSize: 10 },
+        axisLabel: { color: t.textColor, fontSize: 12 },
       },
       yAxis: [
         {
           type: "value",
           splitLine: { lineStyle: { color: t.gridColor } },
-          axisLabel: { color: t.textColor, fontSize: 10, formatter: "{value}%" },
+          axisLabel: { color: t.textColor, fontSize: 12, formatter: "{value}%" },
         },
         {
           type: "value",
           splitLine: { show: false },
-          axisLabel: { color: t.textColor, fontSize: 10 },
+          axisLabel: { color: t.textColor, fontSize: 12 },
         },
       ],
       series: [

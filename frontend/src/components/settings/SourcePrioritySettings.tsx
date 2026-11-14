@@ -1,13 +1,11 @@
 import { useEffect, useId, useState } from "react";
-import { ArrowDown, ArrowUp, ListOrdered, Loader2, RotateCcw, Save } from "lucide-react";
+import { ArrowDown, ArrowUp, Loader2, RotateCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { Badge, Button, Card, CardBody, CardHeader, EmptyState, Field, Select } from "@/components/ui";
 import { api, type SourceOrderEntry, type SourceOrderUpdate } from "@/lib/api";
 
 type Drafts = Record<string, string[]>;
-
-const fieldClass =
-  "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60";
 
 function draftsFromEntries(entries: SourceOrderEntry[]): Drafts {
   return Object.fromEntries(
@@ -142,148 +140,127 @@ export function SourcePrioritySettings() {
   };
 
   return (
-    <section className="rounded-lg border bg-card p-5 shadow-sm">
-      <div className="mb-5 space-y-1">
-        <div className="flex items-center gap-2">
-          <ListOrdered className="h-4 w-4 text-primary" />
-          <h2 className="text-base font-semibold">{t("settings.sourcePriority.title")}</h2>
-          {customCount > 0 ? (
-            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
-              {t("settings.sourcePriority.customMarkets", { count: customCount })}
-            </span>
-          ) : null}
-        </div>
-        <p className="max-w-3xl text-sm text-muted-foreground">
-          {t("settings.sourcePriority.description")}
-        </p>
-      </div>
-
-      {error ? (
-        <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-          {error}
-        </div>
-      ) : null}
-
-      {loading ? (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          {t("settings.loading")}
-        </div>
-      ) : !entries?.length ? (
-        <div className="rounded-md border bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
-          {t("settings.sourcePriority.noMarkets")}
-        </div>
-      ) : (
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)]">
-          <div className="grid gap-4">
-            <label className="grid gap-2" htmlFor={`${idPrefix}-market`}>
-              <span className="text-sm font-medium">{t("settings.sourcePriority.marketLabel")}</span>
-              <select
-                id={`${idPrefix}-market`}
-                value={activeMarket}
-                onChange={(event) => setActiveMarket(event.target.value)}
-                className={fieldClass}
-                disabled={saving}
-              >
-                {entries.map((entry) => (
-                  <option key={entry.market} value={entry.market}>
-                    {labels[entry.market] ?? entry.market}
-                    {(drafts[entry.market] ?? entry.effective_order).join(",")
-                    !== entry.default_order.join(",")
-                      ? ` · ${t("settings.sourcePriority.badgeCustom")}`
-                      : ""}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            {activeEntry?.override_invalid ? (
-              <div className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning-foreground">
-                {t("settings.sourcePriority.invalidOverrideWarning", {
-                  envVar: activeEntry.env_var,
-                })}
-              </div>
+    <Card>
+      <CardHeader
+        title={(
+          <span className="inline-flex flex-wrap items-center gap-2">
+            {t("settings.sourcePriority.title")}
+            {customCount > 0 ? (
+              <Badge tone="info">{t("settings.sourcePriority.customMarkets", { count: customCount })}</Badge>
             ) : null}
+          </span>
+        )}
+        description={t("settings.sourcePriority.description")}
+      />
+      <CardBody className="space-y-4">
+        {error ? (
+          <div role="alert" className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-[13px] text-danger">
+            {error}
+          </div>
+        ) : null}
 
-            <ol className="grid gap-2">
-              {activeDraft.map((source, index) => (
-                <li
-                  key={source}
-                  className="flex items-center gap-3 rounded-md border bg-background px-3 py-2"
+        {loading ? (
+          <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            {t("settings.loading")}
+          </div>
+        ) : !entries?.length ? (
+          <EmptyState title={t("settings.sourcePriority.noMarkets")} />
+        ) : (
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(240px,0.9fr)]">
+            <div className="grid gap-4">
+              <Field label={t("settings.sourcePriority.marketLabel")} htmlFor={`${idPrefix}-market`}>
+                <Select
+                  id={`${idPrefix}-market`}
+                  value={activeMarket}
+                  onChange={(event) => setActiveMarket(event.target.value)}
+                  disabled={saving}
                 >
-                  <span className="w-5 text-right text-xs text-muted-foreground">{index + 1}</span>
-                  <span className="min-w-0 flex-1 truncate font-mono text-sm">{source}</span>
-                  <div className="flex gap-1">
-                    <button
-                      type="button"
-                      onClick={() => move(activeMarket, index, -1)}
-                      disabled={index === 0 || saving}
-                      aria-label={`${t("settings.sourcePriority.moveUp")}: ${source}`}
-                      className="rounded p-1.5 hover:bg-muted disabled:opacity-30"
-                    >
-                      <ArrowUp className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => move(activeMarket, index, 1)}
-                      disabled={index === activeDraft.length - 1 || saving}
-                      aria-label={`${t("settings.sourcePriority.moveDown")}: ${source}`}
-                      className="rounded p-1.5 hover:bg-muted disabled:opacity-30"
-                    >
-                      <ArrowDown className="h-4 w-4" />
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ol>
+                  {entries.map((entry) => (
+                    <option key={entry.market} value={entry.market}>
+                      {labels[entry.market] ?? entry.market}
+                      {(drafts[entry.market] ?? entry.effective_order).join(",")
+                      !== entry.default_order.join(",")
+                        ? ` · ${t("settings.sourcePriority.badgeCustom")}`
+                        : ""}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={resetActive}
-                disabled={isDefaultOrder || saving}
-                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <RotateCcw className="h-4 w-4" />
-                {t("settings.sourcePriority.resetToDefault")}
-              </button>
-              <button
-                type="button"
-                onClick={submit}
-                disabled={loading || saving}
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                {saving ? t("settings.saving") : t("settings.save")}
-              </button>
-              {!isDefaultOrder ? (
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
-                  {t("settings.sourcePriority.badgeCustom")}
-                </span>
-              ) : (
-                <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                  {t("settings.sourcePriority.badgeDefault")}
-                </span>
-              )}
-            </div>
-          </div>
+              {activeEntry?.override_invalid ? (
+                <div className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-[13px] text-warning">
+                  {t("settings.sourcePriority.invalidOverrideWarning", {
+                    envVar: activeEntry.env_var,
+                  })}
+                </div>
+              ) : null}
 
-          <div className="rounded-md border bg-muted/20 p-4 text-sm text-muted-foreground">
-            <div className="mb-2 font-medium text-foreground">
-              {t("settings.sourcePriority.howItWorksTitle")}
+              <ol className="grid gap-2">
+                {activeDraft.map((source, index) => (
+                  <li
+                    key={source}
+                    className="flex items-center gap-3 rounded-md border border-border bg-background px-3 py-1.5"
+                  >
+                    <span className="w-5 text-right text-xs tabular-nums text-muted-foreground">{index + 1}</span>
+                    <span className="min-w-0 flex-1 truncate font-mono text-[13px]">{source}</span>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => move(activeMarket, index, -1)}
+                        disabled={index === 0 || saving}
+                        aria-label={`${t("settings.sourcePriority.moveUp")}: ${source}`}
+                      >
+                        <ArrowUp className="h-4 w-4" aria-hidden="true" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => move(activeMarket, index, 1)}
+                        disabled={index === activeDraft.length - 1 || saving}
+                        aria-label={`${t("settings.sourcePriority.moveDown")}: ${source}`}
+                      >
+                        <ArrowDown className="h-4 w-4" aria-hidden="true" />
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+
+              <div className="flex flex-wrap items-center justify-end gap-3">
+                {!isDefaultOrder ? (
+                  <Badge tone="info">{t("settings.sourcePriority.badgeCustom")}</Badge>
+                ) : (
+                  <Badge>{t("settings.sourcePriority.badgeDefault")}</Badge>
+                )}
+                <Button onClick={resetActive} disabled={isDefaultOrder || saving}>
+                  <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                  {t("settings.sourcePriority.resetToDefault")}
+                </Button>
+                <Button variant="primary" onClick={submit} disabled={loading} loading={saving}>
+                  {saving ? t("settings.saving") : t("settings.save")}
+                </Button>
+              </div>
             </div>
-            <p>{t("settings.sourcePriority.howItWorks")}</p>
-            <p className="mt-3 rounded-md border border-warning/40 bg-warning/10 px-2 py-1.5 text-xs text-warning-foreground">
-              {t("settings.sourcePriority.caliberCaveat")}
-            </p>
-            {activeEntry ? (
-              <p className="mt-3 break-all font-mono text-xs">
-                {activeEntry.env_var}
+
+            <div className="space-y-3 rounded-md border border-border bg-muted/40 p-4 text-[13px] text-muted-foreground">
+              <div className="text-sm font-medium text-foreground">
+                {t("settings.sourcePriority.howItWorksTitle")}
+              </div>
+              <p>{t("settings.sourcePriority.howItWorks")}</p>
+              <p className="rounded-md border border-warning/40 bg-warning/10 px-2 py-1.5 text-xs text-warning">
+                {t("settings.sourcePriority.caliberCaveat")}
               </p>
-            ) : null}
+              {activeEntry ? (
+                <p className="break-all font-mono text-[13px]">{activeEntry.env_var}</p>
+              ) : null}
+            </div>
           </div>
-        </div>
-      )}
-    </section>
+        )}
+      </CardBody>
+    </Card>
   );
 }

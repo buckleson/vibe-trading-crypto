@@ -28,8 +28,8 @@ export function RollingBetaAlphaChart({ data, height = 280 }: Props) {
         trigger: "axis",
         axisPointer: { type: "cross" },
         backgroundColor: t.tooltipBg,
-        borderColor: t.tooltipBorder,
-        textStyle: { color: t.tooltipText, fontSize: 11 },
+        borderColor: t.tooltipBorder, borderWidth: 1, extraCssText: "box-shadow:none;",
+        textStyle: { color: t.tooltipText, fontSize: 12 },
         formatter: (raw: unknown) => {
           const params = raw as Array<{ dataIndex?: number }>;
           if (!Array.isArray(params) || !params.length) return "";
@@ -42,9 +42,9 @@ export function RollingBetaAlphaChart({ data, height = 280 }: Props) {
       },
       legend: {
         data: [betaLabel, alphaLabel],
-        textStyle: { color: t.textColor, fontSize: 11 },
-        right: 60,
-        top: 4,
+        textStyle: { color: t.textColor, fontSize: 12 },
+        left: 0,
+        top: 0,
       },
       toolbox: {
         feature: {
@@ -60,22 +60,22 @@ export function RollingBetaAlphaChart({ data, height = 280 }: Props) {
         type: "category",
         data: dates,
         axisLine: { lineStyle: { color: t.axisColor } },
-        axisLabel: { color: t.textColor, fontSize: 10 },
+        axisLabel: { color: t.textColor, fontSize: 12 },
       },
       yAxis: [
         {
           type: "value",
           name: betaLabel,
-          nameTextStyle: { color: t.textColor, fontSize: 10 },
+          nameTextStyle: { color: t.textColor, fontSize: 12 },
           splitLine: { lineStyle: { color: t.gridColor } },
-          axisLabel: { color: t.textColor, fontSize: 10 },
+          axisLabel: { color: t.textColor, fontSize: 12 },
         },
         {
           type: "value",
           name: alphaLabel,
-          nameTextStyle: { color: t.textColor, fontSize: 10 },
+          nameTextStyle: { color: t.textColor, fontSize: 12 },
           splitLine: { show: false },
-          axisLabel: { color: t.textColor, fontSize: 10, formatter: "{value}%" },
+          axisLabel: { color: t.textColor, fontSize: 12, formatter: "{value}%" },
         },
       ],
       dataZoom: [{ type: "inside" }],

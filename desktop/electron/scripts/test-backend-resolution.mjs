@@ -3,7 +3,14 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { resolveBackend } from "../dist/backend-manager.js";
+import {
+  backendExecutableNames,
+  resolveBackend as resolveBackendForPlatform,
+  resolveMcpCommand,
+} from "../dist/backend-manager.js";
+
+// Existing cases simulate Windows; POSIX cases below pass "linux" explicitly.
+const resolveBackend = (opts, platform = "win32") => resolveBackendForPlatform(opts, platform);
 
 const testRoot = await mkdtemp(path.join(os.tmpdir(), "vibe-desktop-resolution-"));
 
@@ -86,7 +93,63 @@ try {
     "packaged mode must not search source ancestors even when a marker exists",
   );
 
+  // POSIX cases.
+  assert.deepEqual(backendExecutableNames("linux").cli, ["vibe-crypto", "vibe-trading"]);
+  assert.equal(backendExecutableNames("win32").scriptsDir, "Scripts");
+
+  const posixPython = await makeExecutable("posix-packaged/resources/backend/bin/python3");
+  const posixPackaged = resolveBackend(options({
+    appPath: path.join(testRoot, "posix-packaged/app.asar"),
+    resourcesPath: path.join(testRoot, "posix-packaged/resources"),
+  }), "linux");
+  assertResolution(posixPackaged, posixPython, "packaged backend/bin/python3 must be selected");
+  assert.equal(posixPackaged?.includeServeCommand, false);
+  assert.deepEqual(resolveMcpCommand(posixPackaged, "linux"), {
+    command: path.resolve(posixPython),
+    args: ["-c", "import mcp_server; raise SystemExit(mcp_server.main())"],
+  });
+
+  const posixSourceRoot = path.join(testRoot, "posix-source");
+  await writeProjectMarker(posixSourceRoot, "vibe-crypto");
+  const posixSourceCli = await makeExecutable("posix-source/.venv/bin/vibe-crypto");
+  const posixSourceMcp = await makeExecutable("posix-source/.venv/bin/vibe-crypto-mcp");
+  const posixSource = resolveBackend(options({
+    appPath: path.join(posixSourceRoot, "desktop/electron"),
+    moduleDirectory: path.join(posixSourceRoot, "desktop/electron/dist"),
+  }), "linux");
+  assertResolution(posixSource, posixSourceCli, "source .venv/bin/vibe-crypto must be selected");
+  assert.deepEqual(resolveMcpCommand(posixSource, "linux"), {
+    command: path.resolve(posixSourceMcp),
+    args: [],
+  });
+
+  const posixPathCli = await makeExecutable("posix-path/vibe-crypto");
+  assertResolution(
+    resolveBackend(options({ pathEnvironment: path.dirname(posixPathCli) }), "linux"),
+    posixPathCli,
+    "PATH lookup must find vibe-crypto",
+  );
+
+  const legacyCli = await makeExecutable("posix-legacy/vibe-trading");
+  const legacyMcp = await makeExecutable("posix-legacy/vibe-trading-mcp");
+  const legacy = resolveBackend(options({ pathEnvironment: path.dirname(legacyCli) }), "linux");
+  assertResolution(legacy, legacyCli, "legacy vibe-trading must be a fallback");
+  assert.equal(resolveMcpCommand(legacy, "linux")?.command, path.resolve(legacyMcp));
+
+  const lonelyCli = await makeExecutable("posix-lonely/vibe-crypto");
+  assert.equal(
+    resolveMcpCommand(resolveBackend(options({ pathEnvironment: path.dirname(lonelyCli) }), "linux"), "linux"),
+    undefined,
+    "no sibling mcp executable means no MCP command",
+  );
+  assert.equal(
+    resolveBackend(options({ pathEnvironment: path.dirname(legacyCli) }), "win32"),
+    undefined,
+    "win32 resolution must not accept POSIX names",
+  );
+
   console.log(JSON.stringify({
+    posixCases: true,
     explicitOverride: true,
     exactPackagedResource: true,
     markedSourceRoot: true,

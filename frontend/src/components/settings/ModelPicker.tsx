@@ -1,4 +1,5 @@
 import { Check, ChevronDown } from "lucide-react";
+import { controlClass } from "@/components/ui/Input";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 
 interface ModelPickerProps {
@@ -80,7 +81,7 @@ export function ModelPicker({
           onClick={openList}
           onFocus={openList}
           onKeyDown={onKeyDown}
-          className="w-full rounded-md border bg-background py-2 pl-3 pr-10 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+          className={`${controlClass} pr-10`}
           role="combobox"
           aria-label={ariaLabel}
           aria-expanded={open}
@@ -106,7 +107,7 @@ export function ModelPicker({
           id={listId}
           role="listbox"
           aria-label={optionsAriaLabel}
-          className="absolute z-50 mt-1.5 max-h-64 w-max min-w-full max-w-[min(32rem,90vw)] overflow-y-auto overflow-x-hidden rounded-md border bg-card p-1.5 shadow-lg ring-1 ring-black/5"
+          className="absolute z-50 mt-1.5 max-h-64 w-max min-w-full max-w-[min(32rem,90vw)] overflow-y-auto overflow-x-hidden rounded-md border border-border bg-popover p-1.5 shadow-lg"
         >
           {uniqueOptions.map((model, index) => {
             const selected = model === value;

@@ -13,9 +13,15 @@ import {
   type VolatilitySurfaceResponse,
 } from "@/lib/options";
 import { cn } from "@/lib/utils";
+import { Button, Card, CardBody, CardHeader, Input } from "@/components/ui";
 
 function formatPercent(value: number): string {
   return `${(value * 100).toFixed(2)}%`;
+}
+
+/** Single-hue sequential scale: primary at 0.10 (low IV) to 0.82 (high IV). */
+function scaleAlpha(ratio: number): number {
+  return Number((0.1 + ratio * 0.72).toFixed(3));
 }
 
 function pointKey(point: Pick<VolatilitySurfacePoint, "strike" | "time_to_expiry">): string {
@@ -96,31 +102,29 @@ export function VolatilitySurfaceGrid() {
   const cellStyle = (point: VolatilitySurfacePoint) => {
     const ratio = maxIv === minIv ? 0.5 : (point.implied_volatility - minIv) / (maxIv - minIv);
     return {
-      backgroundColor: `rgba(37, 99, 235, ${0.10 + ratio * 0.72})`,
-      color: ratio > 0.62 ? "#ffffff" : undefined,
+      backgroundColor: `hsl(var(--primary) / ${scaleAlpha(ratio)})`,
+      color: ratio > 0.62 ? "hsl(var(--primary-foreground))" : undefined,
     };
   };
 
   return (
-    <section className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-      <div className="mb-3">
-        <h2 className="text-sm font-semibold">{t("options.surface.title")}</h2>
-        <p className="mt-1 text-xs text-muted-foreground">{t("options.surface.subtitle")}</p>
-      </div>
+    <Card>
+      <CardHeader title={t("options.surface.title")} description={t("options.surface.subtitle")} />
+      <CardBody>
       <form className="flex flex-col gap-3" onSubmit={compute}>
         <div className="grid gap-3 md:grid-cols-3">
-          <label className="text-xs">
-            <span className="mb-1 block text-muted-foreground">{t("options.surface.spot")}</span>
-            <input aria-label={t("options.surface.spot")} className="w-full rounded-md border bg-background px-2 py-1.5" inputMode="decimal" value={spot} onChange={(event) => setSpot(event.target.value)} />
-            <span className="mt-1 block text-[10px] leading-4 text-muted-foreground">{t("options.surface.spotHint")}</span>
+          <label className="block">
+            <span className="mb-1.5 block text-[13px] font-medium">{t("options.surface.spot")}</span>
+            <Input aria-label={t("options.surface.spot")} inputMode="decimal" value={spot} onChange={(event) => setSpot(event.target.value)} />
+            <span className="mt-1 block text-xs leading-4 text-muted-foreground">{t("options.surface.spotHint")}</span>
           </label>
-          <label className="text-xs">
-            <span className="mb-1 block text-muted-foreground">{t("options.surface.gridStrikes")}</span>
-            <input className="w-full rounded-md border bg-background px-2 py-1.5" value={strikes} onChange={(event) => setStrikes(event.target.value)} />
+          <label className="block">
+            <span className="mb-1.5 block text-[13px] font-medium">{t("options.surface.gridStrikes")}</span>
+            <Input value={strikes} onChange={(event) => setStrikes(event.target.value)} />
           </label>
-          <label className="text-xs">
-            <span className="mb-1 block text-muted-foreground">{t("options.surface.gridExpiries")}</span>
-            <input className="w-full rounded-md border bg-background px-2 py-1.5" value={expiryDays} onChange={(event) => setExpiryDays(event.target.value)} />
+          <label className="block">
+            <span className="mb-1.5 block text-[13px] font-medium">{t("options.surface.gridExpiries")}</span>
+            <Input value={expiryDays} onChange={(event) => setExpiryDays(event.target.value)} />
           </label>
         </div>
 
@@ -133,28 +137,28 @@ export function VolatilitySurfaceGrid() {
           </div>
           {observations.map((observation, index) => (
             <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2" key={observation.id}>
-              <input aria-label={`${t("options.surface.strike")} ${index + 1}`} className="min-w-0 rounded-md border bg-background px-2 py-1.5 text-xs" inputMode="decimal" value={observation.strike} onChange={(event) => updateObservation(observation.id, "strike", event.target.value)} />
-              <input aria-label={`${t("options.surface.expiryDays")} ${index + 1}`} className="min-w-0 rounded-md border bg-background px-2 py-1.5 text-xs" inputMode="decimal" value={observation.expiryDays} onChange={(event) => updateObservation(observation.id, "expiryDays", event.target.value)} />
-              <input aria-label={`${t("options.surface.ivPct")} ${index + 1}`} className="min-w-0 rounded-md border bg-background px-2 py-1.5 text-xs" inputMode="decimal" value={observation.ivPct} onChange={(event) => updateObservation(observation.id, "ivPct", event.target.value)} />
-              <button aria-label={`${t("options.surface.remove")} ${index + 1}`} className="rounded-md border px-2 text-muted-foreground hover:text-danger disabled:opacity-40" type="button" disabled={observations.length === 1} onClick={() => setObservations((current) => current.filter((item) => item.id !== observation.id))}>
+              <Input aria-label={`${t("options.surface.strike")} ${index + 1}`} className="min-w-0" inputMode="decimal" value={observation.strike} onChange={(event) => updateObservation(observation.id, "strike", event.target.value)} />
+              <Input aria-label={`${t("options.surface.expiryDays")} ${index + 1}`} className="min-w-0" inputMode="decimal" value={observation.expiryDays} onChange={(event) => updateObservation(observation.id, "expiryDays", event.target.value)} />
+              <Input aria-label={`${t("options.surface.ivPct")} ${index + 1}`} className="min-w-0" inputMode="decimal" value={observation.ivPct} onChange={(event) => updateObservation(observation.id, "ivPct", event.target.value)} />
+              <Button size="icon" className="h-9 w-9 text-muted-foreground hover:text-danger" aria-label={`${t("options.surface.remove")} ${index + 1}`} disabled={observations.length === 1} onClick={() => setObservations((current) => current.filter((item) => item.id !== observation.id))}>
                 <Trash2 className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             </div>
           ))}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <button className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs" type="button" onClick={addObservation}>
+          <Button onClick={addObservation}>
             <Plus className="h-3.5 w-3.5" />{t("options.surface.addQuote")}
-          </button>
-          <button className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground" type="submit">
+          </Button>
+          <Button variant="primary" type="submit">
             {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             {loading ? t("options.surface.computing") : t("options.surface.compute")}
-          </button>
+          </Button>
         </div>
       </form>
 
-      {error && <div role="alert" className="mt-3 rounded border border-danger/30 bg-danger/5 p-3 text-sm text-danger">{error}</div>}
+      {error && <div role="alert" className="mt-3 rounded-lg border border-danger/30 bg-danger/5 p-3 text-sm text-danger">{error}</div>}
       {!result && !error && <p className="mt-3 text-xs text-muted-foreground">{t("options.surface.empty")}</p>}
 
       {result && (
@@ -177,7 +181,7 @@ export function VolatilitySurfaceGrid() {
                     return (
                       <td className={cn("rounded-md p-2 tabular-nums", point.source === "observed" && "ring-1 ring-inset ring-primary/40")} key={strike} style={cellStyle(point)}>
                         <div className="font-semibold">{formatPercent(point.implied_volatility)}</div>
-                        <div className="mt-0.5 text-[10px] opacity-80">{t(`options.surface.${point.source}`)}</div>
+                        <div className="mt-0.5 text-xs opacity-80">{t(`options.surface.${point.source}`)}</div>
                       </td>
                     );
                   })}
@@ -185,8 +189,16 @@ export function VolatilitySurfaceGrid() {
               ))}
             </tbody>
           </table>
+          <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground" aria-label={t("options.surface.legend", { defaultValue: "Implied volatility scale" })}>
+            <span className="tabular-nums">{formatPercent(minIv)}</span>
+            <span className="flex" aria-hidden="true">
+              {[0, 0.25, 0.5, 0.75, 1].map((r) => <span key={r} className="h-3 w-6 border border-border" style={{ backgroundColor: `hsl(var(--primary) / ${scaleAlpha(r)})` }} />)}
+            </span>
+            <span className="tabular-nums">{formatPercent(maxIv)}</span>
+          </div>
         </div>
       )}
-    </section>
+      </CardBody>
+    </Card>
   );
 }

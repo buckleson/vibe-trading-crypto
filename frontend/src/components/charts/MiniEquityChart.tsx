@@ -29,11 +29,7 @@ export function MiniEquityChart({ data, height = 80 }: Props) {
       series: [{
         type: "line", data: values, symbol: "none", smooth: true,
         lineStyle: { color, width: 1.5 },
-        areaStyle: {
-          color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1,
-            colorStops: [{ offset: 0, color: color + "30" }, { offset: 1, color: color + "05" }],
-          },
-        },
+        areaStyle: { color: color + "1A" },
       }],
     });
 

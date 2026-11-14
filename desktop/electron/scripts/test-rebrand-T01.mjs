@@ -62,7 +62,9 @@ await check("package fields unchanged vs baseline", () => {
   const raw = baseline("desktop/electron/package.json");
   if (!raw) return;
   const base = JSON.parse(raw);
-  assert.deepEqual(pkg.scripts, base.scripts);
+  // T11 added cross-platform scripts and made `start` independent of the Windows prepare step.
+  const { start: _start, ...baseScripts } = base.scripts;
+  for (const [name, command] of Object.entries(baseScripts)) assert.equal(pkg.scripts[name], command, name);
   assert.equal(pkg.version, base.version);
   assert.equal(pkg.build.win.icon, base.build.win.icon);
 });
@@ -174,7 +176,7 @@ function resolveFrom(root, pathExe) {
     moduleDirectory: path.join(root, "desktop/electron/dist"),
     allowSourceDiscovery: true,
     pathEnvironment: path.dirname(pathExe),
-  });
+  }, "win32");
 }
 
 try {

@@ -1,10 +1,11 @@
 import { useTranslation } from "react-i18next";
+import { Badge } from "@/components/ui";
 import type { PortfolioConnectorCompatibility } from "@/lib/api";
 
-const STYLE = {
-  native: "bg-positive/10 text-positive",
-  contract_tested: "bg-primary/10 text-primary",
-  experimental: "bg-warning/10 text-warning",
+const TONE = {
+  native: "success",
+  contract_tested: "info",
+  experimental: "warning",
 } as const;
 
 /** Explain how far a connector has been verified for portfolio aggregation. */
@@ -20,10 +21,5 @@ export function PortfolioCompatibilityBadge({
     : compatibility.level === "contract_tested"
       ? t("portfolio.compatibility.contractTested")
       : t("portfolio.compatibility.experimental");
-  return <span
-    className={`inline-flex rounded-full px-2 py-1 text-xs ${STYLE[compatibility.level]}`}
-    title={compatibility.note}
-  >
-    {label}
-  </span>;
+  return <Badge tone={TONE[compatibility.level]} title={compatibility.note}>{label}</Badge>;
 }

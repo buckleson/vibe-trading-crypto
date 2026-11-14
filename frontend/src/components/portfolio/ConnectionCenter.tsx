@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CheckCircle2, FolderCode, Loader2, PlugZap, Plus, ShieldCheck, Trash2, Wallet, X } from "lucide-react";
+import { CheckCircle2, FolderCode, PlugZap, Plus, ShieldCheck, Trash2, Wallet, X } from "lucide-react";
+import { Badge, Button } from "@/components/ui";
+import { controlClass } from "@/components/ui/Input";
 import { PortfolioCompatibilityBadge } from "@/components/portfolio/PortfolioCompatibilityBadge";
 import { api, ApiError, type BrokerAccountChoice, type ConnectionsResponse, type LocalConnection } from "@/lib/api";
 
@@ -10,7 +12,7 @@ interface Props {
   onChanged: () => Promise<void>;
 }
 
-const fieldClass = "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20";
+const fieldClass = controlClass;
 type TestResult = { ok: boolean; message: string };
 
 /**
@@ -144,17 +146,17 @@ export function ConnectionCenter({ open, onClose, onChanged }: Props) {
   if (!open) return null;
 
   return <div className="fixed inset-0 z-[60] flex justify-end bg-black/40" role="presentation">
-    <section className="flex h-full w-full max-w-2xl flex-col border-l bg-background shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="connection-center-title">
-      <header className="flex items-start justify-between border-b p-5">
-        <div><h2 id="connection-center-title" className="text-lg font-semibold">{t("portfolio.connections.title")}</h2><p className="mt-1 text-xs text-muted-foreground">{t("portfolio.connections.subtitle")}</p></div>
-        <button type="button" onClick={onClose} className="rounded-md p-2 hover:bg-muted" aria-label={t("portfolio.connections.close")}><X className="h-4 w-4" /></button>
+    <section className="flex h-full w-full max-w-2xl flex-col border-l border-border bg-background shadow-lg" role="dialog" aria-modal="true" aria-labelledby="connection-center-title">
+      <header className="flex items-start justify-between border-b border-border p-5">
+        <div><h2 id="connection-center-title" className="text-base font-semibold">{t("portfolio.connections.title")}</h2><p className="mt-1 text-xs text-muted-foreground">{t("portfolio.connections.subtitle")}</p></div>
+        <Button variant="ghost" size="icon" onClick={onClose} aria-label={t("portfolio.connections.close")}><X className="h-4 w-4" aria-hidden="true" /></Button>
       </header>
 
       <div className="flex-1 space-y-6 overflow-y-auto p-5">
-        {message ? <div className="rounded-md border bg-muted/30 p-3 text-xs break-words">{message}</div> : null}
+        {message ? <div className="rounded-md border border-border bg-muted p-3 text-xs break-words">{message}</div> : null}
 
-        <section className="rounded-xl border bg-card p-4">
-          <div className="flex items-center gap-2"><Plus className="h-4 w-4 text-primary" /><h3 className="font-medium">{t("portfolio.connections.createTitle")}</h3></div>
+        <section className="rounded-lg border border-border bg-card p-4">
+          <div className="flex items-center gap-2"><h3 className="text-sm font-semibold">{t("portfolio.connections.createTitle")}</h3></div>
           <p className="mt-1 text-xs text-muted-foreground">{t("portfolio.connections.createHint")}</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <label className="text-xs text-muted-foreground sm:col-span-2">{t("portfolio.connections.profile")}<select value={profileId} onChange={(event) => chooseProfile(event.target.value)} className={`mt-1 ${fieldClass}`}><option value="">{t("portfolio.connections.chooseProfile")}</option>{profiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.label} · {compatibilityLabel(profile.portfolio_compatibility?.level ?? "experimental")}</option>)}</select></label>
@@ -162,18 +164,18 @@ export function ConnectionCenter({ open, onClose, onChanged }: Props) {
             <label className="text-xs text-muted-foreground">{t("portfolio.connections.displayName")}<input value={label} onChange={(event) => setLabel(event.target.value)} className={`mt-1 ${fieldClass}`} placeholder={t("portfolio.connections.displayNamePlaceholder")} /></label>
           </div>
           {selectedProfile?.onboarding ? <SetupContract onboarding={selectedProfile.onboarding} /> : null}
-          <button type="button" onClick={() => void create()} disabled={!profileId || busy === "create"} className="mt-3 inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-40">{busy === "create" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}{t("portfolio.connections.create")}</button>
+          <Button variant="primary" className="mt-3" onClick={() => void create()} disabled={!profileId} loading={busy === "create"}>{busy === "create" ? null : <Plus className="h-4 w-4" aria-hidden="true" />}{t("portfolio.connections.create")}</Button>
         </section>
 
         <section>
-          <div className="flex items-end justify-between"><div><h3 className="font-medium">{t("portfolio.connections.listTitle")}</h3><p className="mt-1 text-xs text-muted-foreground">{t("portfolio.connections.listCount", { count: data?.connections.length ?? 0 })}</p></div><ShieldCheck className="h-5 w-5 text-positive" /></div>
-          <div className="mt-3 space-y-3">{data?.connections.map((connection) => <ConnectionCard key={connection.id} connection={connection} busy={busy} deleteError={deleteErrors[connection.id]} testResult={testResults[connection.id]} onTest={test} onDelete={remove} onSaved={async () => { await load(); await onChanged(); }} setBusy={setBusy} setMessage={setMessage} />)}{data && !data.connections.length ? <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">{t("portfolio.connections.empty")}</div> : null}</div>
+          <div className="flex items-end justify-between"><div><h3 className="text-sm font-semibold">{t("portfolio.connections.listTitle")}</h3><p className="mt-1 text-xs text-muted-foreground">{t("portfolio.connections.listCount", { count: data?.connections.length ?? 0 })}</p></div><ShieldCheck className="h-5 w-5 text-success" aria-hidden="true" /></div>
+          <div className="mt-3 space-y-3">{data?.connections.map((connection) => <ConnectionCard key={connection.id} connection={connection} busy={busy} deleteError={deleteErrors[connection.id]} testResult={testResults[connection.id]} onTest={test} onDelete={remove} onSaved={async () => { await load(); await onChanged(); }} setBusy={setBusy} setMessage={setMessage} />)}{data && !data.connections.length ? <div className="rounded-lg border border-dashed border-border p-8 text-center text-[13px] text-muted-foreground">{t("portfolio.connections.empty")}</div> : null}</div>
         </section>
 
-        <section className="rounded-xl border border-dashed p-4">
-          <div className="flex items-center gap-2"><FolderCode className="h-4 w-4" /><h3 className="font-medium">{t("portfolio.connections.codexTitle")}</h3></div>
+        <section className="rounded-lg border border-dashed border-border p-4">
+          <div className="flex items-center gap-2"><FolderCode className="h-4 w-4" aria-hidden="true" /><h3 className="text-sm font-semibold">{t("portfolio.connections.codexTitle")}</h3></div>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("portfolio.connections.codexBody")}</p>
-          <code className="mt-3 block overflow-x-auto rounded-md bg-muted p-3 text-xs">{data?.plugin_directory ?? "~/.vibe-trading/connectors"}</code>
+          <code className="mt-3 block overflow-x-auto rounded-md bg-muted p-3 font-mono text-[13px]">{data?.plugin_directory ?? "~/.vibe-trading/connectors"}</code>
         </section>
       </div>
     </section>
@@ -236,8 +238,8 @@ function ConnectionCard({ connection, busy, deleteError, testResult, onTest, onD
       setBusy(null);
     }
   }
-  return <article className="rounded-xl border bg-card p-4">
-    <div className="flex items-start justify-between gap-3"><div><div className="font-medium">{connection.label}</div><div className="mt-1 flex flex-wrap gap-2 text-xs text-muted-foreground"><span>{connection.connector.toUpperCase()}</span><span>·</span><span>{connection.environment === "live" ? t("portfolio.env.live") : t("portfolio.env.paper")}</span><span>·</span><span>{connection.transport}</span></div></div><div className="flex flex-col items-end gap-2"><span className="inline-flex items-center gap-1 rounded-full bg-positive/10 px-2 py-1 text-xs text-positive"><ShieldCheck className="h-3 w-3" />{t("portfolio.connections.readOnly")}</span><PortfolioCompatibilityBadge compatibility={connection.portfolio_compatibility} /></div></div>
+  return <article className="rounded-lg border border-border bg-card p-4">
+    <div className="flex items-start justify-between gap-3"><div><div className="text-sm font-medium">{connection.label}</div><div className="mt-1 flex flex-wrap gap-2 text-xs text-muted-foreground"><span>{connection.connector}</span><span>·</span><span>{connection.environment === "live" ? t("portfolio.env.live") : t("portfolio.env.paper")}</span><span>·</span><span>{connection.transport}</span></div></div><div className="flex flex-col items-end gap-2"><Badge tone="success"><ShieldCheck className="h-3 w-3" aria-hidden="true" />{t("portfolio.connections.readOnly")}</Badge><PortfolioCompatibilityBadge compatibility={connection.portfolio_compatibility} /></div></div>
     {connection.onboarding ? <SetupContract onboarding={connection.onboarding} /> : null}
     {socketConnection ? <fieldset disabled={busy !== null} className="mt-4 grid gap-2 sm:grid-cols-2">
       <label className="text-xs text-muted-foreground">{t("portfolio.connections.host")}<input type="text" value={host} onChange={(event) => setHost(event.target.value)} required maxLength={253} className={`mt-1 ${fieldClass}`} placeholder="127.0.0.1" autoComplete="off" spellCheck={false} /></label>
@@ -245,11 +247,11 @@ function ConnectionCard({ connection, busy, deleteError, testResult, onTest, onD
       {endpointError || connection.endpoint_error ? <p role="alert" className="text-xs text-danger sm:col-span-2">{endpointError ?? connection.endpoint_error}</p> : null}
     </fieldset> : null}
     {connection.account_selection_required ? <AccountSelector connection={connection} busy={busy} setBusy={setBusy} setMessage={setMessage} onSaved={onSaved} /> : null}
-    {connection.credential_fields.length ? <div className="mt-4 grid gap-2 sm:grid-cols-2">{connection.credential_fields.map((field) => <label key={field.name} className="text-xs text-muted-foreground">{field.label}{field.required ? <span className="ml-1 text-danger">*</span> : <span className="ml-1">{t("portfolio.connections.optional")}</span>}{connection.credential_status[field.name] ? <span className="ml-1 text-positive">{t("portfolio.connections.credentialSaved")}</span> : null}<input type={field.secret ? "password" : "text"} value={values[field.name] ?? ""} onChange={(event) => setValues((current) => ({ ...current, [field.name]: event.target.value }))} className={`mt-1 ${fieldClass}`} placeholder={connection.credential_status[field.name] ? "••••••••" : ""} autoComplete="off" /></label>)}</div> : <p className="mt-3 text-xs text-muted-foreground">{connection.transport === "remote_mcp" ? t("portfolio.connections.oauthNote") : t("portfolio.connections.localNote")}</p>}
-    <div className="mt-4 flex flex-wrap gap-2">{connection.credential_fields.length ? <button type="button" onClick={() => void saveCredentials()} disabled={busy === `credentials:${connection.id}` || !Object.values(values).some(Boolean)} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs disabled:opacity-40"><ShieldCheck className="h-3.5 w-3.5" />{t("portfolio.connections.saveVault")}</button> : null}<button type="button" onClick={() => void testConnection()} disabled={socketConnection ? busy !== null || !endpointValid : busy === `test:${connection.id}`} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs">{busy === `test:${connection.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <PlugZap className="h-3.5 w-3.5" />}{t("portfolio.connections.test")}</button><button type="button" onClick={() => void onDelete(connection)} disabled={busy === `delete:${connection.id}`} className="ml-auto inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs text-danger hover:bg-danger/10"><Trash2 className="h-3.5 w-3.5" />{t("portfolio.connections.delete")}</button></div>
-    {deleteError ? <div role="alert" className="mt-3 rounded-md border border-danger/30 bg-danger/5 px-3 py-2 text-xs text-danger break-words">{deleteError instanceof ApiError && deleteError.code === "connection_in_use" ? t("portfolio.connections.deleteInUse") : deleteError.message}</div> : null}
-    {testResult && !endpointDirty ? <div role="status" className={`mt-3 rounded-md border px-3 py-2 text-xs ${testResult.ok ? "border-positive/30 bg-positive/5 text-positive" : "border-danger/30 bg-danger/5 text-danger"}`}>{testResult.message}</div> : null}
-    {connection.credentials_configured ? <div className="mt-3 flex items-center gap-1.5 text-xs text-positive"><CheckCircle2 className="h-3.5 w-3.5" />{t("portfolio.connections.configured")}</div> : null}
+    {connection.credential_fields.length ? <div className="mt-4 grid gap-2 sm:grid-cols-2">{connection.credential_fields.map((field) => <label key={field.name} className="text-xs text-muted-foreground">{field.label}{field.required ? <span className="ml-1 text-danger">*</span> : <span className="ml-1">{t("portfolio.connections.optional")}</span>}{connection.credential_status[field.name] ? <span className="ml-1 text-success">{t("portfolio.connections.credentialSaved")}</span> : null}<input type={field.secret ? "password" : "text"} value={values[field.name] ?? ""} onChange={(event) => setValues((current) => ({ ...current, [field.name]: event.target.value }))} className={`mt-1 ${fieldClass}`} placeholder={connection.credential_status[field.name] ? "••••••••" : ""} autoComplete="off" /></label>)}</div> : <p className="mt-3 text-xs text-muted-foreground">{connection.transport === "remote_mcp" ? t("portfolio.connections.oauthNote") : t("portfolio.connections.localNote")}</p>}
+    <div className="mt-4 flex flex-wrap gap-2">{connection.credential_fields.length ? <Button size="sm" onClick={() => void saveCredentials()} disabled={!Object.values(values).some(Boolean)} loading={busy === `credentials:${connection.id}`}><ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />{t("portfolio.connections.saveVault")}</Button> : null}<Button size="sm" onClick={() => void testConnection()} disabled={socketConnection ? busy !== null || !endpointValid : false} loading={busy === `test:${connection.id}`}>{busy === `test:${connection.id}` ? null : <PlugZap className="h-3.5 w-3.5" aria-hidden="true" />}{t("portfolio.connections.test")}</Button><Button size="sm" variant="ghost" className="ml-auto text-danger hover:bg-danger/10" onClick={() => void onDelete(connection)} loading={busy === `delete:${connection.id}`}>{busy === `delete:${connection.id}` ? null : <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />}{t("portfolio.connections.delete")}</Button></div>
+    {deleteError ? <div role="alert" className="mt-3 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger break-words">{deleteError instanceof ApiError && deleteError.code === "connection_in_use" ? t("portfolio.connections.deleteInUse") : deleteError.message}</div> : null}
+    {testResult && !endpointDirty ? <div role="status" className={`mt-3 rounded-md border px-3 py-2 text-xs ${testResult.ok ? "border-success/30 bg-success/10 text-success" : "border-danger/30 bg-danger/10 text-danger"}`}>{testResult.message}</div> : null}
+    {connection.credentials_configured ? <div className="mt-3 flex items-center gap-1.5 text-xs text-success"><CheckCircle2 className="h-3.5 w-3.5" />{t("portfolio.connections.configured")}</div> : null}
   </article>;
 }
 
@@ -298,13 +300,13 @@ function AccountSelector({ connection, busy, setBusy, setMessage, onSaved }: { c
     }
   }
 
-  return <div className="mt-4 rounded-md border bg-muted/20 p-3 text-xs">
+  return <div className="mt-4 rounded-md border border-border bg-muted/40 p-3 text-xs">
     <div className="flex flex-wrap items-start justify-between gap-2">
       <div className="min-w-0">
         <div className="font-medium text-foreground">{t("portfolio.connections.accountTitle")}</div>
         <p className={`mt-1 ${connection.account_ref ? "text-muted-foreground" : "text-warning"}`}>{connection.account_ref ? t("portfolio.connections.accountCurrent", { last4: connection.account_ref.slice(-4) }) : t("portfolio.connections.accountNone")}</p>
       </div>
-      <button type="button" onClick={() => void loadAccounts()} disabled={loading} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs disabled:opacity-40">{loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wallet className="h-3.5 w-3.5" />}{connection.account_ref ? t("portfolio.connections.accountChange") : t("portfolio.connections.accountLoad")}</button>
+      <Button size="sm" onClick={() => void loadAccounts()} loading={loading}>{loading ? null : <Wallet className="h-3.5 w-3.5" aria-hidden="true" />}{connection.account_ref ? t("portfolio.connections.accountChange") : t("portfolio.connections.accountLoad")}</Button>
     </div>
     {accounts && !accounts.length ? <p className="mt-3 text-muted-foreground">{t("portfolio.connections.accountEmpty")}</p> : null}
     {accounts && accounts.length ? <div className="mt-3 flex flex-wrap items-end gap-2">
@@ -314,7 +316,7 @@ function AccountSelector({ connection, busy, setBusy, setMessage, onSaved }: { c
           {accounts.map((account) => <option key={account.account_ref} value={account.account_ref} disabled={account.deactivated}>{account.label}{account.is_default ? t("portfolio.connections.accountDefault") : ""}{account.deactivated ? t("portfolio.connections.accountDeactivated") : ""}</option>)}
         </select>
       </label>
-      <button type="button" onClick={() => void save()} disabled={!choice || saving} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-medium text-primary-foreground disabled:opacity-40">{saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}{t("portfolio.connections.accountSave")}</button>
+      <Button variant="primary" onClick={() => void save()} disabled={!choice} loading={saving}>{saving ? null : <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />}{t("portfolio.connections.accountSave")}</Button>
     </div> : null}
     {error ? <div role="alert" className="mt-2 break-words text-danger">{error}</div> : null}
   </div>;
@@ -322,9 +324,9 @@ function AccountSelector({ connection, busy, setBusy, setMessage, onSaved }: { c
 
 function SetupContract({ onboarding }: { onboarding: NonNullable<LocalConnection["onboarding"]> }) {
   const { t } = useTranslation();
-  return <div className="mt-3 rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
+  return <div className="mt-3 rounded-md border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
     <div className="flex flex-wrap gap-x-3 gap-y-1"><span>{t("portfolio.connections.authType")}: <strong className="font-medium text-foreground">{onboarding.auth_type}</strong></span>{onboarding.dependency ? <span>{t("portfolio.connections.dependency")}: <strong className="font-medium text-foreground">{onboarding.dependency}</strong></span> : null}</div>
     {onboarding.setup_hint ? <p className="mt-2 leading-5">{onboarding.setup_hint}</p> : null}
-    {onboarding.install_command ? <code className="mt-2 block overflow-x-auto rounded bg-muted px-2 py-1.5 text-foreground">{onboarding.install_command}</code> : null}
+    {onboarding.install_command ? <code className="mt-2 block overflow-x-auto rounded-sm bg-muted px-2 py-1.5 font-mono text-[13px] text-foreground">{onboarding.install_command}</code> : null}
   </div>;
 }

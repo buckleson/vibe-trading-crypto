@@ -14,7 +14,7 @@ interface Props {
 /**
  * Monte Carlo fan chart: sampled shuffled-order equity paths (thin), the
  * P5–P95 / P25–P75 percentile envelope (shaded), the median (dashed), and
- * the actual path (bold) — all over trade sequence number, since the
+ * the actual path (bold) - all over trade sequence number, since the
  * simulation permutes trade order rather than calendar time.
  */
 export function MonteCarloPathsChart({ paths, height = 260 }: Props) {
@@ -79,12 +79,13 @@ export function MonteCarloPathsChart({ paths, height = 260 }: Props) {
       tooltip: {
         trigger: "axis",
         backgroundColor: t.tooltipBg,
-        borderColor: t.tooltipBorder,
-        textStyle: { color: t.tooltipText, fontSize: 11 },
+        borderColor: t.tooltipBorder, borderWidth: 1, extraCssText: "box-shadow:none;",
+        textStyle: { color: t.tooltipText, fontSize: 12 },
       },
       legend: {
         data: [actualLabel, medianLabel, "P25–P75", "P5–P95"],
-        textStyle: { color: t.textColor, fontSize: 11 },
+        textStyle: { color: t.textColor, fontSize: 12 },
+        left: 0,
         top: 0,
       },
       grid: { left: 8, right: 8, top: 30, bottom: 22, containLabel: true },
@@ -94,15 +95,15 @@ export function MonteCarloPathsChart({ paths, height = 260 }: Props) {
         name: i18n.t("validation.tradeNumber"),
         nameLocation: "middle",
         nameGap: 22,
-        nameTextStyle: { color: t.textColor, fontSize: 10 },
+        nameTextStyle: { color: t.textColor, fontSize: 12 },
         axisLine: { lineStyle: { color: t.axisColor } },
-        axisLabel: { color: t.textColor, fontSize: 10 },
+        axisLabel: { color: t.textColor, fontSize: 12 },
       },
       yAxis: {
         type: "value",
         scale: true,
         splitLine: { lineStyle: { color: t.gridColor } },
-        axisLabel: { color: t.textColor, fontSize: 10, formatter: (v: number) => abbreviateNum(v) },
+        axisLabel: { color: t.textColor, fontSize: 12, formatter: (v: number) => abbreviateNum(v) },
       },
       series: [
         ...bandSeries("outer", paths.band_p5, paths.band_p95, "P5–P95", "1f"),

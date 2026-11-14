@@ -29,8 +29,8 @@ export function AttributionCumulativeChart({ data, height = 300 }: Props) {
         trigger: "axis",
         axisPointer: { type: "cross" },
         backgroundColor: t.tooltipBg,
-        borderColor: t.tooltipBorder,
-        textStyle: { color: t.tooltipText, fontSize: 11 },
+        borderColor: t.tooltipBorder, borderWidth: 1, extraCssText: "box-shadow:none;",
+        textStyle: { color: t.tooltipText, fontSize: 12 },
         formatter: (raw: unknown) => {
           const params = raw as Array<{ dataIndex?: number }>;
           if (!Array.isArray(params) || !params.length) return "";
@@ -45,9 +45,9 @@ export function AttributionCumulativeChart({ data, height = 300 }: Props) {
       },
       legend: {
         data: [portfolioLabel, benchmarkLabel, activeLabel],
-        textStyle: { color: t.textColor, fontSize: 11 },
-        right: 60,
-        top: 4,
+        textStyle: { color: t.textColor, fontSize: 12 },
+        left: 0,
+        top: 0,
       },
       toolbox: {
         feature: {
@@ -63,12 +63,12 @@ export function AttributionCumulativeChart({ data, height = 300 }: Props) {
         type: "category",
         data: dates,
         axisLine: { lineStyle: { color: t.axisColor } },
-        axisLabel: { color: t.textColor, fontSize: 10 },
+        axisLabel: { color: t.textColor, fontSize: 12 },
       },
       yAxis: {
         type: "value",
         splitLine: { lineStyle: { color: t.gridColor } },
-        axisLabel: { color: t.textColor, fontSize: 10, formatter: "{value}%" },
+        axisLabel: { color: t.textColor, fontSize: 12, formatter: "{value}%" },
       },
       dataZoom: [{ type: "inside" }],
       series: [

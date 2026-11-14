@@ -48,7 +48,7 @@ export function OptionsScenarioMatrix({ grid, height = 380 }: Props) {
       tooltip: {
         position: "top",
         backgroundColor: t.tooltipBg,
-        borderColor: t.tooltipBorder,
+        borderColor: t.tooltipBorder, borderWidth: 1, extraCssText: "box-shadow:none;",
         textStyle: { color: t.tooltipText, fontSize: 12 },
         formatter: (params: unknown) => {
           const p = params as { data: [number, number, number] };
@@ -65,10 +65,10 @@ export function OptionsScenarioMatrix({ grid, height = 380 }: Props) {
         type: "category",
         data: spotLabels,
         name: i18n.t("options.scenario.spotAxis"),
-        nameTextStyle: { color: t.textColor, fontSize: 10 },
+        nameTextStyle: { color: t.textColor, fontSize: 12 },
         nameLocation: "middle",
         nameGap: 30,
-        axisLabel: { color: t.textColor, fontSize: 10, rotate: 30 },
+        axisLabel: { color: t.textColor, fontSize: 12, rotate: 30 },
         axisLine: { lineStyle: { color: t.axisColor } },
         splitArea: { show: false },
       },
@@ -76,8 +76,8 @@ export function OptionsScenarioMatrix({ grid, height = 380 }: Props) {
         type: "category",
         data: ivLabels,
         name: i18n.t("options.scenario.ivAxis"),
-        nameTextStyle: { color: t.textColor, fontSize: 10 },
-        axisLabel: { color: t.textColor, fontSize: 10, interval: 0 },
+        nameTextStyle: { color: t.textColor, fontSize: 12 },
+        axisLabel: { color: t.textColor, fontSize: 12, interval: 0 },
         axisLine: { lineStyle: { color: t.axisColor } },
         splitArea: { show: false },
       },
@@ -89,7 +89,7 @@ export function OptionsScenarioMatrix({ grid, height = 380 }: Props) {
         orient: "vertical",
         right: 8,
         top: "center",
-        textStyle: { color: t.textColor, fontSize: 11 },
+        textStyle: { color: t.textColor, fontSize: 12 },
         inRange: { color: [pnlC.loss, pnlC.neutral, pnlC.profit] },
       },
       series: [
@@ -99,7 +99,7 @@ export function OptionsScenarioMatrix({ grid, height = 380 }: Props) {
           data,
           label: {
             show: colIdx.length <= 16 && grid.iv_values.length <= 6,
-            fontSize: 10,
+            fontSize: 12,
             color: t.textColor,
             formatter: (params: unknown) => {
               const p = params as { value: [number, number, number] };
@@ -107,7 +107,7 @@ export function OptionsScenarioMatrix({ grid, height = 380 }: Props) {
             },
           },
           emphasis: {
-            itemStyle: { shadowBlur: 10, shadowColor: "rgba(0, 0, 0, 0.5)" },
+            itemStyle: { borderColor: t.textColor, borderWidth: 1 },
           },
         },
       ],

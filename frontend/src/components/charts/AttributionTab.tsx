@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import i18n from "@/i18n";
 import { Activity, AlertTriangle, BarChart3, Loader2, TrendingUp } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Card, CardBody, CardHeader, Stat, Table, TBody, TD, TH, THead, TR } from "@/components/ui";
 import { api } from "@/lib/api";
 import type {
   AttributionBenchmarkInfo,
@@ -63,17 +63,11 @@ function AttrStat({ label, value, sub, tone = "neutral" }: {
   tone?: "positive" | "negative" | "neutral";
 }) {
   return (
-    <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className={cn(
-        "mt-1 truncate text-sm font-medium tabular-nums",
-        tone === "positive" && "text-success",
-        tone === "negative" && "text-danger",
-      )}>
-        {value}
-      </div>
-      {sub && <div className="mt-0.5 text-[11px] text-muted-foreground">{sub}</div>}
-    </div>
+    <Card className="p-4">
+      <Stat label={label} hint={sub}
+        value={<span className="block truncate text-lg">{value}</span>}
+        tone={tone === "positive" ? "success" : tone === "negative" ? "danger" : "neutral"} />
+    </Card>
   );
 }
 
@@ -83,13 +77,10 @@ function AttrPanel({ title, icon: Icon, children }: {
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-      <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
-        <Icon className="h-4 w-4 text-muted-foreground" />
-        {title}
-      </div>
-      {children}
-    </section>
+    <Card>
+      <CardHeader title={<span className="flex items-center gap-2"><Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />{title}</span>} />
+      <CardBody>{children}</CardBody>
+    </Card>
   );
 }
 
@@ -98,50 +89,49 @@ function BrinsonTable({ brinson }: { brinson: AttributionBrinson }) {
   const weightTotal = (pick: "portfolio_weight" | "benchmark_weight") =>
     sectors.reduce((sum, s) => sum + s[pick], 0);
 
+  const cls = (v: number) => signedNumberClass(v);
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b bg-muted/40 text-left text-[11px] uppercase tracking-wide text-muted-foreground [&_th]:font-medium">
-            <th className="py-2 ps-4 pr-4">{i18n.t("runDetail.attrSector")}</th>
-            <th className="py-2 pr-4 text-right">{i18n.t("runDetail.attrPortfolioWeight")}</th>
-            <th className="py-2 pr-4 text-right">{i18n.t("runDetail.attrBenchmarkWeight")}</th>
-            <th className="py-2 pr-4 text-right">{i18n.t("runDetail.attrPortfolioReturn")}</th>
-            <th className="py-2 pr-4 text-right">{i18n.t("runDetail.attrBenchmarkReturn")}</th>
-            <th className="py-2 pr-4 text-right">{i18n.t("runDetail.attrAllocation")}</th>
-            <th className="py-2 pr-4 text-right">{i18n.t("runDetail.attrSelection")}</th>
-            <th className="py-2 pr-4 text-right">{i18n.t("runDetail.attrInteraction")}</th>
-            <th className="py-2 text-right">{i18n.t("runDetail.attrTotal")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sectors.map((s) => (
-            <tr key={s.sector} className="border-b last:border-0 hover:bg-muted/40">
-              <td className="py-2 ps-4 pr-4 font-mono text-xs">{s.sector}</td>
-              <td className="py-2 pr-4 text-right font-mono tabular-nums">{fmtPct(s.portfolio_weight)}</td>
-              <td className="py-2 pr-4 text-right font-mono tabular-nums">{fmtPct(s.benchmark_weight)}</td>
-              <td className="py-2 pr-4 text-right font-mono tabular-nums">{fmtSignedPct(s.portfolio_return)}</td>
-              <td className="py-2 pr-4 text-right font-mono tabular-nums">{fmtSignedPct(s.benchmark_return)}</td>
-              <td className={cn("py-2 pr-4 text-right font-mono tabular-nums", signedNumberClass(s.allocation))}>{fmtSignedPct(s.allocation)}</td>
-              <td className={cn("py-2 pr-4 text-right font-mono tabular-nums", signedNumberClass(s.selection))}>{fmtSignedPct(s.selection)}</td>
-              <td className={cn("py-2 pr-4 text-right font-mono tabular-nums", signedNumberClass(s.interaction))}>{fmtSignedPct(s.interaction)}</td>
-              <td className={cn("py-2 text-right font-mono tabular-nums", signedNumberClass(s.total))}>{fmtSignedPct(s.total)}</td>
-            </tr>
-          ))}
-          <tr className="border-t bg-muted/40 font-semibold">
-            <td className="py-2 ps-4 pr-4">{i18n.t("runDetail.attrTotal")}</td>
-            <td className="py-2 pr-4 text-right font-mono tabular-nums">{fmtPct(weightTotal("portfolio_weight"))}</td>
-            <td className="py-2 pr-4 text-right font-mono tabular-nums">{fmtPct(weightTotal("benchmark_weight"))}</td>
-            <td className="py-2 pr-4 text-right font-mono tabular-nums">{fmtSignedPct(brinson.portfolio_return)}</td>
-            <td className="py-2 pr-4 text-right font-mono tabular-nums">{fmtSignedPct(brinson.benchmark_return)}</td>
-            <td className={cn("py-2 pr-4 text-right font-mono tabular-nums", signedNumberClass(brinson.allocation))}>{fmtSignedPct(brinson.allocation)}</td>
-            <td className={cn("py-2 pr-4 text-right font-mono tabular-nums", signedNumberClass(brinson.selection))}>{fmtSignedPct(brinson.selection)}</td>
-            <td className={cn("py-2 pr-4 text-right font-mono tabular-nums", signedNumberClass(brinson.interaction))}>{fmtSignedPct(brinson.interaction)}</td>
-            <td className={cn("py-2 text-right font-mono tabular-nums", signedNumberClass(brinson.active_return))}>{fmtSignedPct(brinson.active_return)}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <Table>
+      <THead>
+        <TR>
+          <TH>{i18n.t("runDetail.attrSector")}</TH>
+          <TH numeric>{i18n.t("runDetail.attrPortfolioWeight")}</TH>
+          <TH numeric>{i18n.t("runDetail.attrBenchmarkWeight")}</TH>
+          <TH numeric>{i18n.t("runDetail.attrPortfolioReturn")}</TH>
+          <TH numeric>{i18n.t("runDetail.attrBenchmarkReturn")}</TH>
+          <TH numeric>{i18n.t("runDetail.attrAllocation")}</TH>
+          <TH numeric>{i18n.t("runDetail.attrSelection")}</TH>
+          <TH numeric>{i18n.t("runDetail.attrInteraction")}</TH>
+          <TH numeric>{i18n.t("runDetail.attrTotal")}</TH>
+        </TR>
+      </THead>
+      <TBody>
+        {sectors.map((s) => (
+          <TR key={s.sector}>
+            <TD className="text-xs">{s.sector}</TD>
+            <TD numeric>{fmtPct(s.portfolio_weight)}</TD>
+            <TD numeric>{fmtPct(s.benchmark_weight)}</TD>
+            <TD numeric>{fmtSignedPct(s.portfolio_return)}</TD>
+            <TD numeric>{fmtSignedPct(s.benchmark_return)}</TD>
+            <TD numeric className={cls(s.allocation)}>{fmtSignedPct(s.allocation)}</TD>
+            <TD numeric className={cls(s.selection)}>{fmtSignedPct(s.selection)}</TD>
+            <TD numeric className={cls(s.interaction)}>{fmtSignedPct(s.interaction)}</TD>
+            <TD numeric className={cls(s.total)}>{fmtSignedPct(s.total)}</TD>
+          </TR>
+        ))}
+        <TR className="bg-muted/40 font-semibold">
+          <TD>{i18n.t("runDetail.attrTotal")}</TD>
+          <TD numeric>{fmtPct(weightTotal("portfolio_weight"))}</TD>
+          <TD numeric>{fmtPct(weightTotal("benchmark_weight"))}</TD>
+          <TD numeric>{fmtSignedPct(brinson.portfolio_return)}</TD>
+          <TD numeric>{fmtSignedPct(brinson.benchmark_return)}</TD>
+          <TD numeric className={cls(brinson.allocation)}>{fmtSignedPct(brinson.allocation)}</TD>
+          <TD numeric className={cls(brinson.selection)}>{fmtSignedPct(brinson.selection)}</TD>
+          <TD numeric className={cls(brinson.interaction)}>{fmtSignedPct(brinson.interaction)}</TD>
+          <TD numeric className={cls(brinson.active_return)}>{fmtSignedPct(brinson.active_return)}</TD>
+        </TR>
+      </TBody>
+    </Table>
   );
 }
 
@@ -152,7 +142,7 @@ function FactorStatCards({ factor, metrics }: { factor: AttributionFactor | null
   if (!hasFactor && informationRatio === undefined && trackingError === undefined) return null;
 
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
       {hasFactor && (
         <>
           <AttrStat
