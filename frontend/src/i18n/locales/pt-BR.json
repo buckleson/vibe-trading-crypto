@@ -29,7 +29,8 @@
     "groups": {
       "research": "Pesquisa cotidiana",
       "analysis": "Análise especializada",
-      "automation": "Automação e configuração"
+      "automation": "Automação e configuração",
+      "trade": "Negociar"
     },
     "howTo": "Como usar {{feature}}",
     "startResearch": "Comece com o assistente de pesquisa",
@@ -76,7 +77,7 @@
     "optionsLab": "Análise de opções",
     "sessions": "Sessões",
     "newChat": "Novo chat",
-    "noSessions": "Ainda não há chats — pressione + para iniciar um.",
+    "noSessions": "Ainda não há chats. Pressione + para iniciar um.",
     "confirm": "Confirmar",
     "cancel": "Cancelar",
     "rename": "Renomear",
@@ -94,7 +95,11 @@
     "pixelOffice": "Escritório pixel",
     "paperTrading": "Negociação simulada",
     "researchArtifacts": "Artefatos de pesquisa",
-    "researchLab": "Laboratório de pesquisa"
+    "researchLab": "Laboratório de pesquisa",
+    "selectLanguage": "Selecionar idioma",
+    "run": "Execução",
+    "compare": "Comparar execuções",
+    "app": "Vibe Crypto"
   },
   "researchArtifacts": {
     "compareTitle": "Comparação de revisões",
@@ -350,7 +355,12 @@
     "deliveryTargetPlaceholder_slack_destination": "#canal, @usuário ou ID da conversa",
     "deliveryTargetKind_slack_destination": "Destino",
     "deliveryProtectPdf": "Proteger PDF com senha",
-    "deliveryProtectPdfUnavailable": "Nenhuma senha de PDF foi configurada. Defina uma em Configurações > Canais > E-mail para ativar a proteção."
+    "deliveryProtectPdfUnavailable": "Nenhuma senha de PDF foi configurada. Defina uma em Configurações > Canais > E-mail para ativar a proteção.",
+    "newSchedule": "Novo agendamento",
+    "colSchedule": "Agendamento",
+    "colNextRun": "Próxima execução",
+    "colStatus": "Último status",
+    "colActions": "Ações"
   },
   "reports": {
     "badge": "Relatórios",
@@ -379,7 +389,9 @@
     "sharpe": "Sharpe",
     "fullReport": "Relatório completo",
     "compare": "Comparar",
-    "unknown": "Desconhecido"
+    "unknown": "Desconhecido",
+    "run": "Execução",
+    "actions": "Ações"
   },
   "connection": {
     "reconnecting": "Reconectando…",
@@ -454,7 +466,7 @@
       "analyzeBrokerExportDesc": "Lê exportações de Tonghuashun / Eastmoney / Futu ou qualquer CSV – dias de retenção, taxa de ganhos, relação lucro/perda, padrão de hora do dia",
       "analyzeBrokerExportPrompt": "Analise o diário comercial que acabei de enviar – perfil completo com estatísticas de retenção, taxa de vitória, símbolos principais e distribuição por hora",
       "diagnoseBehavior": "Diagnosticar meus preconceitos comportamentais",
-      "diagnoseBehaviorDesc": "Efeito de disposição, overtrading, perseguição de momentum, ancoragem — gravidade + evidência numérica",
+      "diagnoseBehaviorDesc": "Efeito de disposição, overtrading, perseguição de momentum, ancoragem: gravidade + evidência numérica",
       "diagnoseBehaviorPrompt": "Execute os 4 diagnósticos de comportamento em meu diário comercial (disposição, overtrading, perseguição, ancoragem) e me diga qual preconceito prejudica mais meu PnL",
       "checkConnector": "Verifique o conector selecionado",
       "checkConnectorDesc": "Liste os perfis do conector e verifique o selecionado",
@@ -478,7 +490,7 @@
       "adaptStrategyDesc": "Manter o sinal e testar outro universo",
       "adaptStrategyPrompt": "Ajude-me a adaptar uma estratégia cadastrada a outro universo e período. Primeiro liste as estratégias e confira as evidências da original; pergunte pelo ID, ativos, datas e tamanho das posições que faltarem. Preserve o sinal, gere o código da derivada, execute o backtest e relate apenas as evidências atualizadas da própria derivada."
     },
-    "taskSubtitle": "Pergunte sobre uma ação, uma estratégia ou seu portfólio — extrairei os dados, analisarei os números e mostrarei cada etapa.",
+    "taskSubtitle": "Pergunte sobre uma ação, uma estratégia ou seu portfólio. Extrairei os dados, analisarei os números e mostrarei cada etapa.",
     "quickActions": "Ações rápidas",
     "browseAllExamples": "Navegue por todos os exemplos",
     "featured": "Exemplos em destaque",
@@ -499,8 +511,6 @@
   },
   "settings": {
     "title": "Configurações",
-    "authRequired": "Autenticação necessária",
-    "authDesc": "Insira a chave de autenticação da API para desbloquear as configurações.",
     "dataSources": "Fontes de dados",
     "llmBackend": "Backend de LLM",
     "save": "Salvar",
@@ -511,7 +521,6 @@
     "refresh": "Atualizar",
     "modelName": "Nome do modelo",
     "baseUrl": "URL base",
-    "apiAuthKey": "Chave de autenticação da API",
     "loading": "Carregando…",
     "temperature": "Temperatura",
     "temperatureDesc": "Controla a aleatoriedade da resposta, não a inteligência. Valores menores são mais estáveis e mais adequados à análise financeira; 0–0,2 é uma configuração inicial sensata.",
@@ -529,7 +538,7 @@
     "reasoningEffortMinimal": "Mínimo",
     "reasoningEffortUltra": "Ultra",
     "reasoningEffortPersistent": "Persistente",
-    "reasoningEffortDesc": "Controla a profundidade do raciocínio nos modelos suportados. Níveis mais elevados podem melhorar análises complexas, mas podem demorar mais; provedores não suportados podem ignorar esta configuração. Nenhum (explícito) envia o campo com o raciocínio desabilitado — alguns modelos OpenAI precisam disso para usar ferramentas.",
+    "reasoningEffortDesc": "Controla a profundidade do raciocínio nos modelos suportados. Níveis mais elevados podem melhorar análises complexas, mas podem demorar mais; provedores não suportados podem ignorar esta configuração. Nenhum (explícito) envia o campo com o raciocínio desabilitado: alguns modelos OpenAI precisam disso para usar ferramentas.",
     "reasoningEffortReset": "O modelo selecionado não suporta {{level}}; redefinido para o padrão do provedor.",
     "useDefaultModel": "Usar modelo padrão",
     "useDefaultUrl": "Usar URL padrão",
@@ -547,11 +556,6 @@
     "noProjectLoader": "Nenhum carregador de projeto",
     "pythonPackageInstalled": "Pacote Python instalado",
     "pythonPackageNotInstalled": "Pacote Python não instalado",
-    "localApiAccess": "Acesso à API local",
-    "localApiAccessDesc": "Para implantações de UI da Web remotas ou privadas, insira a chave de API do servidor uma vez neste navegador. O uso de localhost pode ficar em branco.",
-    "serverApiKey": "Chave API do servidor",
-    "storedInBrowser": "Armazenado apenas neste navegador. Deixe em branco para limpar.",
-    "localApiKeySaved": "Chave de API local salva",
     "subtitle": "Configure credenciais de modelo e tokens de origem de dados de mercado para este projeto local.",
     "unavailable": "As configurações não estão disponíveis",
     "llmSettings": "Configurações de LLM",
@@ -601,7 +605,7 @@
         "listPlaceholder": "Digite um valor e pressione Enter para adicionar",
         "removeValue": "Remover {{value}}",
         "save": "Salvar configuração",
-        "hotApply": "Salvar é aplicado imediatamente — não é preciso reiniciar.",
+        "hotApply": "Salvar é aplicado imediatamente. Não é preciso reiniciar.",
         "saved": "Configuração do canal salva",
         "appliedInPlace": "Configurações salvas sem reconectar o canal.",
         "appliedReset": "Configurações salvas. As conexões dos canais foram reiniciadas.",
@@ -619,7 +623,7 @@
         "testedSavedConfig": "Foi testada a configuração salva.",
         "testedDraftConfig": "Foram testados os valores atuais do formulário (ainda não salvos).",
         "enable": "Ativar canal",
-        "enableHint": "Desativar mantém as credenciais salvas — você pode reativar quando quiser.",
+        "enableHint": "Desativar mantém as credenciais salvas. Você pode reativar quando quiser.",
         "enabledToast": "Canal ativado",
         "disabledToast": "Canal desativado",
         "enableFailed": "Falha ao ativar o canal: {{message}}",
@@ -627,10 +631,10 @@
         "enableRejected": "O provedor rejeitou estas credenciais, então o canal não foi ativado.",
         "enableRejectedDetail": "Resposta do provedor: {{detail}}",
         "enableAnyway": "Ativar mesmo assim",
-        "enableAnywayHint": "Ativar mesmo assim ignora a verificação de credenciais — o canal pode não conseguir conectar.",
+        "enableAnywayHint": "Ativar mesmo assim ignora a verificação de credenciais. O canal pode não conseguir conectar.",
         "notWritable": "A configuração do canal fica em um arquivo YAML ({{path}}), que a interface web não pode editar. Edite o arquivo diretamente para alterar as credenciais.",
         "notWritableChip": "Somente leitura (YAML)",
-        "sdkMissing": "SDK de execução não instalado — {{hint}}",
+        "sdkMissing": "SDK de execução não instalado: {{hint}}",
         "sdkMissingNoHint": "O SDK de execução não está instalado; o canal pode ser configurado, mas talvez não inicie.",
         "noFields": "Este canal não tem campos configuráveis.",
         "loadFailed": "Não foi possível carregar a configuração do canal."
@@ -1007,7 +1011,7 @@
         "discord": {
           "token": {
             "label": "Token do bot",
-            "help": "O token do bot obtido no Portal de Desenvolvedores do Discord — não um token de usuário ou OAuth. Armazenado no servidor e nunca devolvido ao navegador."
+            "help": "O token do bot obtido no Portal de Desenvolvedores do Discord, não um token de usuário ou OAuth. Armazenado no servidor e nunca devolvido ao navegador."
           },
           "allow_from": {
             "label": "Remetentes permitidos",
@@ -1047,11 +1051,11 @@
           },
           "proxy_username": {
             "label": "Usuário do proxy",
-            "help": "Usuário do proxy; informe-o junto com a senha do proxy ou não informe nenhum — um par pela metade é ignorado com um aviso. Armazenado no servidor e nunca devolvido ao navegador."
+            "help": "Usuário do proxy; informe-o junto com a senha do proxy ou não informe nenhum. Um par pela metade é ignorado com um aviso. Armazenado no servidor e nunca devolvido ao navegador."
           },
           "proxy_password": {
             "label": "Senha do proxy",
-            "help": "Senha do proxy; informe-a junto com o usuário do proxy ou não informe nenhum — um par pela metade é ignorado com um aviso. Armazenado no servidor e nunca devolvido ao navegador."
+            "help": "Senha do proxy; informe-a junto com o usuário do proxy ou não informe nenhum. Um par pela metade é ignorado com um aviso. Armazenado no servidor e nunca devolvido ao navegador."
           }
         }
       },
@@ -1089,7 +1093,7 @@
         "websocket": {
           "title": "Guia de configuração do WebSocket",
           "intro": "O canal WebSocket executa seu próprio servidor local ao qual os clientes se conectam por uma URL WebSocket, então não é necessária uma URL de callback pública.",
-          "step1": "Escolha um endereço de escuta: mantenha 127.0.0.1 para uso apenas local ou defina 0.0.0.0 / :: para expor o servidor — um host curinga exige um token ou um segredo de emissão.",
+          "step1": "Escolha um endereço de escuta: mantenha 127.0.0.1 para uso apenas local ou defina 0.0.0.0 / :: para expor o servidor: um host curinga exige um token ou um segredo de emissão.",
           "step2": "Defina um token estático, ou um caminho de emissão com seu segredo Bearer para que os clientes obtenham tokens de curta duração.",
           "step3": "Conecte os clientes com ws://host:port/path?client_id=...&token=...",
           "step4": "Salvar com o canal em execução troca o servidor a quente: os clientes conectados (incluindo este chat da interface web) caem por um instante e se reconectam.",
@@ -1099,11 +1103,11 @@
         "feishu": {
           "title": "Configuração do bot Feishu / Lark",
           "intro": "Bots do Feishu usam a conexão contínua por WebSocket, então não é preciso IP público nem webhook.",
-          "step1": "Crie um aplicativo personalizado na plataforma de desenvolvedores do Feishu (open.feishu.cn) — ou crie por leitura de QR no terminal com vibe-crypto channels login feishu, que salva o App ID e o App Secret automaticamente.",
+          "step1": "Crie um aplicativo personalizado na plataforma de desenvolvedores do Feishu (open.feishu.cn), ou crie por leitura de QR no terminal com vibe-crypto channels login feishu, que salva o App ID e o App Secret automaticamente.",
           "step2": "Adicione a capacidade de bot ao aplicativo.",
           "step3": "Em Assinatura de eventos, assine «Receber mensagens im.message.receive_v1» e escolha o modo de conexão contínua.",
           "step4": "Copie o App ID e o App Secret em Credenciais e informações básicas e cole-os nos campos acima.",
-          "step5": "Crie uma versão e publique o aplicativo (com aprovação do administrador se o seu tenant exigir); em seguida, ative o canal aqui — a aplicação é imediata, sem reiniciar. Em tenants internacionais do Lark, defina o domínio como lark.",
+          "step5": "Crie uma versão e publique o aplicativo (com aprovação do administrador se o seu tenant exigir); em seguida, ative o canal aqui. A aplicação é imediata, sem reiniciar. Em tenants internacionais do Lark, defina o domínio como lark.",
           "docsLabel": "Abrir a plataforma de desenvolvedores do Feishu"
         },
         "discord": {
@@ -1111,7 +1115,7 @@
           "intro": "Bots do Discord conectam-se ao gateway com um token de bot, então não é preciso IP público nem webhook.",
           "step1": "Crie uma aplicação no Portal de Desenvolvedores do Discord (discord.com/developers).",
           "step2": "Abra a página Bot, redefina o token e copie-o.",
-          "step3": "Em Privileged Gateway Intents, ative MESSAGE CONTENT INTENT — os intents padrão o exigem.",
+          "step3": "Em Privileged Gateway Intents, ative MESSAGE CONTENT INTENT. Os intents padrão o exigem.",
           "step4": "Gere uma URL de convite OAuth2 com o escopo bot (e applications.commands) e adicione o bot ao seu servidor.",
           "step5": "Cole o token aqui, clique em “Testar conexão” e ative o canal.",
           "docsLabel": "Abrir a documentação de desenvolvedores do Discord"
@@ -1131,7 +1135,7 @@
       "moveUp": "Subir",
       "moveDown": "Mover para baixo",
       "resetToDefault": "Redefinir para o padrão",
-      "invalidOverrideWarning": "A substituição salva para {{envVar}} é inválida (deve reordenar as mesmas fontes) — a ordem padrão está em vigor.",
+      "invalidOverrideWarning": "A substituição salva para {{envVar}} é inválida (deve reordenar as mesmas fontes). A ordem padrão está em vigor.",
       "noMarkets": "Nenhuma fonte de dados de mercado está registrada.",
       "howItWorksTitle": "Como funciona",
       "howItWorks": "Para símbolos detectados automaticamente, as fontes são testadas de cima para baixo; uma fonte que falha passa para a próxima. O salvamento é aplicado imediatamente – não é necessário reiniciar.",
@@ -1191,7 +1195,34 @@
     "authentication": "Autenticação",
     "apiKey": "Chave de API",
     "tushareTokenDesc": "Usado para ações A da China, futuros, fundos e dados macro. Se não for definido, o projeto volta para o AKShare, quando disponível.",
-    "gildataTokenDesc": "Dados opcionais da Gildata: preços diários ajustados de ações A, preços brutos de Hong Kong e índices, valores patrimoniais de fundos não negociados em bolsa e ferramentas de macroeconomia, comunicados e pesquisa da China."
+    "gildataTokenDesc": "Dados opcionais da Gildata: preços diários ajustados de ações A, preços brutos de Hong Kong e índices, valores patrimoniais de fundos não negociados em bolsa e ferramentas de macroeconomia, comunicados e pesquisa da China.",
+    "claudeUnavailable": "Indisponível",
+    "claudeNeedsLogin": "Requer login",
+    "claudeConnected": "Conectado",
+    "claudeUsingApiKey": "Usando chave de API",
+    "claudeUsingLogin": "Usando seu login do Claude",
+    "claudeSetupHint": "Defina ANTHROPIC_API_KEY ou entre com o comando claude",
+    "claudeCommandCopied": "Comando copiado",
+    "claudeCopyFailed": "Não foi possível copiar o comando",
+    "claudeTitle": "Claude",
+    "claudeDesc": "Converse com o Claude sobre suas estratégias, backtests e operações simuladas.",
+    "claudeOpenChat": "Abrir chat",
+    "claudeTerminalTitle": "Use o Claude Code no seu terminal",
+    "claudeCopy": "Copiar",
+    "claudeInstallAlt": "Ou execute vibe-crypto mcp install",
+    "claudeGuide": "Guia de configuração",
+    "hideSecret": "Ocultar valor",
+    "showSecret": "Mostrar valor",
+    "sections": "Seções de configurações",
+    "desktopTitle": "Desktop",
+    "desktopDesc": "Como as credenciais são armazenadas no app para desktop.",
+    "desktopCredentialNote": "As chaves de API e os tokens salvos aqui ficam guardados pelo app para desktop. O backend reinicia quando um deles muda.",
+    "navModel": "Modelo",
+    "navClaude": "Claude",
+    "navData": "Fontes de dados",
+    "navProviders": "Provedores personalizados",
+    "navChannels": "Canais",
+    "navDesktop": "Desktop"
   },
   "agent": {
     "reasoningStrength": "Esforço de raciocínio",
@@ -1264,7 +1295,7 @@
     "continueGoalMessage": "Continuar meta de pesquisa: {{goal}}",
     "loadEarlier": "Carregar mensagens anteriores",
     "authRequired": "O acesso remoto à API requer uma chave de API. Adicione-o em Configurações ou execute o backend em localhost para uso somente local.",
-    "followUpPlaceholder": "Pergunte sobre esta execução — por exemplo, por que o drawdown é tão profundo?",
+    "followUpPlaceholder": "Pergunte sobre esta execução, por exemplo, por que o drawdown é tão profundo?",
     "continuePrompt": "Continue de onde você parou.",
     "doneMarker": "Execução concluída",
     "backgroundRunComplete": "Uma execução terminou em outra sessão.",
@@ -1278,7 +1309,7 @@
       },
       "done": "Concluído",
       "stopped": "Parado por você",
-      "timeout": "Parou de esperar após {{elapsed}} — a execução ainda pode estar terminando",
+      "timeout": "Parou de esperar após {{elapsed}}. A execução ainda pode estar terminando",
       "failed": "Falha",
       "steps": "Etapas {{count}}",
       "continue": "Continuar",
@@ -1507,7 +1538,9 @@
     "attrCumulativeTitle": "Retornos cumulativos",
     "attrLoading": "Carregando atribuição…",
     "attrError": "Falha ao carregar a atribuição.",
-    "attrNoData": "Nenhum dado de atribuição está disponível para esta execução."
+    "attrNoData": "Nenhum dado de atribuição está disponível para esta execução.",
+    "runOnPaper": "Executar em simulado",
+    "sections": "Seções da execução"
   },
   "compare": {
     "title": "Comparação de estratégias",
@@ -1555,7 +1588,7 @@
     "loading": "Computação...",
     "failedToCompute": "Falha ao calcular a correlação",
     "regimeTimeline": "Cronograma do regime",
-    "regimeTimelineHint": "Densidade de borda + histerese ao longo do tempo — contexto de risco descritivo, não um sinal de negociação",
+    "regimeTimelineHint": "Densidade de borda + histerese ao longo do tempo: contexto de risco descritivo, não um sinal de negociação",
     "regimeDensity": "Densidade de borda",
     "regimeSmoothed": "Suavizado",
     "regimeFused": "FUNDIDO",
@@ -1672,7 +1705,8 @@
       "quoteLimit": "Use no máximo {{limit}} linhas de cotações.",
       "gridLimit": "Use no máximo {{limit}} valores para cada eixo da grade.",
       "pointLimit": "A grade é limitada a {{limit}} pontos. Reduza strikes ou vencimentos.",
-      "spotHint": "Somente para validação; o preço à vista se cancela na interpolação de IV."
+      "spotHint": "Somente para validação; o preço à vista se cancela na interpolação de IV.",
+      "legend": "Escala de volatilidade implícita"
     },
     "chain": {
       "title": "Cadeia de opções dos EUA",
@@ -1759,7 +1793,6 @@
     "sourceCode": "Código fonte",
     "viewSource": "Ver fonte (linhas {{lines}})",
     "noSource": "(nenhuma fonte disponível)",
-    "benchRunner": "Executor de referência",
     "scoreZoo": "Marque um Alpha Zoo em um universo",
     "scoreDesc": "Calcula IC/IR para cada alfa no Alpha Zoo selecionado durante o universo e período escolhido e, em seguida, classifica-os como vivos/invertidos/mortos.",
     "period": "Período",
@@ -1778,7 +1811,6 @@
     "meanIc": "IC médio",
     "ir": "RI",
     "category": "Categoria",
-    "headToHeadCompare": "Comparação cara a cara",
     "compareAlphas": "Compare alfas lado a lado",
     "compareDesc": "Compara apenas os alfas que você escolhe em um universo e período e, em seguida, classifica-os por IC / IR com a diferença para o líder - muito mais rápido do que analisar um Alpha Zoo inteiro quando você se preocupa apenas com uma lista restrita.",
     "alphaIds": "IDs alfa",
@@ -2031,28 +2063,6 @@
     "pineScript": "Pine Script",
     "shadowReport": "Relatório de sombra"
   },
-  "home": {
-    "title": "Pesquisa de estratégia quantitativa baseada em IA",
-    "subtitle": "Descreva uma estratégia de negociação em linguagem natural. O agente gera código, executa backtests e otimiza – tudo ao vivo.",
-    "startResearch": "Iniciar pesquisa",
-    "featureAgent": "Agente de IA",
-    "featureAgentDesc": "Geração de estratégia de linguagem natural com raciocínio ReAct",
-    "featureBacktest": "Backtest integrado",
-    "featureBacktestDesc": "Múltiplas fontes de dados cobrindo análises quantitativas de ações A",
-    "featureStreaming": "Transmissão ao vivo",
-    "featureStreamingDesc": "Observe o agente pensar, chamar ferramentas e iterar",
-    "featureReplay": "Repetição de estratégia",
-    "featureReplayDesc": "Analisador de diário de operações + Conta Shadow: extraia suas regras, faça o backtest delas e atribua o delta de PnL.",
-    "howItWorksTitle": "Como funciona",
-    "step1Title": "1. Descreva sua estratégia",
-    "step1Desc": "Diga ao agente o que você deseja testar, em linguagem simples – sem necessidade de código.",
-    "step2Title": "2. Observe a pesquisa e o backtest",
-    "step2Desc": "O agente planeja, extrai dados de mercado e executa o backtest ao vivo, para que você possa acompanhar cada passo.",
-    "step3Title": "3. Revise os resultados",
-    "step3Desc": "Veja as métricas de desempenho, a curva de patrimônio e o Pine Script exportável para a estratégia.",
-    "step4Title": "4. Transmita ao vivo quando estiver pronto",
-    "step4Desc": "Opcionalmente, aprove um mandato de negociação com limites explícitos — nada é negociado sem a sua confirmação."
-  },
   "errorBoundary": {
     "somethingWrong": "Algo deu errado. Atualize a página para continuar."
   },
@@ -2196,7 +2206,6 @@
     "write_file": "Gerar código"
   },
   "runDashboard": {
-    "eyebrow": "Pesquisa quantitativa · Backtest",
     "noBacktestData": "Esta execução não tem dados de backtest para traçar",
     "noBacktestDataStudioHint": "Em vez disso, parece uma análise de portfólio/risk – verifique a guia Studio para ver seus números.",
     "engine": "motor",
@@ -2610,7 +2619,6 @@
   },
   "paper": {
     "title": "Negociação simulada",
-    "description": "Teste operações diárias com recursos fictícios. Nenhuma ordem é enviada à corretora. Os resultados excluem dividendos em dinheiro e não representam retorno total.",
     "accounts": "Contas",
     "newAccount": "Nova conta simulada",
     "eligible": "Disponível a partir de {{date}}; feriados aguardam a próxima sessão disponível.",
@@ -2650,7 +2658,58 @@
     "nav": "Patrimônio líquido",
     "us": "Ações dos EUA · USD",
     "hk": "Ações de Hong Kong · HKD",
-    "cn_a": "Ações A da China · CNY"
+    "cn_a": "Ações A da China · CNY",
+    "on": "em",
+    "startedAt": "Iniciada em {{date}}",
+    "countsFrom": "Conta a partir de {{date}}",
+    "refresh": "Atualizar",
+    "stop": "Parar",
+    "delete": "Excluir",
+    "waitingBanner": "Aguardando as primeiras barras após {{date}}. Os resultados simulados começam na primeira barra depois que você iniciou.",
+    "unknownError": "Falha ao atualizar.",
+    "equity": "Patrimônio",
+    "pnl": "P&L",
+    "return": "Retorno",
+    "maxDrawdown": "Drawdown máximo",
+    "sharpe": "Sharpe",
+    "trades": "Operações",
+    "equityCurve": "Curva de patrimônio",
+    "noCurve": "A curva de patrimônio aparece após duas barras.",
+    "positions": "Posições",
+    "noPositions": "Nenhuma posição aberta",
+    "weight": "Peso",
+    "tradeHistory": "Histórico de operações",
+    "noTrades": "Ainda não há operações",
+    "time": "Hora",
+    "returnPct": "Retorno",
+    "showAll": "Mostrar todas as {{count}}",
+    "footnote": "As execuções simuladas reproduzem a estratégia testada no backtest com dados novos a cada atualização. Se um provedor de dados revisar barras passadas, o histórico pode mudar um pouco. Nenhuma ordem é enviada a nenhuma corretora ou exchange.",
+    "stopTitle": "Parar esta execução simulada? Ela mantém o histórico e deixa de contar novas barras.",
+    "cancel": "Cancelar",
+    "deleteTitle": "Excluir esta execução simulada?",
+    "deleteBody": "O histórico e os resultados são removidos definitivamente.",
+    "startRun": "Iniciar execução simulada",
+    "noRuns": "Ainda não há execuções simuladas",
+    "noRunsBody": "Inicie uma a partir de qualquer backtest concluído. Os resultados contam apenas a partir do momento em que você inicia.",
+    "runsList": "Execuções simuladas",
+    "active": "Ativa",
+    "stopped": "Parada",
+    "waiting": "Aguardando dados",
+    "error": "Erro",
+    "updated": "Atualizada {{when}}",
+    "pickRun": "Selecione uma execução simulada para ver os resultados",
+    "startDesc": "Reproduz um backtest concluído para a frente com dados novos. Os resultados contam apenas a partir de agora.",
+    "backtestRun": "Execução de backtest",
+    "noBacktests": "Nenhum backtest concluído encontrado. Execute um backtest primeiro.",
+    "name": "Nome",
+    "startingCash": "Saldo inicial",
+    "cashHint": "Deixe vazio para usar a configuração do backtest",
+    "tabs": "Visões da negociação simulada",
+    "tabRuns": "Execuções de estratégias",
+    "tabManual": "Contas manuais",
+    "pageDescription": "Teste estratégias com dados de mercado ao vivo sem enviar ordens reais.",
+    "colSymbol": "Símbolo",
+    "colQty": "Qtd."
   },
   "shannon": {
     "regionLabel": "Diagnóstico de carteira Shannon",
@@ -2680,7 +2739,7 @@
     "sourceLimitations": "A fonte informou limitações; interprete estas estimativas com cautela.",
     "styleTitle": "Exposição de estilo da carteira",
     "styleAxis": "Menor ← Referência do modelo 0 → Maior",
-    "styleNote": "Vermelho indica maior e verde menor; a distância do zero mostra a inclinação. Os valores são características padronizadas, não pesos nem previsões; o beta de mercado é padronizado, não o beta bruto de regressão. Cobertura ausente ou incompleta aparece como —.",
+    "styleNote": "Vermelho indica maior e verde menor; a distância do zero mostra a inclinação. Os valores são características padronizadas, não pesos nem previsões; o beta de mercado é padronizado, não o beta bruto de regressão. Cobertura ausente ou incompleta aparece como um traço.",
     "viewStockStyles": "Ver estilos por ação",
     "heatmapTitle": "Mapa de calor de exposição de estilo por ação",
     "heatmapNote": "As linhas são ações; as colunas seguem a ordem dos fatores acima. Vermelho é maior e verde menor; as cores saturam em ±2 sem cortar os valores. São características de cada ação, não uma decomposição da contribuição da ação para o risco.",
@@ -2774,5 +2833,71 @@
     "rolling": "Móvel",
     "expanding": "Expansiva",
     "invalidChoices": "Insira um valor para cada opção."
+  },
+  "claude": {
+    "placeholder": "Pergunte ao Claude sobre suas estratégias",
+    "stop": "Parar",
+    "send": "Enviar",
+    "notConnected": "O Claude não está conectado",
+    "notConnectedHint": "Defina ANTHROPIC_API_KEY em agent/.env, ou execute claude uma vez em um terminal para entrar, e reabra este painel.",
+    "loading": "Carregando",
+    "authKey": "Usando chave de API",
+    "authLogin": "Usando seu login do Claude",
+    "title": "Claude",
+    "newChat": "Novo chat",
+    "retry": "Tentar novamente",
+    "usedTool": "{{name}} usado",
+    "toolRunning": "Em execução",
+    "toolDone": "Concluído",
+    "toolFailed": "Falhou",
+    "chat": "Chat",
+    "terminal": "Terminal",
+    "dock": "Assistente Claude",
+    "closeDock": "Fechar assistente",
+    "close": "Fechar o Claude ({{shortcut}})",
+    "open": "Abrir o Claude ({{shortcut}})",
+    "suggestRuns": "Liste minhas últimas execuções de backtest",
+    "suggestPaper": "Inicie uma execução simulada a partir do meu melhor backtest",
+    "suggestCheck": "Como estão minhas execuções simuladas?"
+  },
+  "terminal": {
+    "comingSoon": "O terminal só está disponível no app para desktop",
+    "title": "Claude Code com as ferramentas do Vibe Crypto",
+    "restart": "Reiniciar"
+  },
+  "wallet": {
+    "connect": "Conectar carteira",
+    "noWalletTitle": "Nenhuma carteira de navegador encontrada",
+    "desktopNote": "Carteiras de navegador não funcionam dentro do app para desktop. Abra {{url}} em um navegador com MetaMask para conectar.",
+    "linkCopied": "Link copiado",
+    "copyLink": "Copiar link",
+    "noWalletText": "Instale o MetaMask para ver aqui o endereço e o saldo da sua carteira.",
+    "getMetaMask": "Obter o MetaMask",
+    "popoverLabel": "Detalhes da carteira",
+    "copyAddress": "Copiar endereço",
+    "addressCopied": "Endereço copiado",
+    "refresh": "Atualizar saldo",
+    "readOnly": "Somente leitura. O Vibe Crypto nunca pede que sua carteira assine nada.",
+    "forget": "Esquecer carteira",
+    "forgetNote": "Para desconectar por completo, remova também este site no MetaMask.",
+    "declined": "A conexão da carteira foi recusada"
+  },
+  "about": {
+    "featureResearch": "Agente de pesquisa",
+    "featureResearchDesc": "Descreva uma estratégia em linguagem simples e deixe o agente escrevê-la e refiná-la.",
+    "featureBacktest": "Backtesting",
+    "featureBacktestDesc": "Teste ideias em cripto, ações, futuros e mais, com fontes de dados integradas.",
+    "featurePaper": "Negociação simulada",
+    "featurePaperDesc": "Execute uma estratégia para a frente com fundos simulados e acompanhe lucros e perdas.",
+    "featureClaude": "Assistente Claude",
+    "featureClaudeDesc": "Converse com o Claude no painel lateral ou conecte-o pelo terminal.",
+    "stepDescribe": "Descreva a estratégia que você quer testar.",
+    "stepResearch": "O agente pesquisa, escreve o código e executa um backtest.",
+    "stepPaper": "Revise os resultados e depois execute a estratégia para a frente no modo simulado.",
+    "stepLive": "Conecte uma corretora ou exchange quando estiver pronto para operar de verdade.",
+    "title": "Vibe Crypto",
+    "summary": "Um espaço de trabalho local para pesquisar, fazer backtests e negociar de forma simulada cripto, ações e outros mercados, com o Claude integrado.",
+    "start": "Começar a pesquisar",
+    "how": "Como funciona"
   }
 }

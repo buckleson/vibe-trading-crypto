@@ -215,7 +215,7 @@ export function PaperRunDetail({ runId, onRun, onDeleted }: {
               <Table>
                 <THead>
                   <TR>
-                    <TH>{t("paper.symbol", { defaultValue: "Symbol" })}</TH>
+                    <TH>{t("paper.colSymbol", { defaultValue: "Symbol" })}</TH>
                     <TH numeric>{t("paper.weight", { defaultValue: "Weight" })}</TH>
                   </TR>
                 </THead>
@@ -242,9 +242,9 @@ export function PaperRunDetail({ runId, onRun, onDeleted }: {
                   <THead>
                     <TR>
                       <TH>{t("paper.time", { defaultValue: "Time" })}</TH>
-                      <TH>{t("paper.symbol", { defaultValue: "Symbol" })}</TH>
+                      <TH>{t("paper.colSymbol", { defaultValue: "Symbol" })}</TH>
                       <TH>{t("paper.side", { defaultValue: "Side" })}</TH>
-                      <TH numeric>{t("paper.quantity", { defaultValue: "Qty" })}</TH>
+                      <TH numeric>{t("paper.colQty", { defaultValue: "Qty" })}</TH>
                       <TH numeric>{t("paper.price", { defaultValue: "Price" })}</TH>
                       <TH numeric>{t("paper.pnl", { defaultValue: "P&L" })}</TH>
                       <TH numeric>{t("paper.returnPct", { defaultValue: "Return" })}</TH>

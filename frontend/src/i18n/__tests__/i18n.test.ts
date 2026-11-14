@@ -182,6 +182,7 @@ describe("new locale content", () => {
       "R²", "Beta", "Delta", "Pearson", "Spearman", "Spot", "Gamma", "Theta", "Vega", "Rho",
       "Alpha Zoo", "IR", "IC>0", "n", "ID", "Qlib 158", "GTJA 191", "Momentum",
       "Pine Script v6", "Pine Script", "Test", "Normal", "name@example.com",
+      "Claude", "Vibe Crypto", "Terminal",
     ]);
     const copied = Object.entries(collectStrings(locales.tr)).filter(([key, value]) => {
       const prose = value.replace(/\{\{.*?\}\}/g, "");

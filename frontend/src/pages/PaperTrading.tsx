@@ -37,7 +37,7 @@ export function PaperTrading() {
     <Page width="wide">
       <PageHeader
         title={t("paper.title", { defaultValue: "Paper trading" })}
-        description={t("paper.description", { defaultValue: "Test strategies on live market data without placing real orders." })}
+        description={t("paper.pageDescription", { defaultValue: "Test strategies on live market data without placing real orders." })}
         actions={
           <Button
             variant="primary"

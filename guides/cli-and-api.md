@@ -229,16 +229,56 @@ vibe-crypto serve --port 8899
 | `POST` | `/sessions/{id}/cancel` | Stop the session's in-flight run (recorded as cancelled, not failed) |
 | `POST` | `/sessions/{id}/title/auto` | Summarize the first exchange into a session title (never overwrites a manual rename) |
 | `GET` | `/correlation/regime` | Correlation edge-density regime timeline |
-| `GET` | `/agents.json` · `POST` `/v1/query` | OpenBB Workspace bridge — registered only with the optional `openbb` extra; `/v1/query` requires auth |
+| `GET` | `/agents.json` · `POST` `/v1/query` | OpenBB Workspace bridge, registered only with the optional `openbb` extra |
 
-Interactive docs are available at `http://localhost:8899/docs` in keyless
-loopback development mode. When `API_AUTH_KEY` is configured, `/docs` and
-`/redoc` are disabled; authenticated tooling can fetch `/openapi.json` with an
-`Authorization: Bearer <key>` header.
+Interactive docs are available at `http://localhost:8899/docs` (and `/redoc`) to clients on this computer. The paper run and Claude chat routes are described below.
+
+### Paper runs
+
+A paper run replays a backtested strategy forward from the moment you start it, using the same engine as the backtest. Details: [ADR 0004](../docs/vibe-crypto/ADR/0004-paper-trading.md). Errors are `404 {"detail":"Paper run not found"}` and `422 {"detail":"<message>"}`.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/paper-runs` | Create a run. Body: `{"run_id": "<backtest run id>", "label": "optional", "initial_cash": 10000, "warmup_days": 180}`. Only `run_id` is required. Returns the run document. |
+| `GET` | `/api/paper-runs` | List runs, newest first |
+| `GET` | `/api/paper-runs/{id}` | Run detail: `run`, `equity`, `trades` (newest first), `positions`. Does not recompute. |
+| `POST` | `/api/paper-runs/{id}/refresh` | Recompute with the latest data and return the detail. Can take several seconds. |
+| `POST` | `/api/paper-runs/{id}/stop` | Freeze the end date at today and return the detail. A stopped run can still be refreshed. |
+| `DELETE` | `/api/paper-runs/{id}` | Delete the run. Returns `{"deleted": true}`. |
+
+The run document has `id`, `label`, `source_run_id`, `codes`, `source`, `interval`, `initial_cash`, `started_at`, `evaluation_start`, `status` (`active` or `stopped`), `state` (`waiting`, `ok` or `error`), `last_error` and `summary` (`equity`, `pnl`, `total_return`, `max_drawdown`, `sharpe`, `trade_count`, `bars`, `as_of`). State is `waiting` until two forward bars exist. There is no background scheduler: call refresh to update a run. Manual paper accounts for `us`, `hk` and `cn_a` remain under `/api/paper-accounts`.
+
+### Claude chat
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/claude/status` | Readiness probe: `{"available", "sdk_version", "auth", "model", "error"}`. `auth` is `api_key`, `claude_login` or `unknown`. Never starts a process. |
+| `POST` | `/api/claude/chat` | Send one message and stream the reply as server-sent events |
+
+`POST /api/claude/chat` takes `{"message": "...", "session_id": "optional, resumes a conversation", "model": "optional"}`. Each frame is `event: <type>` followed by `data: <json>`. Event types:
+
+| Event | Fields |
+|-------|--------|
+| `session` | `session_id`, sent first so the client can resume later |
+| `text` | `delta`, a piece of the reply |
+| `tool_use` | `id`, `name`, `input` |
+| `tool_result` | `tool_use_id`, `is_error`, `preview` (first 2000 characters) |
+| `done` | `session_id`, `is_error`, `cost_usd`, `duration_ms` |
+| `error` | `message` |
+
+The chat gives Claude only the Vibe Crypto MCP tools (no file or shell tools) and does not read your Claude Code settings. It needs `ANTHROPIC_API_KEY` or a logged-in Claude Code. See [docs/vibe-crypto/CLAUDE_CODE.md](../docs/vibe-crypto/CLAUDE_CODE.md) for the MCP server itself.
 
 ### Security defaults
 
-For localhost development, `vibe-crypto serve` keeps the browser workflow simple. For any non-local client, sensitive API endpoints require `API_AUTH_KEY`; use `Authorization: Bearer <key>` for JSON/upload requests. Browser EventSource streams are handled by the Web UI after you enter the same key once in Settings.
+Vibe Crypto is a local, single-user app and has no login, API key or token. Instead the API guards itself against other machines and other websites ([ADR 0002](../docs/vibe-crypto/ADR/0002-remove-auth.md)):
+
+- Requests are accepted only from loopback peers. Anything else gets `403`. Remote access (LAN, phone, another computer) is not supported.
+- Host headers are checked, which stops DNS rebinding.
+- Cross-site browser requests that change state are rejected, so a website you visit cannot drive the local API.
+- Security headers are set on every response.
+- Under Docker, publish the port on `127.0.0.1` and set `VIBE_TRADING_TRUST_DOCKER_LOOPBACK=1`.
+
+Broker and exchange credentials are separate. They are stored locally and are not an app login.
 
 Shell-capable process tools (`bash` / `background_run` / `cancel_background`) are enabled only for the interactive local CLI. Every other surface — the HTTP/SSE API and the MCP server on **all** transports (stdio included) — keeps them off unless you explicitly opt in with `VIBE_TRADING_ENABLE_SHELL_TOOLS=1` (or pass `--enable-shell-tools` to `vibe-crypto-mcp`). Transport type never implicitly grants shell access. `cancel_background` stops only the tracked task ID returned by `background_run`; broad Python process-name termination is refused because it could terminate Vibe Crypto itself. A background task and the notice that it finished belong to the session or swarm worker that started them: another conversation cannot list the task, read its output or cancel it, and only the owner is shown the result. Document and journal readers are limited to upload/import roots by default; place files under `~/.vibe-trading/uploads`, `~/.vibe-trading/runs`, `./uploads`, `./data` (or the legacy `agent/uploads` / `agent/runs`), or add a dedicated directory through `VIBE_TRADING_ALLOWED_FILE_ROOTS`. Sessions, runs, swarm runs, uploads, and the `sessions.db` index live under `~/.vibe-trading` (relocatable via the `VIBE_TRADING_HOME` shell environment variable); pre-existing history is moved there automatically on first run.
 
@@ -248,7 +288,7 @@ Generated backtest code runs as a local Python subprocess and can make network r
 
 The Web UI Settings page lets local users update the LLM provider/model, base URL, generation parameters, reasoning effort, and optional market data credentials such as the Tushare token. Settings are persisted to `agent/.env`; provider defaults are loaded from `agent/src/providers/llm_providers.json`.
 
-Settings reads are side-effect free: `GET /settings/llm` and `GET /settings/data-sources` never create `agent/.env`, and they only return project-relative paths. Settings reads and writes can expose credential state or update credentials/runtime environment, so they require `API_AUTH_KEY` when configured. If `API_AUTH_KEY` is unset for dev mode, settings access is accepted only from loopback clients.
+Settings reads are side-effect free: `GET /settings/llm` and `GET /settings/data-sources` never create `agent/.env`, and they only return project-relative paths. Settings reads and writes can expose credential state or update credentials/runtime environment, so they are accepted only from this computer and, for writes, only from same-site requests.
 
 The same Settings page includes an **IM Channels** panel for local operators. It polls `/channels/status`, shows configured/enabled/available/loaded/running states, surfaces adapter recovery hints, and can start or stop the configured channel runtime without going back to the terminal.
 
@@ -278,7 +318,7 @@ curl http://localhost:8899/scheduled-runs
 curl -X DELETE http://localhost:8899/scheduled-runs/<job_id>
 ```
 
-Each fire runs the `prompt` through a fresh agent session (optional backtest parameters go in `config`), and jobs persist under `~/.vibe-trading/` so they survive restarts. Without the flag, the `/scheduled-runs` endpoints still record jobs but nothing fires. Add `-H "Authorization: Bearer <key>"` to each call when `API_AUTH_KEY` is set.
+Each fire runs the `prompt` through a fresh agent session (optional backtest parameters go in `config`), and jobs persist under `~/.vibe-trading/` so they survive restarts. Without the flag, the `/scheduled-runs` endpoints still record jobs but nothing fires.
 
 The agent sees exactly one scheduling tool, `scheduled_research`. Its read
 actions inspect status/jobs/playbooks; `propose_create` and `propose_cancel`

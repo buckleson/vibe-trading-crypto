@@ -1,9 +1,9 @@
 # Research Lab
 
-Open **Analysis → Research Lab** (`/research-lab`). The Web UI, CLI, authenticated
+Open **Analysis → Research Lab** (`/research-lab`). The Web UI, CLI, local
 REST API and Agent/MCP `research_lab` tool execute the same persisted jobs.
 For this checkout, activate the project environment with `source .venv/bin/activate`,
-or invoke `./.venv/bin/vibe-trading` directly. An old console script in another
+or invoke `./.venv/bin/vibe-crypto` directly. An old console script in another
 Python environment uses that environment’s dependencies.
 
 Costs and parameter studies reuse a completed backtest's exported inputs and
@@ -113,8 +113,8 @@ reported as live Agent performance. See the [harness schema](../agent/evals/harn
 - `GET /api/research-lab/jobs/{id}`: durable status, progress, request and result.
 - `GET /api/research-lab/jobs/{id}/report`: completed JSON report.
 
-All routes use application authentication; submission uses settings-write
-protection. The API admits two simultaneous workers. Saved jobs live under the
+All routes accept requests from this computer only; submission also rejects
+cross-site requests. The API admits two simultaneous workers. Saved jobs live under the
 configured runs directory, and Web's `?job=...` URL recovers a report after a
 reload. An exited worker is shown as interrupted rather than running forever.
 CLI `research-lab show JOB_ID --json` reads the same result. Exit codes are

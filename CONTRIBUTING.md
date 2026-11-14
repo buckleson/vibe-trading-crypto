@@ -1,13 +1,19 @@
 # Contributing to Vibe Crypto
 
-Vibe Crypto is a natural-language finance research AI agent (FastAPI + ReAct
-agent backend, Vite+React frontend, vectorized daily and options backtesting).
+Vibe Crypto is a local app for AI-assisted research, backtesting and paper
+trading (FastAPI + ReAct agent backend, Vite+React frontend, Electron desktop
+shell, vectorized backtesting). Repository:
+<https://github.com/buckleson/vibe-trading-crypto>, a fork of the HKUDS
+project under the MIT license.
 This guide covers contribution governance: the Developer Certificate of Origin
 (DCO) sign-off requirement, the reviewer checklist for Alpha Zoo factor
 contributions, and the quickstart for adding a new alpha.
 
 For general project setup (`pip install -e ".[dev]"`, dev servers,
-`pytest --ignore=agent/tests/e2e_backtest`), see the README. For bug reports
+`pytest --ignore=agent/tests/e2e_backtest`), see the README. Run one test
+file at a time while developing, for example
+`python -m pytest agent/tests/test_paper_runs.py -q`, and `cd frontend && npx vitest run`
+for the web UI. For bug reports
 and feature requests, use the GitHub issue templates.
 
 The Web UI bounds API requests (including reading the response body) to two
@@ -95,10 +101,28 @@ For AI-assisted or automation-assisted contributions, also see
 local checks, higher-risk broker/MCP/credential surfaces, and the expected PR
 risk notes for agent-authored changes.
 
+## Fork documentation conventions
+
+Project decisions and handoff notes live in `docs/vibe-crypto/`:
+
+- `ADR/NNNN-title.md`: one file per architecture decision, with context,
+  decision, consequences and rejected alternatives.
+- `handoff/<TASK_ID>.md`: one note per task with what changed, commands run and
+  their results, known gaps and follow-ups.
+- `HANDOFF.md` is the merged current state, run instructions and open risks.
+  `TODO.md` is the checklist; tick a box only after verifying it in the repo.
+- UI changes follow `cook/BRIEF.md`. New copy uses
+  `t("ns.key", { defaultValue: "English" })` and the key is added to every
+  locale file in the same change.
+- Write docs in plain English with sentence case headings, no em dashes and no
+  emoji.
+
 ## Keep internal documents local
 
-The repository-root `docs/` directory holds local working notes and must not
-be committed. Local agent instructions and memory files (`AGENTS.md`,
+The repository-root `docs/` directory holds local working notes and is ignored by
+Git, except for the fork documentation in `docs/vibe-crypto/` described above
+(tracking it needs `!docs/vibe-crypto/` in `.gitignore` and an allowlist entry in
+`tools/ci_private_files_gate.py`; see `docs/vibe-crypto/HANDOFF.md`). Local agent instructions and memory files (`AGENTS.md`,
 `AGENTS.override.md`, `CLAUDE.md`, `CLAUDE.local.md`, `MEMORY.md`,
 `CODEX_MEMORY.md`, and `NOTES.md`) must also remain untracked at any depth.
 Publish project documentation in `README.md`, `guides/`, or the relevant source directory.

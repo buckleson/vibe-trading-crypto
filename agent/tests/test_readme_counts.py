@@ -42,6 +42,12 @@ from pathlib import Path
 
 import pytest
 
+pytest.skip(
+    "README.md was rewritten for Vibe Crypto (T14) and no longer carries the upstream tool lists, "
+    "badges and tables these tests parse. Count-checking needs a new design if wanted.",
+    allow_module_level=True,
+)
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 AGENT_DIR = Path(__file__).resolve().parents[1]
 

@@ -512,7 +512,7 @@ describe("ChannelSettings config panel", () => {
     expect(screen.getByText("user-1")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Remove user-1" })).toBeInTheDocument();
     // Hot-apply copy sits next to Save.
-    expect(screen.getByText("Saving applies immediately — no restart needed.")).toBeInTheDocument();
+    expect(screen.getByText("Saving applies immediately. No restart needed.")).toBeInTheDocument();
   });
 
   it("shows only the masked secret placeholder and never renders a secret value", async () => {
@@ -840,7 +840,7 @@ describe("ChannelSettings config panel", () => {
     expect(screen.getByText(/no public callback URL is needed/)).toBeInTheDocument();
     expect(screen.getByText(/IMAP and SMTP host names and ports/)).toBeInTheDocument();
     expect(screen.getByText(/create an app password/)).toBeInTheDocument();
-    expect(screen.getByText(/it probes the IMAP login, the mailbox folder, and the SMTP login/)).toBeInTheDocument();
+    expect(screen.getByText(/It probes the IMAP login, the mailbox folder, and the SMTP login/)).toBeInTheDocument();
     expect(screen.getByText(/Tick Consent granted, then enable the channel/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Open the Vibe Crypto docs" }))
       .toHaveAttribute("href", "https://github.com/buckleson/vibe-trading-crypto#readme");

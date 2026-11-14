@@ -1,5 +1,7 @@
 # News archive
 
+> Upstream news before the fork. These entries come from the HKUDS project that Vibe Crypto was forked from, before it was renamed. They are kept as history and describe the upstream project, not this one.
+
 ## 📰 News
 
 - **2026-11-10** 📊 **Interactive IV surfaces and options analysis fixes** — Edit strike/expiry IV grids in Options Lab, with observed/interpolated labels and no extrapolation ([#2186](https://github.com/buckleson/vibe-trading-crypto/pull/2186)).

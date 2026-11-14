@@ -647,7 +647,7 @@ export function Settings() {
                   <Field
                     label={t("settings.gildataToken")}
                     htmlFor="gildata-token"
-                    hint={t("settings.gildataTokenDesc", { defaultValue: "Optional Gildata data credentials." })}
+                    hint={t("settings.gildataTokenDesc", { defaultValue: "Optional Gildata data: adjusted A-share daily bars, raw HK/index bars, OTC fund NAVs, and China macro, announcement and research tools." })}
                   >
                     <SecretInput
                       id="gildata-token"

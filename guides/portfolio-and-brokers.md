@@ -290,7 +290,7 @@ state under the existing mandate gate.
 
 Configure cadence, a once-daily wall-clock time/timezone, and daily budgets in
 **Runtime → Model schedule and spending limits**, or the chat runner panel.
-Stop the runner before editing. The CLI uses the same authenticated API:
+Stop the runner before editing. The CLI uses the same local API:
 
 ```bash
 vibe-crypto connector runner-settings --profile robinhood-live-mcp

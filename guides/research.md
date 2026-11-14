@@ -72,7 +72,7 @@ To export one selected comparison instead of the full series, provide both `from
 ### Strategy & Backtesting
 
 **Daily paper trading** is available in the Web sidebar (`/paper-trading`),
-`vibe-crypto paper`, and the authenticated `/api/paper-accounts` API. Start today
+`vibe-crypto paper`, and the local `/api/paper-accounts` API. To replay a backtested strategy forward on live data, use paper runs (`/paper-trading`, tab Strategy runs; see [Paper runs](cli-and-api.md#paper-runs)). Start today
 or next session with configurable cash/positions; settle completed daily bars
 and inspect fills, rejections and NAV history. Strategy history stops before the
 execution date, and each day receives the ledger after preceding fills. The

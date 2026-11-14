@@ -97,7 +97,7 @@ LANGCHAIN_MODEL_NAME=claude-opus-5-5
 
 ```bash
 git clone https://github.com/buckleson/vibe-trading-crypto.git
-cd Vibe Crypto
+cd vibe-trading-crypto
 cp agent/.env.example agent/.env
 # Edit agent/.env — uncomment your LLM provider and set API key
 docker compose up --build
@@ -116,7 +116,7 @@ Open `http://localhost:8899`. Backend + frontend in one container.
 >
 > If you use `docker exec` directly, pass `-it` before the container name.
 
-Docker publishes the backend on `127.0.0.1:8899` by default and runs the app as a non-root container user. If you intentionally expose the API beyond your own machine, set a strong `API_AUTH_KEY` and send `Authorization: Bearer <key>` from clients.
+Docker publishes the backend on `127.0.0.1:8899` and runs the app as a non-root container user. The compose file sets `VIBE_TRADING_TRUST_DOCKER_LOOPBACK=1` so the container accepts requests that Docker forwards from your own machine. Keep the port bound to `127.0.0.1`: Vibe Crypto has no login, and remote access is not supported (see [Security defaults](cli-and-api.md#security-defaults)).
 
 > [!NOTE]
 > **Using Ollama with Docker:** the container reaches a host-side Ollama via `host.docker.internal`, not `localhost` (inside the container `localhost` is the container itself). `docker-compose.yml` defaults `OLLAMA_BASE_URL` to `http://host.docker.internal:11434`; export `OLLAMA_BASE_URL` (or set it in a top-level `.env`) to point elsewhere. This relies on the `host-gateway` mapping in `extra_hosts`, which requires **Docker Engine ≥ 20.10 / Compose v2** (provided automatically on Docker Desktop).
@@ -127,7 +127,7 @@ Your data survives updates: persistent memory, the cross-session search index, u
 
 ```bash
 git clone https://github.com/buckleson/vibe-trading-crypto.git
-cd Vibe Crypto
+cd vibe-trading-crypto
 python -m venv .venv
 
 # Activate
@@ -137,6 +137,7 @@ source .venv/bin/activate          # Linux / macOS
 
 pip install -e .
 cp agent/.env.example agent/.env   # Edit — set your LLM provider API key
+vibe-crypto init                  # Creates ~/.vibe-trading/.env (optional if you edited agent/.env)
 vibe-crypto                       # Launch interactive TUI
 ```
 
@@ -154,7 +155,7 @@ vibe-crypto serve --port 8899
 cd frontend && npm install && npm run dev  # requires Node >= 22.22
 ```
 
-Open `http://localhost:5899`. The frontend proxies API calls to `localhost:8899`.
+Open `http://localhost:5899`. The frontend proxies API calls to `localhost:8899`. The UI has no login.
 
 **Production mode (single server):**
 
@@ -164,7 +165,7 @@ vibe-crypto serve --port 8899     # FastAPI serves dist/ as static files
 ```
 
 > [!NOTE]
-> `vibe-crypto serve` binds `0.0.0.0` and is loopback-only by default: opening the UI on the **same machine** (`http://localhost:8899`) works with zero config. If you browse from **another machine, a VM host, or a phone on your LAN**, sensitive endpoints return `403` and the chat shows "Remote API access requires an API key" — set a strong `API_AUTH_KEY` in `agent/.env`, restart, and enter the same key once in **Settings**. (Docker Desktop's host gateway: set `VIBE_TRADING_TRUST_DOCKER_LOOPBACK=1` with the default `127.0.0.1` port bind.)
+> Vibe Crypto is a local, single-user app with no login. The API accepts requests only from this computer, so opening the UI on the **same machine** (`http://localhost:8899`) works with zero config. Requests from another machine, a VM host or a phone on your LAN get `403`; remote access is not supported. Under Docker Desktop, publish the port on `127.0.0.1` and set `VIBE_TRADING_TRUST_DOCKER_LOOPBACK=1` (the compose file already does).
 
 </details>
 
@@ -173,6 +174,8 @@ vibe-crypto serve --port 8899     # FastAPI serves dist/ as static files
 See [MCP Plugin](mcp.md#-mcp-plugin) section below.
 
 ### Path D: ClawHub (one command)
+
+> The ClawHub skill is published by the upstream project and is not published for Vibe Crypto yet. The command below may not resolve.
 
 ```bash
 npx clawhub@latest install vibe-crypto --force
@@ -201,7 +204,6 @@ Copy `agent/.env.example` to `agent/.env` and uncomment the provider block you w
 | `VIBE_TRADING_BASH_POLICY` | No | Explicit `python-only` or `off` across providers; unconfigured retains prior defaults (`python-only` for Claude CLI, `off` otherwise) |
 | `CLAUDE_CLI_DENY_TOOL_PREFIXES` | No | Legacy alias for `VIBE_TRADING_DENY_TOOL_PREFIXES`, used when the generic name is unset |
 | `CLAUDE_CLI_BASH_POLICY` | No | Legacy alias for `VIBE_TRADING_BASH_POLICY`, used when the generic name is unset |
-| `API_AUTH_KEY` | Recommended for network deployments | Bearer token required when the API is reachable from non-local clients |
 | `VIBE_TRADING_ENABLE_SHELL_TOOLS` | No | Explicit opt-in for shell-capable tools in remote API/MCP-SSE style deployments |
 | `VIBE_TRADING_ALLOWED_FILE_ROOTS` | No | Extra comma-separated roots for document and broker-journal imports |
 | `VIBE_TRADING_ALLOWED_RUN_ROOTS` | No | Extra comma-separated roots for generated-code run directories |
@@ -216,7 +218,7 @@ Copy `agent/.env.example` to `agent/.env` and uncomment the provider block you w
 
 **PDF reports:** Ask the agent to save a report as PDF. `write_file` renders a
 `.pdf` target from Markdown/text with an embedded font; it does not need system
-Pango/Cairo or a font download. The Web chat provides an authenticated download
+Pango/Cairo or a font download. The Web chat provides a download
 link, and IM channels that support files receive the PDF as an attachment.
 External folders must be listed in `VIBE_TRADING_ALLOWED_WRITE_ROOTS`. Successful
 writes return the resolved path and byte count; a rejected path does not forbid
