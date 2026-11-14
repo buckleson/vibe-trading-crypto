@@ -7,9 +7,11 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    # Pushing a tag like v0.3.0 also publishes a GitHub Release with the installer.
+    tags: ["v*"]
 
 permissions:
-  contents: read
+  contents: write
 
 # `npm ci` runs a security audit after installing and can block for minutes
 # when the npm advisory endpoint is slow. CI only; local installs still audit.
@@ -140,3 +142,20 @@ jobs:
             desktop/electron/release/Vibe-Crypto-*-x64.exe
             desktop/electron/release/SHA256SUMS.txt
             desktop/electron/release/Vibe-Crypto-win-unpacked-x64.zip
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        working-directory: desktop/electron
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $installer = Get-ChildItem -LiteralPath release -Filter 'Vibe-Crypto-*-x64.exe' |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          $notes = @"
+          Vibe Crypto $env:GITHUB_REF_NAME for Windows x64.
+
+          Install: download $($installer.Name) and run it. The installer is unsigned, so Windows SmartScreen may warn; choose More info, then Run anyway.
+          Verify: compare the file's SHA-256 with SHA256SUMS.txt.
+          "@
+          gh release create $env:GITHUB_REF_NAME $installer.FullName release\SHA256SUMS.txt --title "Vibe Crypto $env:GITHUB_REF_NAME" --notes $notes
