@@ -7,8 +7,6 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    # Pushing a tag like v0.3.0 also publishes a GitHub Release with the installer.
-    tags: ["v*"]
 
 permissions:
   contents: write
@@ -144,18 +142,25 @@ jobs:
             desktop/electron/release/Vibe-Crypto-win-unpacked-x64.zip
 
       - name: Publish GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+        # Creates release v<desktop/electron package.json version> (and its tag)
+        # the first time that version is built on main. Bump the version to
+        # publish a new release; later pushes of the same version skip this.
+        if: github.ref == 'refs/heads/main'
         working-directory: desktop/electron
         shell: powershell
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          $tag = "v" + (Get-Content package.json -Raw | ConvertFrom-Json).version
+          gh release view $tag 2>$null
+          if ($LASTEXITCODE -eq 0) { "Release $tag already exists; skipping."; exit 0 }
           $installer = Get-ChildItem -LiteralPath release -Filter 'Vibe-Crypto-*-x64.exe' |
             Sort-Object LastWriteTime -Descending | Select-Object -First 1
           $notes = @"
-          Vibe Crypto $env:GITHUB_REF_NAME for Windows x64.
+          Vibe Crypto $tag for Windows x64.
 
           Install: download $($installer.Name) and run it. The installer is unsigned, so Windows SmartScreen may warn; choose More info, then Run anyway.
           Verify: compare the file's SHA-256 with SHA256SUMS.txt.
           "@
-          gh release create $env:GITHUB_REF_NAME $installer.FullName release\SHA256SUMS.txt --title "Vibe Crypto $env:GITHUB_REF_NAME" --notes $notes
+          gh release create $tag $installer.FullName release\SHA256SUMS.txt --target $env:GITHUB_SHA --title "Vibe Crypto $tag" --notes $notes
+          if ($LASTEXITCODE -ne 0) { throw "gh release create failed" }
