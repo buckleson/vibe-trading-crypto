@@ -60,7 +60,7 @@ jobs:
     # hang, fills the budget, and runner speed varies by minutes (the same
     # tree's 3.14 leg took 5m14s one run and 8m32s the other), so the limit
     # leaves room for that instead of being trimmed to the last good run.
-    timeout-minutes: 20
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
