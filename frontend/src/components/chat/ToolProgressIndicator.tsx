@@ -91,7 +91,7 @@ function ProgressRing({ current, total }: RingProps): JSX.Element {
   return (
     <svg
       viewBox="0 0 24 24"
-      className="h-3 w-3 text-primary shrink-0"
+      className="h-4 w-4 text-primary shrink-0"
       aria-hidden="true"
     >
       <circle
@@ -140,19 +140,19 @@ function ToolRow({ entries, eta }: RowProps): JSX.Element {
   }
 
   const icon = entry.status === "error"
-    ? <XCircle className="h-3 w-3 text-danger shrink-0" />
+    ? <XCircle className="h-4 w-4 text-danger shrink-0" />
     : entry.status === "ok"
-      ? <CheckCircle2 className="h-3 w-3 text-success shrink-0" />
+      ? <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
       : hasDeterminate
         ? <ProgressRing current={progress!.current!} total={progress!.total!} />
-        : <Loader2 className="h-3 w-3 animate-spin text-primary shrink-0" />;
+        : <Loader2 className="h-4 w-4 animate-spin text-primary shrink-0" />;
 
   const localized = localizeToolName(entry.tool);
   const details = [...new Set(entries.map(detailFor).filter(Boolean))];
   const detailText = details.slice(0, 3).join(", ") + (details.length > 3 ? ` +${details.length - 3}` : "");
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-x-2 gap-y-0.5 text-xs min-w-0">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-x-2 gap-y-0.5 text-[13px] min-w-0">
       {/* Primary row */}
       <div className="flex items-center gap-2 min-w-0">
         {icon}
@@ -163,12 +163,12 @@ function ToolRow({ entries, eta }: RowProps): JSX.Element {
           )}
         </span>
         {detailText && (
-          <span className="min-w-0 truncate text-muted-foreground/80">{detailText}</span>
+          <span className="min-w-0 truncate text-muted-foreground">{detailText}</span>
         )}
         {elapsedSeconds != null && (
           <span
             aria-hidden="true"
-            className="ml-auto sm:ml-0 tabular-nums text-[10px] text-muted-foreground/70 shrink-0"
+            className="ml-auto sm:ml-0 tabular-nums text-xs text-muted-foreground shrink-0"
           >
             {formatStepElapsed(elapsedSeconds)}
           </span>
@@ -193,7 +193,7 @@ function ToolRow({ entries, eta }: RowProps): JSX.Element {
           {eta != null && (
             <span
               aria-hidden="true"
-              className="text-[10px] text-muted-foreground/70 tabular-nums shrink-0"
+              className="text-xs text-muted-foreground tabular-nums shrink-0"
             >
               {t("toolProgress.etaSeconds" as never, { seconds: eta })}
             </span>
@@ -202,7 +202,7 @@ function ToolRow({ entries, eta }: RowProps): JSX.Element {
       )}
       {/* Tertiary row: message */}
       {message && (
-        <div className="text-[10px] text-muted-foreground/60 truncate min-w-0 sm:basis-full">
+        <div className="text-xs text-muted-foreground truncate min-w-0 sm:basis-full">
           {message}
         </div>
       )}
@@ -288,7 +288,7 @@ export const ToolProgressIndicator = memo(function ToolProgressIndicator({
   if (toolCalls.length === 0) return null;
 
   return (
-    <div className="min-w-0 space-y-1 border-s border-border/40 ps-3">
+    <div className="min-w-0 space-y-1 border-s border-border ps-3">
       {rows.map((entries) => (
         <ToolRow
           key={entries[0].id}

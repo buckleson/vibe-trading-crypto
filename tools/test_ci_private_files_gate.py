@@ -51,7 +51,7 @@ def test_force_added_internal_documents_fail(repo: Path, name: str, capsys) -> N
 
 
 def test_public_docs_and_ignored_local_notes_pass(repo: Path) -> None:
-    for name in ["wiki/docs/guide.md", "agent/src/skills/example/SKILL.md", "README.md"]:
+    for name in ["guides/guide.md", "agent/src/skills/example/SKILL.md", "README.md"]:
         path = repo / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("public documentation", encoding="utf-8")

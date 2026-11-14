@@ -8,8 +8,8 @@ async function loadApiModule() {
 
 describe("generated report download", () => {
   afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
-  it("downloads PDF bytes with bearer authentication and keeps the key out of the URL", async () => {
-    vi.stubGlobal("localStorage", { getItem: vi.fn((key) => key === "vibe_trading_api_auth_key" ? "report-test-key" : "en"), setItem: vi.fn(), removeItem: vi.fn() });
+  it("downloads PDF bytes without any credentials", async () => {
+    vi.stubGlobal("localStorage", { getItem: vi.fn(() => "en"), setItem: vi.fn(), removeItem: vi.fn() });
     const fetch = vi.fn().mockResolvedValue(new Response("%PDF-contents", { headers: { "content-type": "application/pdf" } }));
     vi.stubGlobal("fetch", fetch);
     const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
@@ -19,7 +19,7 @@ describe("generated report download", () => {
     });
     const { downloadGeneratedReport } = await loadApiModule();
     await downloadGeneratedReport("a".repeat(32), "研究报告.pdf");
-    expect(fetch).toHaveBeenCalledWith(`/api/reports/${"a".repeat(32)}`, expect.objectContaining({ headers: { Authorization: "Bearer report-test-key" } }));
+    expect(fetch).toHaveBeenCalledWith(`/api/reports/${"a".repeat(32)}`, expect.not.objectContaining({ headers: expect.anything() }));
     expect(click).toHaveBeenCalledOnce();
   });
 });
@@ -95,9 +95,9 @@ describe("api request helper", () => {
     } satisfies Partial<ApiError>);
   });
 
-  it("posts an authenticated connector verification request with an encoded profile id", async () => {
+  it("posts a connector verification request with an encoded profile id", async () => {
     vi.stubGlobal("localStorage", {
-      getItem: vi.fn(() => "remote-test-key"),
+      getItem: vi.fn(() => "en"),
       setItem: vi.fn(),
       removeItem: vi.fn(),
     });
@@ -116,14 +116,14 @@ describe("api request helper", () => {
       "/live/connectors/longbridge%2Flive%20sdk/verify?force=true",
       expect.objectContaining({
         method: "POST",
-        headers: expect.objectContaining({ Authorization: "Bearer remote-test-key" }),
+        headers: expect.not.objectContaining({ Authorization: expect.anything() }),
       }),
     );
   });
 
-  it("sends the stored API key when fetching a correlation matrix", async () => {
+  it("sends no credentials when fetching a correlation matrix", async () => {
     vi.stubGlobal("localStorage", {
-      getItem: vi.fn(() => "remote-test-key"),
+      getItem: vi.fn(() => "en"),
       setItem: vi.fn(),
       removeItem: vi.fn(),
     });
@@ -144,14 +144,14 @@ describe("api request helper", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "/correlation?codes=A%2CB&days=90&method=pearson",
       expect.objectContaining({
-        headers: expect.objectContaining({ Authorization: "Bearer remote-test-key" }),
+        headers: expect.not.objectContaining({ Authorization: expect.anything() }),
       }),
     );
   });
 
-  it("sends the stored API key when fetching a correlation regime timeline", async () => {
+  it("sends no credentials when fetching a correlation regime timeline", async () => {
     vi.stubGlobal("localStorage", {
-      getItem: vi.fn(() => "remote-test-key"),
+      getItem: vi.fn(() => "en"),
       setItem: vi.fn(),
       removeItem: vi.fn(),
     });
@@ -178,7 +178,7 @@ describe("api request helper", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "/correlation/regime?codes=A%2CB&days=90",
       expect.objectContaining({
-        headers: expect.objectContaining({ Authorization: "Bearer remote-test-key" }),
+        headers: expect.not.objectContaining({ Authorization: expect.anything() }),
       }),
     );
   });

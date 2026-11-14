@@ -1,12 +1,13 @@
 # Core LLM & Orchestration
 rich>=13.0.0
+claude-agent-sdk>=0.2.172,<0.3
 prompt_toolkit>=3.0.0
 pyyaml>=6.0.0
 langchain>=1.3.9,<2
 langchain-core>=1.0.0,<2
 langchain-openai>=1.0.0,<2
-# optional: pip install "vibe-trading-ai[deepseek]" — native DeepSeek adapter (langchain-deepseek)
-# optional: pip install "vibe-trading-ai[anthropic]" — native Anthropic Messages API adapter (langchain-anthropic)
+# optional: pip install "vibe-crypto[deepseek]" — native DeepSeek adapter (langchain-deepseek)
+# optional: pip install "vibe-crypto[anthropic]" — native Anthropic Messages API adapter (langchain-anthropic)
 langgraph>=1.2.14,<1.3
 langgraph-checkpoint>=2.1.0,<5
 python-dotenv>=1.0.0
@@ -34,8 +35,8 @@ scikit-learn>=1.3.0
 joblib>=1.3.0
 
 # Signal Skills
-# optional: pip install "vibe-trading-ai[harmonic]" for the pyharmonics-backed harmonic pattern detector
-# optional: pip install "vibe-trading-ai[smc]" for the smartmoneyconcepts-backed Smart Money Concepts engine
+# optional: pip install "vibe-crypto[harmonic]" for the pyharmonics-backed harmonic pattern detector
+# optional: pip install "vibe-crypto[smc]" for the smartmoneyconcepts-backed Smart Money Concepts engine
 
 # Data Providers
 tushare>=1.2.89
@@ -56,7 +57,7 @@ joserfc>=1.7.6
 langgraph-sdk>=0.4.6
 urllib3>=2.8.0
 opentelemetry-api>=1.45.1
-# optional: pip install "vibe-trading-ai[mt5]" — MetaTrader 5 terminal bridge (Windows only): forex/metals data + broker connector
+# optional: pip install "vibe-crypto[mt5]" — MetaTrader 5 terminal bridge (Windows only): forex/metals data + broker connector
 
 # REST API & SSE
 fastapi>=0.104.0
@@ -65,7 +66,7 @@ websockets>=12.0
 pydantic>=2.0.0
 python-multipart>=0.0.18
 sse-starlette>=1.6.0
-# optional: pip install "vibe-trading-ai[openbb]" — OpenBB Workspace custom-agent bridge (openbb-ai protocol models + SSE helpers)
+# optional: pip install "vibe-crypto[openbb]" — OpenBB Workspace custom-agent bridge (openbb-ai protocol models + SSE helpers)
 
 # MCP Server
 fastmcp>=3.4.10,<4.0.0

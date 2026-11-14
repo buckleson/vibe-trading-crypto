@@ -10,16 +10,7 @@ from rich.text import Text
 from cli._version import __version__ as _VERSION
 from cli.theme import Theme
 
-_LOGO: Final[tuple[str, ...]] = (
-    r"__      ___ _             _______             _ _             ",
-    r"\ \    / (_) |           |__   __|           | (_)            ",
-    r" \ \  / / _| |__   ___      | |_ __ __ _  __| |_ _ __   __ _ ",
-    r"  \ \/ / | | '_ \ / _ \     | | '__/ _` |/ _` | | '_ \ / _` |",
-    r"   \  /  | | |_) |  __/     | | | | (_| | (_| | | | | | (_| |",
-    r"    \/   |_|_.__/ \___|     |_|_|  \__,_|\__,_|_|_| |_|\__, |",
-    r"                                                        __/ |",
-    r"                                                       |___/ ",
-)
+_LOGO: Final[tuple[str, ...]] = ("Vibe Crypto",)
 
 _GRADIENT_START: Final[tuple[int, int, int]] = (0x25, 0x8B, 0xFF)
 _GRADIENT_END: Final[tuple[int, int, int]] = (0xA5, 0xCF, 0xFF)
@@ -76,6 +67,6 @@ def print_banner(
         console.print(rendered)
 
     meta = Text(pad)
-    meta.append(f"vibe-trading v{version}  ·  {mode}  ·  {model}", style=Theme.muted)
+    meta.append(f"vibe-crypto v{version}  ·  {mode}  ·  {model}", style=Theme.muted)
     console.print(meta)
     console.print()

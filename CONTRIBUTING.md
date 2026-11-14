@@ -1,6 +1,6 @@
-# Contributing to Vibe-Trading
+# Contributing to Vibe Crypto
 
-Vibe-Trading is a natural-language finance research AI agent (FastAPI + ReAct
+Vibe Crypto is a natural-language finance research AI agent (FastAPI + ReAct
 agent backend, Vite+React frontend, vectorized daily and options backtesting).
 This guide covers contribution governance: the Developer Certificate of Origin
 (DCO) sign-off requirement, the reviewer checklist for Alpha Zoo factor
@@ -101,7 +101,7 @@ The repository-root `docs/` directory holds local working notes and must not
 be committed. Local agent instructions and memory files (`AGENTS.md`,
 `AGENTS.override.md`, `CLAUDE.md`, `CLAUDE.local.md`, `MEMORY.md`,
 `CODEX_MEMORY.md`, and `NOTES.md`) must also remain untracked at any depth.
-Publish project documentation in `wiki/docs/` or the relevant source directory.
+Publish project documentation in `README.md`, `guides/`, or the relevant source directory.
 
 Before committing, run:
 
@@ -233,7 +233,7 @@ merging. Authors are strongly encouraged to self-check first.
    ```
 4. (Optional but recommended) Run a quick bench:
    ```bash
-   vibe-trading alpha bench --zoo <zoo_id> --universe csi300 --period 2020-2025
+   vibe-crypto alpha bench --zoo <zoo_id> --universe csi300 --period 2020-2025
    ```
 5. Open a PR. Every commit must include `Signed-off-by:` (use
    `git commit -s`). Reviewers will walk the checklist above.
@@ -417,7 +417,7 @@ checks and portfolio reads; existing broker configuration remains the fallback.
 The CLI supports the same persisted address, for example:
 
 ```bash
-vibe-trading connector setup ibkr-paper-local --connection-id my-gateway --host 127.0.0.1 --port 4002 --skip-check
+vibe-crypto connector setup ibkr-paper-local --connection-id my-gateway --host 127.0.0.1 --port 4002 --skip-check
 ```
 
 Supply both `--host` and `--port`. Existing agent read tools select the saved

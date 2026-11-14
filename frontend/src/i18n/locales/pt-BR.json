@@ -87,7 +87,7 @@
     "collapse": "Recolher",
     "expand": "Expandir",
     "skipToMain": "Pular para o conteúdo principal",
-    "sidebar": "Barra lateral Vibe-Trading",
+    "sidebar": "Barra lateral Vibe Crypto",
     "mainNavigation": "Navegação principal",
     "about": "Sobre",
     "sessionsLoadFailed": "Não foi possível carregar as conversas.",
@@ -571,7 +571,7 @@
     "clearApiKey": "Limpar chave de API salva",
     "channels": {
       "title": "Canais de mensagens instantâneas",
-      "description": "Conecte adaptadores de chat ao mesmo runtime de sessão do Vibe-Trading usado pela UI da Web e CLI.",
+      "description": "Conecte adaptadores de chat ao mesmo runtime de sessão do Vibe Crypto usado pela UI da Web e CLI.",
       "runtime": "Runtime",
       "running": "Em execução",
       "stopped": "Parado",
@@ -1084,7 +1084,7 @@
           "step3": "Preencha as credenciais de IMAP e SMTP acima, defina o endereço do remetente e adicione o seu endereço em «Remetentes permitidos».",
           "step4": "Clique em «Testar conexão»: ele verifica o login IMAP, a pasta da caixa e o login SMTP.",
           "step5": "Marque «Consentimento concedido» e ative o canal; as respostas automáticas passam a chegar aos remetentes que passarem nas verificações DKIM/SPF.",
-          "docsLabel": "Abrir a documentação do Vibe-Trading"
+          "docsLabel": "Abrir a documentação do Vibe Crypto"
         },
         "websocket": {
           "title": "Guia de configuração do WebSocket",
@@ -1094,12 +1094,12 @@
           "step3": "Conecte os clientes com ws://host:port/path?client_id=...&token=...",
           "step4": "Salvar com o canal em execução troca o servidor a quente: os clientes conectados (incluindo este chat da interface web) caem por um instante e se reconectam.",
           "step5": "Clique em «Testar conexão»: ele valida localmente o certificado e a chave SSL e a disponibilidade do endereço.",
-          "docsLabel": "Abrir a documentação do Vibe-Trading"
+          "docsLabel": "Abrir a documentação do Vibe Crypto"
         },
         "feishu": {
           "title": "Configuração do bot Feishu / Lark",
           "intro": "Bots do Feishu usam a conexão contínua por WebSocket, então não é preciso IP público nem webhook.",
-          "step1": "Crie um aplicativo personalizado na plataforma de desenvolvedores do Feishu (open.feishu.cn) — ou crie por leitura de QR no terminal com vibe-trading channels login feishu, que salva o App ID e o App Secret automaticamente.",
+          "step1": "Crie um aplicativo personalizado na plataforma de desenvolvedores do Feishu (open.feishu.cn) — ou crie por leitura de QR no terminal com vibe-crypto channels login feishu, que salva o App ID e o App Secret automaticamente.",
           "step2": "Adicione a capacidade de bot ao aplicativo.",
           "step3": "Em Assinatura de eventos, assine «Receber mensagens im.message.receive_v1» e escolha o modo de conexão contínua.",
           "step4": "Copie o App ID e o App Secret em Credenciais e informações básicas e cole-os nos campos acima.",
@@ -1939,7 +1939,7 @@
     "unknown": "desconhecido",
     "justNow": "agora mesmo",
     "loadingInstructions": "Carregando instruções de autorização do conector...",
-    "fallbackInstruction": "Execute `vibe-trading connector list`, escolha o perfil da corretora e execute `vibe-trading connector authorize <profile>` na sessão de desktop que manterá a conexão da corretora.",
+    "fallbackInstruction": "Execute `vibe-crypto connector list`, escolha o perfil da corretora e execute `vibe-crypto connector authorize <profile>` na sessão de desktop que manterá a conexão da corretora.",
     "secondsAgo": "{{n}}s atrás",
     "minutesAgo": "{{n}}m atrás",
     "hoursAgo": "{{n}}h atrás",

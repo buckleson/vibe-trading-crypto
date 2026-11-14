@@ -1,49 +1,17 @@
-<p align="center">
-  <b>English</b> | <a href="README_zh.md">中文</a> | <a href="README_ja.md">日本語</a> | <a href="README_ko.md">한국어</a> | <a href="README_ar.md">العربية</a> | <a href="README_es.md">Español</a> | <a href="README_id.md">Bahasa Indonesia</a>
-</p>
+# Vibe Crypto
 
-<p align="center">
-  <img src="assets/icon.png" width="120" alt="Vibe-Trading Logo"/>
-</p>
-
-<h1 align="center">Vibe-Trading: Your Personal Trading Agent</h1>
-
-<p align="center">
-  <b>One Command to Empower Your Agent with Comprehensive Trading Capabilities</b>
-</p>
-
-<p align="center">
-  <a href="https://www.star-history.com/HKUDS/Vibe-Trading"><img src="https://api.star-history.com/badge?repo=HKUDS/Vibe-Trading&amp;type=trending" height="55" alt="Star History: GitHub Trending"/></a>
-  <a href="https://trendshift.io/repositories/25527"><img src="https://trendshift.io/api/badge/trendshift/repositories/25527/daily" height="55" alt="Trendshift: daily ranking"/></a>
-  <a href="https://www.star-history.com/HKUDS/Vibe-Trading"><img src="https://api.star-history.com/badge?repo=HKUDS/Vibe-Trading" height="55" alt="Star History: global star ranking"/></a>
-</p>
-
-<p align="center">
-  <b>GitHub topic rankings by stars</b> · Nov 4, 2026<br>
-  <a href="https://github.com/search?q=topic%3Abacktesting&amp;type=repositories&amp;s=stars&amp;o=desc">#1 Backtesting</a> &nbsp;·&nbsp;
-  <a href="https://github.com/search?q=topic%3Aalgorithmic-trading&amp;type=repositories&amp;s=stars&amp;o=desc">#3 Algorithmic Trading</a> &nbsp;·&nbsp;
-  <a href="https://github.com/search?q=topic%3Aquantitative-finance&amp;type=repositories&amp;s=stars&amp;o=desc">#4 Quantitative Finance</a>
-</p>
+Vibe Crypto is an AI research, backtesting and paper trading workspace for crypto, stocks and more. It works with Claude and keeps every market the upstream project supports.
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat&logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/Backend-FastAPI-009688?style=flat" alt="FastAPI">
   <img src="https://img.shields.io/badge/Frontend-React%2019-61DAFB?style=flat&logo=react&logoColor=white" alt="React">
-  <a href="https://pypi.org/project/vibe-trading-ai/"><img src="https://img.shields.io/pypi/v/vibe-trading-ai?style=flat&logo=pypi&logoColor=white" alt="PyPI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow?style=flat" alt="License"></a>
-  <br>
-  <a href="https://github.com/HKUDS/.github/blob/main/profile/README.md"><img src="https://img.shields.io/badge/Feishu-Group-E9DBFC?style=flat-square&logo=feishu&logoColor=white" alt="Feishu"></a>
-  <a href="https://github.com/HKUDS/.github/blob/main/profile/README.md"><img src="https://img.shields.io/badge/WeChat-Group-C5EAB4?style=flat-square&logo=wechat&logoColor=white" alt="WeChat"></a>
-  <a href="https://discord.gg/6TdQnT5xcF"><img src="https://img.shields.io/badge/Discord-Join-7289DA?style=flat-square&logo=discord&logoColor=white" alt="Discord"></a>
 </p>
 
 <p align="center">
-  <a href="https://vibetrading.wiki/">Website</a> &nbsp;&middot;&nbsp;
-  <a href="https://vibetrading.wiki/docs/">Docs</a> &nbsp;&middot;&nbsp;
   <a href="#-news">News</a> &nbsp;&middot;&nbsp;
   <a href="#-key-features">Features</a> &nbsp;&middot;&nbsp;
-  <a href="#accounts-and-trading">Shadow Account</a> &nbsp;&middot;&nbsp;
-  <a href="#-demo">Demo</a> &nbsp;&middot;&nbsp;
   <a href="#-quick-start">Quick Start</a> &nbsp;&middot;&nbsp;
   <a href="#-examples">Examples</a> &nbsp;&middot;&nbsp;
   <a href="#-api-server">API / MCP</a> &nbsp;&middot;&nbsp;
@@ -52,7 +20,7 @@
 </p>
 
 <p align="center">
-  <a href="#-quick-start"><img src="assets/pip-install.svg" height="45" alt="pip install vibe-trading-ai"></a>
+  <a href="#-quick-start"><img src="assets/pip-install.svg" height="45" alt="pip install vibe-crypto"></a>
 </p>
 
 ## 📰 News
@@ -63,31 +31,31 @@
 - **2026-11-12** 🛠️ **Backtest timing, report figures and research completion fixes** — Shadow Account now uses the requested starting capital; token-truncated worker replies no longer count as completed. Committee PMs can synthesize valid upstream reports without fetching the same data again, and the native Anthropic adapter defaults to a configurable 16,384 output tokens.
   Generated strategies reject detected extra shifts on output targets unless explicitly declared intentional, while indicator lookbacks remain valid. Grounding now accepts supported magnitude spellings and precise observed declarations without weakening evidence checks. SPY/GLD backtests match an independent ledger on all 206/140 fills and total returns. **Unreleased.**
 
-- **2026-11-11** 🧾 **Paper-trade partial fills and ledger reconciliation** — Opt into per-order volume caps, partial fills and reported order states for A-share 5-minute paper simulations ([#2128](https://github.com/HKUDS/Vibe-Trading/pull/2128)). Independently reconcile fees, cash, positions and NAV arithmetic from returned fills with the new `paper_trade_reconcile` Agent/MCP tool ([#2197](https://github.com/HKUDS/Vibe-Trading/pull/2197)).
-  Correctly handle supported wrapped percentage headers and explicitly quoted document integers while preserving their source labels ([#2185](https://github.com/HKUDS/Vibe-Trading/pull/2185), [#2192](https://github.com/HKUDS/Vibe-Trading/pull/2192)). Also fix strict factor benchmark inputs ([#2195](https://github.com/HKUDS/Vibe-Trading/pull/2195)) and prevent timed-out channel turns from returning an earlier answer ([#2194](https://github.com/HKUDS/Vibe-Trading/pull/2194)).
+- **2026-11-11** 🧾 **Paper-trade partial fills and ledger reconciliation** — Opt into per-order volume caps, partial fills and reported order states for A-share 5-minute paper simulations ([#2128](https://github.com/buckleson/vibe-trading-crypto/pull/2128)). Independently reconcile fees, cash, positions and NAV arithmetic from returned fills with the new `paper_trade_reconcile` Agent/MCP tool ([#2197](https://github.com/buckleson/vibe-trading-crypto/pull/2197)).
+  Correctly handle supported wrapped percentage headers and explicitly quoted document integers while preserving their source labels ([#2185](https://github.com/buckleson/vibe-trading-crypto/pull/2185), [#2192](https://github.com/buckleson/vibe-trading-crypto/pull/2192)). Also fix strict factor benchmark inputs ([#2195](https://github.com/buckleson/vibe-trading-crypto/pull/2195)) and prevent timed-out channel turns from returning an earlier answer ([#2194](https://github.com/buckleson/vibe-trading-crypto/pull/2194)).
   Thanks [@shadowinlife](https://github.com/shadowinlife), [@he-yufeng](https://github.com/he-yufeng), [@Jackzigen](https://github.com/Jackzigen) and [@divya0795](https://github.com/divya0795)! **On `main`, for the next pip release.**
 
 <details>
 <summary>Earlier news</summary>
 
-- **2026-11-10** 📊 **Interactive IV surfaces and options analysis fixes** — Edit strike/expiry IV grids in Options Lab, with observed/interpolated labels and no extrapolation ([#2186](https://github.com/HKUDS/Vibe-Trading/pull/2186)).
-  Fix low-price presets, quantities, expiry dates, retries, language-switch loading and the 20-leg limit. Bare three-digit Zhengzhou contracts such as `CF501` now use China futures rules ([#2193](https://github.com/HKUDS/Vibe-Trading/pull/2193)).
+- **2026-11-10** 📊 **Interactive IV surfaces and options analysis fixes** — Edit strike/expiry IV grids in Options Lab, with observed/interpolated labels and no extrapolation ([#2186](https://github.com/buckleson/vibe-trading-crypto/pull/2186)).
+  Fix low-price presets, quantities, expiry dates, retries, language-switch loading and the 20-leg limit. Bare three-digit Zhengzhou contracts such as `CF501` now use China futures rules ([#2193](https://github.com/buckleson/vibe-trading-crypto/pull/2193)).
   Thanks [@he-yufeng](https://github.com/he-yufeng) and [@GPT-AGI](https://github.com/GPT-AGI)! **On `main`, for the next pip release.**
 
-- **2026-11-09** 🧭 **Export a selected revision comparison; backtests refuse codes they cannot place** — Download the exact pair of research revisions you are comparing as JSON or Markdown from the Web, API or CLI ([#2189](https://github.com/HKUDS/Vibe-Trading/pull/2189)). A backtest code no market rule recognises (such as `local:BHP.AX` or `7203.T`) is now refused before any data is fetched instead of running on A-share rules; bare six-digit and `.SS` Shanghai codes still work. OpenRouter replies no longer show the model name twice ([#2191](https://github.com/HKUDS/Vibe-Trading/pull/2191)), and an empty revision id in `research-artifact export` is now an error. Thanks [@he-yufeng](https://github.com/he-yufeng) and [@Gloubiboulgator](https://github.com/Gloubiboulgator)! **On `main`, for the next pip release.**
+- **2026-11-09** 🧭 **Export a selected revision comparison; backtests refuse codes they cannot place** — Download the exact pair of research revisions you are comparing as JSON or Markdown from the Web, API or CLI ([#2189](https://github.com/buckleson/vibe-trading-crypto/pull/2189)). A backtest code no market rule recognises (such as `local:BHP.AX` or `7203.T`) is now refused before any data is fetched instead of running on A-share rules; bare six-digit and `.SS` Shanghai codes still work. OpenRouter replies no longer show the model name twice ([#2191](https://github.com/buckleson/vibe-trading-crypto/pull/2191)), and an empty revision id in `research-artifact export` is now an error. Thanks [@he-yufeng](https://github.com/he-yufeng) and [@Gloubiboulgator](https://github.com/Gloubiboulgator)! **On `main`, for the next pip release.**
 
-- **2026-11-08** 📝 **Research revision comparison and full-history export** — Compare content, evidence and metadata between any two revisions ([#2168](https://github.com/HKUDS/Vibe-Trading/pull/2168)), and export the complete research history as JSON or Markdown ([#2170](https://github.com/HKUDS/Vibe-Trading/pull/2170)). Switching research records now ignores stale responses, and Markdown exports preserve original content in isolated code blocks. Also fix missing factor weights, partial-return attribution, insufficient IC samples, non-finite valuation inputs and margin calculations for negative entry prices. **On `main`, for the next pip release.**
+- **2026-11-08** 📝 **Research revision comparison and full-history export** — Compare content, evidence and metadata between any two revisions ([#2168](https://github.com/buckleson/vibe-trading-crypto/pull/2168)), and export the complete research history as JSON or Markdown ([#2170](https://github.com/buckleson/vibe-trading-crypto/pull/2170)). Switching research records now ignores stale responses, and Markdown exports preserve original content in isolated code blocks. Also fix missing factor weights, partial-return attribution, insufficient IC samples, non-finite valuation inputs and margin calculations for negative entry prices. **On `main`, for the next pip release.**
 
-- **2026-11-07** 🧪 **Research Lab: trading costs and out-of-sample testing** — Rerun saved price inputs under different fees and slippage; select parameters using training results only, then freeze them for out-of-sample tests and a separate final holdout. The [Research Lab](guides/research-lab.md) shares Web, CLI, API and Agent/MCP workflows, with all eleven UI languages. Also correct window-boundary returns and factor warmup/long-window calculations, and add 20 offline task-replay cases that keep missing evidence visible. Versioned research artifacts can now store structured financial facts ([#2164](https://github.com/HKUDS/Vibe-Trading/pull/2164)), and bare Chinese futures contract codes resolve correctly ([#2177](https://github.com/HKUDS/Vibe-Trading/pull/2177)). **On `main`, for the next pip release.**
+- **2026-11-07** 🧪 **Research Lab: trading costs and out-of-sample testing** — Rerun saved price inputs under different fees and slippage; select parameters using training results only, then freeze them for out-of-sample tests and a separate final holdout. The [Research Lab](guides/research-lab.md) shares Web, CLI, API and Agent/MCP workflows, with all eleven UI languages. Also correct window-boundary returns and factor warmup/long-window calculations, and add 20 offline task-replay cases that keep missing evidence visible. Versioned research artifacts can now store structured financial facts ([#2164](https://github.com/buckleson/vibe-trading-crypto/pull/2164)), and bare Chinese futures contract codes resolve correctly ([#2177](https://github.com/buckleson/vibe-trading-crypto/pull/2177)). **On `main`, for the next pip release.**
 
-- **2026-11-06** 📈 **Implied-volatility grids and paper-trading fixes** — Build strike-by-expiry IV grids from supplied option observations, with observed/interpolated labels and no extrapolation ([#2172](https://github.com/HKUDS/Vibe-Trading/pull/2172)). Extreme numeric inputs now produce finite results or explicit errors. A-share 5m market orders blocked by a price limit are canceled immediately ([#2176](https://github.com/HKUDS/Vibe-Trading/pull/2176)); the matcher also processes symbols chronologically so later proceeds cannot fund earlier orders. **On `main`, for the next pip release; public 5m requests still support one symbol per step.**
+- **2026-11-06** 📈 **Implied-volatility grids and paper-trading fixes** — Build strike-by-expiry IV grids from supplied option observations, with observed/interpolated labels and no extrapolation ([#2172](https://github.com/buckleson/vibe-trading-crypto/pull/2172)). Extreme numeric inputs now produce finite results or explicit errors. A-share 5m market orders blocked by a price limit are canceled immediately ([#2176](https://github.com/buckleson/vibe-trading-crypto/pull/2176)); the matcher also processes symbols chronologically so later proceeds cannot fund earlier orders. **On `main`, for the next pip release; public 5m requests still support one symbol per step.**
 
-- **2026-11-05** 🚀 **v0.1.19 released** ([Release notes](https://github.com/HKUDS/Vibe-Trading/releases/tag/v0.1.19), `pip install -U vibe-trading-ai`): research that outlives the chat — save versioned research artifacts with their evidence and revise them, reuse backtests from earlier turns and sessions, and edit a research goal in place. New opt-ins: a five-minute A-share paper simulation, and Gildata financial queries, stock screening and Shannon portfolio diagnosis (QVeris is removed; an existing `GILDATA_TOKEN` alone now enables nothing). Also Argentina (BYMA) backtests, Parallel web search, Codex OAuth model discovery, and both 0.1.18 regressions fixed. 116 merged pull requests plus 21 landed through maintainer commits, from 26 contributors ([CHANGELOG](CHANGELOG.md)).
-  **Fixed today:** a backtest reports the benchmark it actually evaluated, long/short books get a risk x-ray, GTJA alpha 17 stays missing while its inputs warm up, the Shannon panel speaks all eleven UI languages, and two reviewed contributor fixes that had not landed are in ([#2042](https://github.com/HKUDS/Vibe-Trading/pull/2042) TTM sums across a missing quarter, [#1985](https://github.com/HKUDS/Vibe-Trading/pull/1985) 3:2 split detection). Thanks [@rudycelekli](https://github.com/rudycelekli), [@he-yufeng](https://github.com/he-yufeng), [@Jackzigen](https://github.com/Jackzigen), [@Shizoqua](https://github.com/Shizoqua), [@cgycorey](https://github.com/cgycorey), [@dajiaohuang](https://github.com/dajiaohuang), [@zeus229](https://github.com/zeus229), [@alexwan02](https://github.com/alexwan02), [@BHhhh-123](https://github.com/BHhhh-123), [@remote-controlled-man](https://github.com/remote-controlled-man), [@shadowinlife](https://github.com/shadowinlife), [@TWJxi](https://github.com/TWJxi), [@lishuanghong1989-netizen](https://github.com/lishuanghong1989-netizen), [@TerryF7](https://github.com/TerryF7), [@davidalmeida90](https://github.com/davidalmeida90), [@DrDLyuan](https://github.com/DrDLyuan), [@goatyyc](https://github.com/goatyyc), [@hnq-ai](https://github.com/hnq-ai), [@kadyrbekovhamit-cyber](https://github.com/kadyrbekovhamit-cyber), [@MetaAviator](https://github.com/MetaAviator), [@octo-patch](https://github.com/octo-patch), [@RowanAldean](https://github.com/RowanAldean), [@VectorPeak](https://github.com/VectorPeak), [@wavebyrd](https://github.com/wavebyrd) and [@yufengsika](https://github.com/yufengsika)!
+- **2026-11-05** 🚀 **v0.1.19 released** ([Release notes](https://github.com/buckleson/vibe-trading-crypto/releases/tag/v0.1.19), `pip install -U vibe-crypto`): research that outlives the chat — save versioned research artifacts with their evidence and revise them, reuse backtests from earlier turns and sessions, and edit a research goal in place. New opt-ins: a five-minute A-share paper simulation, and Gildata financial queries, stock screening and Shannon portfolio diagnosis (QVeris is removed; an existing `GILDATA_TOKEN` alone now enables nothing). Also Argentina (BYMA) backtests, Parallel web search, Codex OAuth model discovery, and both 0.1.18 regressions fixed. 116 merged pull requests plus 21 landed through maintainer commits, from 26 contributors ([CHANGELOG](CHANGELOG.md)).
+  **Fixed today:** a backtest reports the benchmark it actually evaluated, long/short books get a risk x-ray, GTJA alpha 17 stays missing while its inputs warm up, the Shannon panel speaks all eleven UI languages, and two reviewed contributor fixes that had not landed are in ([#2042](https://github.com/buckleson/vibe-trading-crypto/pull/2042) TTM sums across a missing quarter, [#1985](https://github.com/buckleson/vibe-trading-crypto/pull/1985) 3:2 split detection). Thanks [@rudycelekli](https://github.com/rudycelekli), [@he-yufeng](https://github.com/he-yufeng), [@Jackzigen](https://github.com/Jackzigen), [@Shizoqua](https://github.com/Shizoqua), [@cgycorey](https://github.com/cgycorey), [@dajiaohuang](https://github.com/dajiaohuang), [@zeus229](https://github.com/zeus229), [@alexwan02](https://github.com/alexwan02), [@BHhhh-123](https://github.com/BHhhh-123), [@remote-controlled-man](https://github.com/remote-controlled-man), [@shadowinlife](https://github.com/shadowinlife), [@TWJxi](https://github.com/TWJxi), [@lishuanghong1989-netizen](https://github.com/lishuanghong1989-netizen), [@TerryF7](https://github.com/TerryF7), [@davidalmeida90](https://github.com/davidalmeida90), [@DrDLyuan](https://github.com/DrDLyuan), [@goatyyc](https://github.com/goatyyc), [@hnq-ai](https://github.com/hnq-ai), [@kadyrbekovhamit-cyber](https://github.com/kadyrbekovhamit-cyber), [@MetaAviator](https://github.com/MetaAviator), [@octo-patch](https://github.com/octo-patch), [@RowanAldean](https://github.com/RowanAldean), [@VectorPeak](https://github.com/VectorPeak), [@wavebyrd](https://github.com/wavebyrd) and [@yufengsika](https://github.com/yufengsika)!
   **On main after the release (next pip release):** backtest benchmarks are bought at the first evaluated open, as the strategy is, instead of from the last warm-up close; excess return no longer includes that move (AAPL 20/60 SMA example: 22.5% → 18.4%).
 
-- **2026-11-04** 📊 **Gildata financial queries, stock screening and Shannon portfolio diagnosis** — Screen stocks by market cap and retrieve their half-year revenue in one request, or inspect portfolio factor exposures and each holding’s contribution to volatility. All nine Gildata features are opt-in, including for existing token holders. Free data sources never fall back to Gildata. [#2117](https://github.com/HKUDS/Vibe-Trading/pull/2117) · [#2118](https://github.com/HKUDS/Vibe-Trading/pull/2118) · [#2119](https://github.com/HKUDS/Vibe-Trading/pull/2119)
-  Also clarified next-bar backtest fills, fixed false Swarm timeouts on Unicode heartbeats and sped up research artifact deduplication. [#2137](https://github.com/HKUDS/Vibe-Trading/pull/2137) · [#2155](https://github.com/HKUDS/Vibe-Trading/pull/2155) · [#2159](https://github.com/HKUDS/Vibe-Trading/pull/2159)
+- **2026-11-04** 📊 **Gildata financial queries, stock screening and Shannon portfolio diagnosis** — Screen stocks by market cap and retrieve their half-year revenue in one request, or inspect portfolio factor exposures and each holding’s contribution to volatility. All nine Gildata features are opt-in, including for existing token holders. Free data sources never fall back to Gildata. [#2117](https://github.com/buckleson/vibe-trading-crypto/pull/2117) · [#2118](https://github.com/buckleson/vibe-trading-crypto/pull/2118) · [#2119](https://github.com/buckleson/vibe-trading-crypto/pull/2119)
+  Also clarified next-bar backtest fills, fixed false Swarm timeouts on Unicode heartbeats and sped up research artifact deduplication. [#2137](https://github.com/buckleson/vibe-trading-crypto/pull/2137) · [#2155](https://github.com/buckleson/vibe-trading-crypto/pull/2155) · [#2159](https://github.com/buckleson/vibe-trading-crypto/pull/2159)
 
 - **2026-11-03** 🛠️ **Runtime integrity and localization follow-ups**: Preserve U+2028/U+2029 inside trace, audit-ledger and session-search JSONL records, keep ledger appends valid after such payloads, normalize underscored model labels, and preserve handoff summaries during layer-2 compaction. Also accept BOM-prefixed frontmatter and keep the welcome surface aligned in RTL locales. Add regression coverage.
 
@@ -108,9 +76,9 @@
 <a href="assets/feature-quant-lab-card.svg"><img src="assets/feature-quant-lab-card.svg" width="50%" alt="📊 Quant Lab: Benchmark 478 alphas across five libraries; Backtest across markets and test out of sample; Model options payoffs, Greeks and portfolio risk."/></a><a href="assets/feature-trading-portfolio-card.svg"><img src="assets/feature-trading-portfolio-card.svg" width="50%" alt="👥 Trading &amp; Portfolio: 19 broker connectors with per-broker permissions; Track paper fills or set limits for supported live trades; Replay your own trading rules with Shadow Account."/></a>
 </div>
 
-## 💡 What Is Vibe-Trading?
+## 💡 What Is Vibe Crypto?
 
-Vibe-Trading turns finance questions into research reports, runnable backtests and paper portfolios. You can also authorize a supported broker to execute live trades within a mandate you set and can halt. Your funds stay with the broker.
+Vibe Crypto turns finance questions into research reports, runnable backtests and paper portfolios. You can also authorize a supported broker to execute live trades within a mandate you set and can halt. Your funds stay with the broker.
 
 ## ✨ What You Can Do
 
@@ -126,11 +94,11 @@ Vibe-Trading turns finance questions into research reports, runnable backtests a
 
 ## ⚡ Quick Example
 
-Once you have run `vibe-trading init`, you can ask for a backtest in plain English or benchmark an existing alpha library from the terminal.
+Once you have run `vibe-crypto init`, you can ask for a backtest in plain English or benchmark an existing alpha library from the terminal.
 
 ```bash
-vibe-trading run -p "Backtest a BTC-USDT 20/50 moving-average crossover for 2024. Compare it with buy-and-hold and report maximum drawdown."
-vibe-trading alpha bench --zoo gtja191 --universe csi300 --period 2018-2025 --top 20
+vibe-crypto run -p "Backtest a BTC-USDT 20/50 moving-average crossover for 2024. Compare it with buy-and-hold and report maximum drawdown."
+vibe-crypto alpha bench --zoo gtja191 --universe csi300 --period 2018-2025 --top 20
 ```
 
 Open **Run Detail** to compare the crossover with buy-and-hold, inspect the trades behind a drawdown and check the data source on the run card.
@@ -156,7 +124,7 @@ The loader supports **28 market-data sources**. With `source: "auto"`, it infers
 | Crypto | Try OKX, Binance and CCXT before falling back to other sources. |
 | Futures | Chinese contracts can use AKShare or local bars. Supply local bars for global contracts. |
 
-You can also choose a source explicitly. For example, installing `vibe-trading-ai[ashare]` adds the token-free BaoStock loader for daily A-share bars. The [data source reference](guides/capabilities.md#-data-sources--smart-fallback) lists the full chains and credential requirements.
+You can also choose a source explicitly. For example, installing `vibe-crypto[ashare]` adds the token-free BaoStock loader for daily A-share bars. The [data source reference](guides/capabilities.md#-data-sources--smart-fallback) lists the full chains and credential requirements.
 
 ## 🔩 Detailed Capabilities
 
@@ -260,16 +228,16 @@ https://github.com/user-attachments/assets/ac79426e-f3f7-4349-b0d5-d997a2725784
 **Terminal.** Install the package with Python 3.11+, choose a model provider in the setup wizard, then open the interactive CLI.
 
 ```bash
-pip install vibe-trading-ai
-vibe-trading init
-vibe-trading
+pip install vibe-crypto
+vibe-crypto init
+vibe-crypto
 ```
 
 **Web app.** Docker serves the frontend and API together at `http://localhost:8899`. From a fresh checkout, configure your provider before starting the container.
 
 ```bash
-git clone https://github.com/HKUDS/Vibe-Trading.git
-cd Vibe-Trading
+git clone https://github.com/buckleson/vibe-trading-crypto.git
+cd Vibe Crypto
 cp agent/.env.example agent/.env
 # Set your provider and API key in agent/.env.
 docker compose up --build
@@ -279,7 +247,7 @@ The PyPI package includes the CLI, API and MCP server. For a frontend developmen
 
 ## 🖥 CLI Reference
 
-Start `vibe-trading` for the interactive terminal. Type `/help` at the prompt to browse commands or use these shortcuts during research.
+Start `vibe-crypto` for the interactive terminal. Type `/help` at the prompt to browse commands or use these shortcuts during research.
 
 | Command | Use it to |
 |---|---|
@@ -288,7 +256,7 @@ Start `vibe-trading` for the interactive terminal. Type `/help` at the prompt to
 | `/show <run-id>` | Inspect the results of a saved run. |
 | `/pine` | Export the current strategy as a Pine Script indicator. |
 
-From the shell, `vibe-trading alpha list` browses the factor libraries and `vibe-trading playbook list` shows the scheduled research templates.
+From the shell, `vibe-crypto alpha list` browses the factor libraries and `vibe-crypto playbook list` shows the scheduled research templates.
 
 ## 💡 Examples
 
@@ -297,12 +265,12 @@ From the shell, `vibe-trading alpha list` browses the factor libraries and `vibe
 - **Run an investment committee.** Choose a stock and follow the bull and bear cases through to the final report.
 
 ```bash
-vibe-trading --swarm-run investment_committee '{"target":"TSLA","market":"US"}'
+vibe-crypto --swarm-run investment_committee '{"target":"TSLA","market":"US"}'
 ```
 
 ## 🌐 API Server
 
-Start a local server with `vibe-trading serve --port 8899`. In a second terminal, run `curl http://localhost:8899/runs` to list saved runs. Use the returned ID with `GET /runs/{run_id}` to inspect its results.
+Start a local server with `vibe-crypto serve --port 8899`. In a second terminal, run `curl http://localhost:8899/runs` to list saved runs. Use the returned ID with `GET /runs/{run_id}` to inspect its results.
 
 | To run a research session over HTTP | Endpoint |
 |---|---|
@@ -319,7 +287,7 @@ MCP clients can launch the same package over stdio. Add this entry to Claude Des
 ```json
 {
   "mcpServers": {
-    "vibe-trading": { "command": "vibe-trading-mcp" }
+    "vibe-crypto": { "command": "vibe-crypto-mcp" }
   }
 }
 ```
@@ -328,7 +296,7 @@ For other clients or a custom output directory, see the [MCP configurations](gui
 
 ## 🏛 Ecosystem
 
-Vibe-Trading is part of the **[HKUDS](https://github.com/HKUDS)** agent ecosystem:
+Related projects from the upstream authors at **[HKUDS](https://github.com/HKUDS)**:
 
 <table>
   <tr>
@@ -361,17 +329,17 @@ Vibe-Trading is part of the **[HKUDS](https://github.com/HKUDS)** agent ecosyste
 
 | Area | Available now | Next |
 |---|---|---|
-| Paper trading | Daily accounts persist cash, fills and NAV between sessions. A separate simulation replays an A-share session in five-minute steps. | Opt-in volume-share matching ([#2128](https://github.com/HKUDS/Vibe-Trading/pull/2128), draft). |
-| Research | Run cards record metrics and evidence for a completed backtest. Dated research artifacts keep revision history and are searchable. | Structured financial facts in research artifacts ([#2164](https://github.com/HKUDS/Vibe-Trading/pull/2164), in review). |
+| Paper trading | Daily accounts persist cash, fills and NAV between sessions. A separate simulation replays an A-share session in five-minute steps. | Opt-in volume-share matching ([#2128](https://github.com/buckleson/vibe-trading-crypto/pull/2128), draft). |
+| Research | Run cards record metrics and evidence for a completed backtest. Dated research artifacts keep revision history and are searchable. | Structured financial facts in research artifacts ([#2164](https://github.com/buckleson/vibe-trading-crypto/pull/2164), in review). |
 | Options Lab | Explore multi-leg payoffs, Greeks and spot × IV scenarios. | Interactive volatility surface grid at `/options`. |
 
 ## Contributing
 
-Pick a [good first issue](https://github.com/HKUDS/Vibe-Trading/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) or open an issue to discuss a larger change. The [contributing guide](CONTRIBUTING.md) covers local setup and checks to run before opening a pull request.
+Pick a [good first issue](https://github.com/buckleson/vibe-trading-crypto/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) or open an issue to discuss a larger change. The [contributing guide](CONTRIBUTING.md) covers local setup and checks to run before opening a pull request.
 
 ## Contributors
 
-Thank you to everyone who has contributed to Vibe-Trading.
+Thank you to everyone who has contributed to Vibe Crypto.
 
 ### v0.1.19 contributors
 
@@ -458,7 +426,7 @@ Thank you to everyone who has contributed to Vibe-Trading.
 - @tingkk — broker-neutral SDK diagnostics across all locales (#1436)
 - @tonydo — OpenCode as a built-in provider, sending the `x-opencode-session` header OpenCode Go requires (#1416)
 - @woshi77777stars — the `Trigger.market` default restored on non-market triggers (#1599)
-- @Yoruxyv — the Bahasa Indonesia UI locale and `README_id.md` (#1482)
+- @Yoruxyv — the Bahasa Indonesia UI locale (#1482)
 
 </details>
 
@@ -495,7 +463,7 @@ Thank you to everyone who has contributed to Vibe-Trading.
 - @nandofmike — the Brazilian Portuguese (pt-BR) locale (#1327)
 - @P1Piyush — metals treated as metals in the forex backtest: pip size, lot size and spreads (#1226)
 - @sambazhu — per-market data-source priority in Settings and `MARKET_DATA_ORDER_*` (#1231)
-- @SiMinus — `vibe-trading swarm retry` with a resume option (#1194)
+- @SiMinus — `vibe-crypto swarm retry` with a resume option (#1194)
 - @sykuang — the IBKR public MCP OAuth flow (#1186)
 - @thisisjun786 — calendar-triggered partial rebalancing (#1277)
 - @wiliao — a run-stall watchdog, a bash tree-kill timeout and a compaction verification ledger (#1169)
@@ -509,7 +477,7 @@ Thank you to everyone who has contributed to Vibe-Trading.
 - @Shizoqua — a 13-PR correctness sweep across nearly every subsystem: grounding auto-recovers identity and price evidence within a bounded budget (#1092), swarm isolates worker artifacts between retries (#1053), rejects raw `ok`/`success` tool-result envelopes (#1052) and truncates oversized results with the shared notice (#1110), MCP gains offset paging for SEC filings and statements (#1138), routes `load_skill` through the registry so oversized skills page (#1137) and carries market-data provenance on `get_market_data` (#1131), plus `excess_return` consistency (#1058), Wilder-EWM RSI (#1056), the FTS5 tokenizer floor (#1071), non-finite prediction-market fields (#1136), in-flight delivery protection (#1140) and preserved backtest validation evidence (#1139)
 - @shadowinlife — the run-analysis surface, four pages in one cycle: Options Lab (#1096), the Factor Research panel with its new IC correlation matrix (#1099), positions structure visualization (#1097) and the tearsheet tab (#1091); plus evidence-gated Strategy Discovery Phase 1 (#978) and Phase 2 decay monitoring (#1007), per-market volume units in market-data provenance (#1065) and baostock volume normalized to board lots (#1067)
 - @pengpengyi92 — five quantlib numerics fixes: `xirr` and money-weighted return survive long-horizon discount underflow (#1119), zero-volatility options discount their forward value (#1066), the fixed-income curve keeps decay inside the requested bounds (#1076), event studies anchor to the prior session (#1078) and cross-validation aligns label ends to the prior observation (#1079)
-- @cgycorey — reasoning effort honoured in chat completions (#1025), the per-task swarm `ChatLLM` closed to stop a pooled-connection leak (#1145) and the same for one-shot clients (#1153), `gross_profit` derived from revenue minus COGS when the SEC tag is absent (#1111), and `vibe-trading show <run_id>` dispatching its run id instead of the flag (#1147)
+- @cgycorey — reasoning effort honoured in chat completions (#1025), the per-task swarm `ChatLLM` closed to stop a pooled-connection leak (#1145) and the same for one-shot clients (#1153), `gross_profit` derived from revenue minus COGS when the SEC tag is absent (#1111), and `vibe-crypto show <run_id>` dispatching its run id instead of the flag (#1147)
 - @lorenzozanee — the test suite stopped escaping into the real config root and its live audit ledger (#1118, closes #1116), recovery steering delivered as user messages with inline system tags (#1112), and unsupported ticker-plus-name symbol queries marked skipped rather than failed (#1114)
 - @AndyLongest — the interactive backtest research dashboard (#1084), the engine reporting actual post-fill positions (#1082), and grounding ignoring identity constants in rate formulas (#1083)
 - @ofeksh-tr — eToro runtime UI parity for SDK connector status (#1051) and its crypto browse and flat market-data quotes (#1070), plus an empty `Response` for the `scheduled-runs` DELETE 204 (#1068)
@@ -526,7 +494,7 @@ Thank you to everyone who has contributed to Vibe-Trading.
 - @miguelangelo78 — the hosted TickerAll MetaTrader 5 data source, so forex and metals backtests need no local MT5 terminal (#968)
 - @ngoanpv — Vietnam equity (HOSE) support: `.VN` no longer executes under China A-share rules (#1033)
 - @jax-novita — Novita AI registered as a built-in OpenAI-compatible provider (#1059)
-- @daviddaco1 — the Spanish locale and `README_es.md`, the sixth README (#1087)
+- @daviddaco1 — the Spanish locale (#1087)
 - @1psconstructor — German (Deutsch) UI support (#1117)
 - @x-lambda — the tencent loader building its SSL context from the certifi CA bundle, unblocking HK quotes (#1113)
 - @er-s-an — `build_registry()` reporting partial construction instead of silently returning a short tool list (#1129)
@@ -668,12 +636,16 @@ Thank you to everyone who has contributed to Vibe-Trading.
 
 </details>
 
-<a href="https://github.com/HKUDS/Vibe-Trading/graphs/contributors"><img src="https://contrib.rocks/image?repo=HKUDS/Vibe-Trading" alt="Vibe-Trading contributor avatars" /></a>
+<a href="https://github.com/buckleson/vibe-trading-crypto/graphs/contributors"><img src="https://contrib.rocks/image?repo=buckleson/vibe-trading-crypto" alt="Vibe Crypto contributor avatars" /></a>
 
 ## Disclaimer
 
-Vibe-Trading is research and trading software. It is not investment advice, holds no funds, and runs no execution venue. Trading through a broker channel you explicitly authorize (e.g. Robinhood Agentic Trading) happens only within the limits you set and which you can halt at any time. This broker-trading capability is experimental and not verified by us against a real broker account — use it at your own risk. Past performance does not guarantee future results.
+Vibe Crypto is research and trading software. It is not investment advice, holds no funds, and runs no execution venue. Trading through a broker channel you explicitly authorize (e.g. Robinhood Agentic Trading) happens only within the limits you set and which you can halt at any time. This broker-trading capability is experimental and not verified by us against a real broker account — use it at your own risk. Past performance does not guarantee future results.
 
 ## License
 
 MIT License — see [LICENSE](LICENSE)
+
+## Credits
+
+Vibe Crypto is a fork of [Vibe-Trading](https://github.com/HKUDS/Vibe-Trading) by HKUDS, licensed under MIT. See LICENSE and NOTICE.

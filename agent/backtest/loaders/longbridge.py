@@ -82,7 +82,7 @@ def _require_longbridge():
     except ImportError as exc:
         raise LongbridgeDependencyError(
             "The 'longbridge' SDK is not installed. "
-            "Run: pip install 'vibe-trading-ai[longbridge]'"
+            "Run: pip install 'vibe-crypto[longbridge]'"
         ) from exc
     return openapi
 

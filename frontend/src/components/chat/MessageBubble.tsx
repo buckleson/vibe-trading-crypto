@@ -44,7 +44,7 @@ const markdownComponents: ReactMarkdownOptions["components"] = {
     return <a {...props} target="_blank" rel="noopener noreferrer" />;
   },
 };
-const proseClassName = "prose prose-sm dark:prose-invert max-w-none text-[15px] leading-relaxed prose-p:font-serif prose-p:text-[15.5px] prose-p:leading-[1.75] prose-li:font-serif prose-li:text-[15.5px] prose-li:leading-[1.75] prose-headings:font-sans prose-table:font-sans prose-code:font-mono prose-blockquote:font-sans [&_blockquote_p]:font-sans prose-table:border prose-table:border-border/50 prose-th:bg-muted/30 prose-th:px-3 prose-th:py-1.5 prose-td:px-3 prose-td:py-1.5 prose-th:text-left prose-th:text-xs prose-th:font-medium prose-td:text-xs prose-hr:hidden";
+const proseClassName = "prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed prose-headings:font-sans prose-code:font-mono prose-table:border prose-table:border-border prose-th:bg-muted/50 prose-th:px-3 prose-th:py-1.5 prose-td:px-3 prose-td:py-1.5 prose-th:text-left prose-th:text-xs prose-th:font-medium prose-td:text-xs prose-hr:hidden";
 
 interface MarkdownErrorBoundaryProps {
   content: string;
@@ -114,7 +114,7 @@ export const MarkdownContent = memo(function MarkdownContent({
         )}
       </MarkdownErrorBoundary>
       {showCursor && (
-        <span className="inline-block w-0.5 h-4 bg-primary ml-0.5 animate-pulse align-middle" />
+        <span className="inline-block w-0.5 h-4 bg-primary ml-0.5 align-middle" />
       )}
     </div>
   );
@@ -208,13 +208,13 @@ export const MessageBubble = memo(function MessageBubble({ msg, onRetry }: Props
       ?? (meta?.attachment ? [meta.attachment] : []);
     return (
       <div className="flex justify-end group">
-        <div dir="auto" className="max-w-[72%] max-h-[40vh] overflow-y-auto break-words rounded-[18px] bg-muted px-4 py-3 text-[15px] text-foreground leading-relaxed whitespace-pre-wrap">
+        <div dir="auto" className="max-w-[80%] max-h-[40vh] overflow-y-auto break-words rounded-lg bg-muted px-3 py-2 text-sm text-foreground leading-relaxed whitespace-pre-wrap">
           {meta && (attachments.length > 0 || meta.swarmMode || meta.goalMode) && (
-            <div className="mb-1.5 flex flex-wrap justify-end gap-1.5 text-[10px] leading-none text-muted-foreground">
+            <div className="mb-1.5 flex flex-wrap justify-end gap-1.5 text-xs leading-none text-muted-foreground">
               {attachments.map((attachment, index) => (
                 <span
                   key={`${attachment.filename}-${index}`}
-                  className="inline-flex max-w-full items-center gap-1 rounded-full bg-background/60 px-2 py-1 text-muted-foreground"
+                  className="inline-flex max-w-full items-center gap-1 rounded-md bg-background/60 px-2 py-1 text-muted-foreground"
                   title={i18n.t("agent.attachmentChip" as never)}
                 >
                   <Paperclip className="h-3 w-3 shrink-0" />
@@ -223,13 +223,13 @@ export const MessageBubble = memo(function MessageBubble({ msg, onRetry }: Props
                 </span>
               ))}
               {meta.swarmMode && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-background/60 px-2 py-1 text-muted-foreground">
+                <span className="inline-flex items-center gap-1 rounded-md bg-background/60 px-2 py-1 text-muted-foreground">
                   <Users className="h-3 w-3" />
                   {i18n.t("agent.swarmModeChip" as never)}
                 </span>
               )}
               {meta.goalMode && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-background/60 px-2 py-1 text-muted-foreground">
+                <span className="inline-flex items-center gap-1 rounded-md bg-background/60 px-2 py-1 text-muted-foreground">
                   <Target className="h-3 w-3" />
                   {i18n.t("agent.goalModeChip" as never)}
                 </span>
@@ -250,7 +250,7 @@ export const MessageBubble = memo(function MessageBubble({ msg, onRetry }: Props
           <CopyButton text={msg.content} />
           <MarkdownContent content={msg.content} />
           {msg.elapsed_ms != null && (
-            <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground/55">
+            <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1 tabular-nums" title={i18n.t("messageBubble.elapsedTime")}>
                 <Clock3 className="h-3 w-3" aria-hidden="true" />
                 {formatElapsed(msg.elapsed_ms)}
@@ -272,7 +272,7 @@ export const MessageBubble = memo(function MessageBubble({ msg, onRetry }: Props
       <div className="flex gap-3">
         <AgentAvatar />
         <div className="space-y-2">
-          <div className="flex items-start gap-2 rounded-xl border border-danger/30 bg-danger/5 px-4 py-3">
+          <div className="flex items-start gap-2 rounded-lg border border-danger/30 bg-danger/5 px-4 py-3">
             <XCircle className="h-4 w-4 text-danger shrink-0 mt-0.5" />
             <p dir="auto" className="text-sm text-danger leading-relaxed">{msg.content}</p>
           </div>

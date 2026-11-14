@@ -58,7 +58,7 @@ _CHANNEL_TYPES = {"shanghai_connect": "002", "shenzhen_connect": "004"}
 _HKEX_DAILY_URL = "https://www.hkex.com.hk/eng/csm/DailyStat/data_tab_daily_{date}e.js"
 _HKEX_WALKBACK_DAYS = 7
 _HKEX_TIMEOUT_S = 12
-_HKEX_HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; vibe-trading)"}
+_HKEX_HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; VibeCrypto)"}
 
 _DEFAULT_LOOKBACK_DAYS = 30
 _MAX_LOOKBACK_DAYS = 250

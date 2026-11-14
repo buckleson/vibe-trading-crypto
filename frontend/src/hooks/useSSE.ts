@@ -3,7 +3,6 @@
  */
 
 import { useCallback, useRef } from "react";
-import { getApiAuthKey, withAuthTicket } from "@/lib/apiAuth";
 
 type EventHandler = (data: Record<string, unknown>) => void;
 type Handlers = Record<string, EventHandler>;
@@ -138,21 +137,7 @@ export function useSSE(config?: SSEConfig) {
 
     const baseUrl = buildUrl(urlRef.current);
 
-    // When an API key is stored we must first mint a single-use SSE ticket —
-    // EventSource can't send an Authorization header. In loopback dev mode (no
-    // key) the backend bypasses auth, so we connect synchronously and preserve
-    // the original zero-round-trip behavior (and the synchronous test path).
-    if (!getApiAuthKey()) {
-      attach(baseUrl, generation);
-      return;
-    }
-    withAuthTicket(baseUrl)
-      .then((url) => attach(url, generation))
-      .catch(() => {
-        if (!closedRef.current && generation === generationRef.current) {
-          scheduleReconnect(generation);
-        }
-      });
+    attach(baseUrl, generation);
   }, [buildUrl, attach]);
 
   const scheduleReconnect = useCallback((generation: number) => {

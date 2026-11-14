@@ -179,7 +179,7 @@ export class SecureCredentialStore {
           this.values[name] = safeStorage.encryptString(value).toString("base64");
           this.migrated.push(name);
         }
-        nextLines.push(`# ${name} is stored by Vibe-Trading Desktop secure storage.`);
+        nextLines.push(`# ${name} is stored by Vibe Crypto secure storage.`);
         changed = true;
       } else {
         nextLines.push(line);

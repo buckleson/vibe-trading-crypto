@@ -18,7 +18,7 @@ Mootdx talks the native 通达信 (TDX) binary protocol over TCP, bypassing the 
 - GitHub: https://github.com/mootdx/mootdx
 - Legacy SDK installation (not needed for automatic A-share data): `pip install mootdx && pip install 'httpx>=0.28.1'`
 
-> Mootdx pins `httpx<0.26` in `setup.py`, but only uses basic `httpx.Client/get` APIs that are forward-compatible. The second `pip install` restores the modern httpx that the rest of Vibe-Trading (MCP server, fastmcp) needs.
+> Mootdx pins `httpx<0.26` in `setup.py`, but only uses basic `httpx.Client/get` APIs that are forward-compatible. The second `pip install` restores the modern httpx that the rest of Vibe Crypto (MCP server, fastmcp) needs.
 
 ## Quick Start
 
@@ -78,7 +78,7 @@ df_15m = client.bars(symbol="600519", frequency=1, offset=800)
 
 ## Built-in Loader
 
-`backtest/loaders/mootdx_loader.py` remains registered for explicit `source="mootdx"` calls. It is not in the automatic `a_share` fallback chain. The default chain is `tencent → eastmoney → baostock → akshare → tushare → local`, with unavailable loaders skipped. Tencent and AKShare ship in the base install; BaoStock requires the optional `vibe-trading-ai[ashare]` extra. Neither the base install nor that extra includes mootdx.
+`backtest/loaders/mootdx_loader.py` remains registered for explicit `source="mootdx"` calls. It is not in the automatic `a_share` fallback chain. The default chain is `tencent → eastmoney → baostock → akshare → tushare → local`, with unavailable loaders skipped. Tencent and AKShare ship in the base install; BaoStock requires the optional `vibe-crypto[ashare]` extra. Neither the base install nor that extra includes mootdx.
 
 ```python
 from backtest.runner import run

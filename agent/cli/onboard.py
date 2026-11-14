@@ -391,7 +391,7 @@ def _validate_key(provider: Provider, key: str) -> str | None:
 
 def _intro_header(console: Console) -> None:
     console.print()
-    console.print(Text("  Vibe-Trading setup", style=Theme.primary))
+    console.print(Text("  Vibe Crypto setup", style=Theme.primary))
     console.print(Text(
         "  We didn't find a config at ~/.vibe-trading/.env.\n"
         "  Let's set up in under a minute.",
@@ -462,7 +462,7 @@ def run_onboarding(*, console: Console | None = None) -> Path | None:
                     style=Theme.success,
                 ))
                 cons.print(Text(
-                    "  After setup, run: vibe-trading provider login openai-codex",
+                    "  After setup, run: vibe-crypto provider login openai-codex",
                     style=Theme.muted,
                 ))
             else:

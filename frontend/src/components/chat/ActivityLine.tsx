@@ -24,7 +24,7 @@ import type { AgentActivity } from "@/stores/agent";
 
 interface ActivityLineProps {
   activity: AgentActivity;
-  /** Live rolling reasoning excerpt — only supplied for the in-flight attempt. */
+  /** Live rolling reasoning excerpt - only supplied for the in-flight attempt. */
   reasoningTail?: string;
   onContinue?: () => void;
   onReattach?: () => void;
@@ -44,18 +44,18 @@ export function formatActivityElapsed(milliseconds: number): string {
 
 function StateIcon({ state }: { state: AgentActivity["state"] }): JSX.Element {
   if (ACTIVE_STATES.has(state)) {
-    return <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" aria-hidden="true" />;
+    return <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />;
   }
   if (state === "done") {
-    return <CheckCircle2 className="h-3.5 w-3.5 text-success" aria-hidden="true" />;
+    return <CheckCircle2 className="h-4 w-4 text-success" aria-hidden="true" />;
   }
   if (state === "stopped") {
-    return <Octagon className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />;
+    return <Octagon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />;
   }
   if (state === "timeout") {
-    return <Clock3 className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" aria-hidden="true" />;
+    return <Clock3 className="h-4 w-4 text-warning" aria-hidden="true" />;
   }
-  return <XCircle className="h-3.5 w-3.5 text-danger" aria-hidden="true" />;
+  return <XCircle className="h-4 w-4 text-danger" aria-hidden="true" />;
 }
 
 /** The single live and historical status surface for one agent attempt. */
@@ -139,8 +139,8 @@ export const ActivityLine = memo(function ActivityLine({
       aria-live="polite"
       aria-atomic="false"
       className={cn(
-        "overflow-hidden rounded-lg border border-border/40 bg-muted/5",
-        isActive && "border-primary/20 bg-primary/[0.025]",
+        "overflow-hidden rounded-lg border border-border bg-card",
+        isActive && "border-primary/30",
       )}
     >
       <button
@@ -157,16 +157,16 @@ export const ActivityLine = memo(function ActivityLine({
           {summary}
         </span>
         {expanded
-          ? <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
-          : <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />}
+          ? <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+          : <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />}
       </button>
 
       <div id={detailsId} hidden={!expanded}>
-        {/* Live reasoning whisper — DeepTutor-style sub-trace of the current
+        {/* Live reasoning whisper - DeepTutor-style sub-trace of the current
             thought; disappears once the attempt leaves its active states. */}
         {isActive && reasoningTail && (
           <div className="border-t border-border/30 px-3 py-2" aria-hidden="true">
-            <p className="line-clamp-3 border-s-2 border-border/40 ps-2 font-serif text-xs italic leading-relaxed text-muted-foreground/80">
+            <p className="line-clamp-3 border-s-2 border-border/40 ps-2 text-[13px] italic leading-relaxed text-muted-foreground">
               {reasoningTail}
             </p>
           </div>
@@ -181,7 +181,7 @@ export const ActivityLine = memo(function ActivityLine({
             <button
               type="button"
               onClick={onContinue}
-              className="rounded-full border border-border/60 px-3 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="rounded-md border border-border px-3 py-1 text-[13px] font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
               {t("agent.activity.continue" as never)}
             </button>
@@ -192,7 +192,7 @@ export const ActivityLine = memo(function ActivityLine({
             <button
               type="button"
               onClick={onReattach}
-              className="rounded-full border border-border/60 px-3 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="rounded-md border border-border px-3 py-1 text-[13px] font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
               {t("agent.activity.reattach" as never)}
             </button>

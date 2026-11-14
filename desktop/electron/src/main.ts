@@ -1,4 +1,3 @@
-import { randomBytes } from "node:crypto";
 import { writeFileSync } from "node:fs";
 import path from "node:path";
 import {
@@ -25,8 +24,7 @@ let bootPromise: Promise<void> | undefined;
 let quitting = false;
 let desktopLocale: DesktopLocale = "en";
 let desktopMessages = getDesktopMessages(desktopLocale);
-const apiAuthKey = randomBytes(32).toString("base64url");
-const productName = "Vibe-Trading Desktop (Unofficial Community Build)";
+const productName = "Vibe Crypto";
 const testUserData = process.env.VIBE_TRADING_DESKTOP_TEST_USER_DATA;
 let credentialStore: SecureCredentialStore | undefined;
 
@@ -79,23 +77,12 @@ function createWindow(): void {
       nodeIntegration: false,
       sandbox: true,
       devTools: !app.isPackaged,
-      partition: "persist:vibe-trading-desktop",
+      partition: "persist:vibe-crypto",
     },
   });
   const rendererSession = mainWindow.webContents.session;
   rendererSession.setPermissionCheckHandler(() => false);
   rendererSession.setPermissionRequestHandler((_webContents, _permission, callback) => callback(false));
-  rendererSession.webRequest.onBeforeSendHeaders(
-    { urls: ["http://127.0.0.1/*"] },
-    (details, callback) => {
-      const backendOrigin = backend?.url ? new URL(backend.url).origin : undefined;
-      const requestOrigin = safeOrigin(details.url);
-      if (backendOrigin && requestOrigin === backendOrigin) {
-        details.requestHeaders.Authorization = `Bearer ${apiAuthKey}`;
-      }
-      callback({ requestHeaders: details.requestHeaders });
-    },
-  );
   if (!parentDeathSmoke) {
     mainWindow.once("ready-to-show", () => mainWindow?.show());
   }
@@ -172,7 +159,6 @@ async function bootInternal(): Promise<void> {
     resourcesPath: process.resourcesPath,
     allowSourceDiscovery: !app.isPackaged,
     logDirectory: app.getPath("logs"),
-    apiAuthKey,
     messages: desktopMessages,
     credentialEnvironment: requireCredentialStore().environment(),
     onStatus: (message) => mainWindow?.webContents.send("desktop:status", message),

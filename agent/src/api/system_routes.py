@@ -22,12 +22,10 @@ from fastapi import (
     HTTPException,
     Query,
     Request,
-    Security,
     status,
 )
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.responses import JSONResponse
-from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
@@ -216,9 +214,7 @@ def register_system_routes(
             "ensure api_server is imported before calling this function"
         )
 
-    _security = host._security
     _require_shutdown_authorization = host._require_shutdown_authorization
-    _configured_api_key = host._configured_api_key
     require_auth = host.require_auth
     _app_version = app_version if app_version is not None else host.APP_VERSION
 
@@ -236,7 +232,7 @@ def register_system_routes(
     def _health_payload() -> HealthResponse:
         return HealthResponse(
             status="healthy",
-            service="Vibe-Trading API",
+            service="Vibe Crypto API",
             timestamp=datetime.now(timezone.utc).isoformat(),
         )
 
@@ -268,7 +264,7 @@ def register_system_routes(
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=reason)
         return {
             "status": "ready",
-            "service": "Vibe-Trading API",
+            "service": "Vibe Crypto API",
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
@@ -393,10 +389,9 @@ def register_system_routes(
     async def shutdown_local_api(
         background_tasks: BackgroundTasks,
         request: Request,
-        cred: Optional[HTTPAuthorizationCredentials] = Security(_security),
     ):
         """Shut down the local API server after explicit local authorization."""
-        _require_shutdown_authorization(request=request, cred=cred)
+        _require_shutdown_authorization(request=request)
         client_host = request.client.host if request.client else ""
         if client_host not in {"127.0.0.1", "::1", "localhost"}:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Local access only")
@@ -404,7 +399,7 @@ def register_system_routes(
         background_tasks.add_task(_get_terminate_process())
         return {
             "status": "shutting-down",
-            "service": "Vibe-Trading API",
+            "service": "Vibe Crypto API",
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
@@ -430,7 +425,7 @@ def register_system_routes(
     async def api_info():
         """Service metadata."""
         return {
-            "service": "Vibe-Trading API",
+            "service": "Vibe Crypto API",
             "version": _app_version,
             "docs": "/docs",
             "health": "/health",
@@ -465,12 +460,9 @@ def register_system_routes(
     @app.get("/docs", include_in_schema=False)
     async def swagger_ui(
         request: Request,
-        cred: Optional[HTTPAuthorizationCredentials] = Security(_security),
     ):
-        """Serve Swagger UI only in keyless loopback development mode."""
-        if _configured_api_key():
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
-        await require_auth(request, cred)
+        """Serve Swagger UI to local clients."""
+        await require_auth(request)
         return get_swagger_ui_html(
             openapi_url=_openapi_url,
             title=f"{app.title} - Swagger UI",
@@ -480,12 +472,9 @@ def register_system_routes(
     @app.get("/redoc", include_in_schema=False)
     async def redoc_ui(
         request: Request,
-        cred: Optional[HTTPAuthorizationCredentials] = Security(_security),
     ):
-        """Serve ReDoc only in keyless loopback development mode."""
-        if _configured_api_key():
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
-        await require_auth(request, cred)
+        """Serve ReDoc to local clients."""
+        await require_auth(request)
         # ``with_google_fonts=False`` drops ReDoc's fonts.googleapis.com
         # stylesheet, so the docs CSP exception stays limited to the bundle
         # host instead of also allowing a font CDN. ReDoc falls back to system

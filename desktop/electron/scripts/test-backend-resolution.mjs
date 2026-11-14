@@ -33,7 +33,7 @@ try {
   assert.equal(packagedResolution?.includeServeCommand, false);
 
   const sourceRoot = path.join(testRoot, "marked-source");
-  await writeProjectMarker(sourceRoot, "vibe-trading-ai");
+  await writeProjectMarker(sourceRoot, "vibe-crypto");
   const sourceExecutable = await makeExecutable("marked-source/.venv/Scripts/vibe-trading.exe");
   const sourceResolution = resolveBackend(options({
     appPath: path.join(sourceRoot, "desktop/electron"),

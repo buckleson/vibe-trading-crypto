@@ -13,11 +13,13 @@ function renderNavigation(path = "/", collapsed = false) {
 it("keeps every feature directly reachable and distinguishes tasks from tools and setup", () => {
   renderNavigation();
   expect(within(screen.getByRole("region", { name: "Everyday research" })).getAllByRole("link").map((link) => link.getAttribute("href")))
-    .toEqual(["/", "/reports", "/research-artifacts", "/paper-trading", "/portfolio"]);
+    .toEqual(["/", "/reports", "/research-artifacts"]);
+  expect(within(screen.getByRole("region", { name: "Trade" })).getAllByRole("link").map((link) => link.getAttribute("href")))
+    .toEqual(["/paper-trading", "/portfolio"]);
   expect(within(screen.getByRole("region", { name: "Specialized analysis" })).getAllByRole("link").map((link) => link.getAttribute("href")))
     .toEqual(["/alpha-zoo", "/research-lab", "/options", "/correlation"]);
   expect(within(screen.getByRole("region", { name: "Automation & setup" })).getAllByRole("link").map((link) => link.getAttribute("href")))
-    .toEqual(["/pixel-office", "/scheduled", "/runtime", "/settings"]);
+    .toEqual(["/scheduled", "/runtime", "/pixel-office"]);
   expect(screen.getByRole("link", { name: "Research assistant" })).toHaveAttribute("aria-current", "page");
 });
 

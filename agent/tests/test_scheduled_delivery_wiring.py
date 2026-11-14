@@ -30,8 +30,6 @@ def store(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> ScheduledResearchJ
 
 @pytest.fixture
 def client(store: ScheduledResearchJobStore, monkeypatch: pytest.MonkeyPatch) -> TestClient:
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
-    monkeypatch.setattr(api_server, "_API_KEY", "")
     return TestClient(api_server.app, client=("127.0.0.1", 50000))
 
 

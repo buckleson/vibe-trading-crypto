@@ -72,7 +72,7 @@ describe("RunDetail page", () => {
     expect(
       await screen.findByRole("heading", { name: "000001.SZ · 20/50-day moving-average crossover" })
     ).toBeInTheDocument();
-    expect(screen.getByText("RUN 20260811_110751_32_d951c8")).toHaveClass("text-[10px]");
+    expect(screen.getByText("Run 20260811_110751_32_d951c8")).toHaveClass("text-xs");
   });
 
   it("renders the derived strategy name in the active UI language", async () => {
@@ -234,7 +234,7 @@ describe("RunDetail page", () => {
     await screen.findByText("Accessible run");
     expect(screen.getByText("Completed")).toHaveClass("sr-only");
     expect(screen.getByRole("heading", { level: 1, name: "Portfolio · Accessible run" })).toHaveClass("text-xl", "font-semibold");
-    expect(screen.getByText("RUN accessible")).toHaveClass("font-mono", "text-[10px]");
+    expect(screen.getByText("Run accessible")).toHaveClass("font-mono", "text-xs");
     expect(screen.getByRole("tablist")).toBeInTheDocument();
 
     const chartTab = screen.getByRole("tab", { name: "Chart" });
@@ -248,8 +248,17 @@ describe("RunDetail page", () => {
     expect(tradesTab).toHaveAttribute("aria-selected", "true");
     expect(tradesTab).toHaveClass("font-medium");
     const table = screen.getByRole("table");
-    expect(table.parentElement).toHaveClass("overflow-x-auto", "rounded-xl", "border");
+    expect(table.parentElement).toHaveClass("overflow-x-auto", "rounded-lg", "border");
     expect(screen.getByRole("columnheader", { name: "Time" })).toHaveClass("ps-4");
+  });
+
+  it("links a successful run to paper trading", async () => {
+    apiMock.getRun.mockResolvedValue({ status: "success", run_id: "ab/12", prompt: "Test run" });
+    apiMock.getRunCode.mockResolvedValue({});
+    renderRunDetail("/runs/ab%2F12");
+
+    const link = await screen.findByRole("link", { name: "Run on paper" });
+    expect(link).toHaveAttribute("href", "/paper-trading?from_run=ab%2F12");
   });
 
   it("lists every trade newest first and toggles the order from the time header", async () => {
@@ -328,8 +337,7 @@ describe("RunDetail page", () => {
 
     renderRunDetail("/runs/card");
 
-    await screen.findByText("Run card");
-    fireEvent.click(screen.getByRole("tab", { name: "Run Card" }));
+    fireEvent.click(await screen.findByRole("tab", { name: "Run Card" }));
 
     const keyCell = await screen.findByText("engine");
     expect(keyCell).toHaveClass("ps-4");

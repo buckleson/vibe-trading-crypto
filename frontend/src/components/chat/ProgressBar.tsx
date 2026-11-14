@@ -6,7 +6,7 @@ interface ProgressBarProps {
   current: number;
   /** Total value; must be > 0 or the component renders nothing. */
   total: number;
-  /** Bar height: "xs" => h-1, "sm" => h-2. Defaults to "xs". */
+  /** Bar height: "xs" => h-0.5, "sm" => h-2. Defaults to "xs". */
   height?: "xs" | "sm";
   /** When true, appends "{current}/{total}" text after the bar. */
   showCount?: boolean;
@@ -39,7 +39,7 @@ export function ProgressBar({
 
   const clamped = Math.min(total, Math.max(0, current));
   const pct = Math.min(100, Math.max(0, (clamped / total) * 100));
-  const heightClass = height === "sm" ? "h-2" : "h-1";
+  const heightClass = height === "sm" ? "h-2" : "h-0.5";
 
   return (
     <div
@@ -64,7 +64,7 @@ export function ProgressBar({
         />
       </div>
       {showCount && (
-        <span className="text-[10px] text-muted-foreground tabular-nums shrink-0">
+        <span className="text-xs text-muted-foreground tabular-nums shrink-0">
           {clamped}/{total}
         </span>
       )}

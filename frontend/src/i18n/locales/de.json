@@ -86,7 +86,7 @@
     "collapse": "Einklappen",
     "expand": "Ausklappen",
     "skipToMain": "Zum Hauptinhalt springen",
-    "sidebar": "Vibe-Trading-Seitenleiste",
+    "sidebar": "Vibe Crypto-Seitenleiste",
     "mainNavigation": "Hauptnavigation",
     "about": "Über",
     "portfolio": "Kontopositionen",
@@ -571,7 +571,7 @@
     "clearApiKey": "Gespeicherten API-Schlüssel löschen",
     "channels": {
       "title": "IM-Kanäle",
-      "description": "Verbinden Sie Chat-Adapter mit derselben Vibe-Trading-Sitzungs-Laufzeit, die von Web-UI und CLI verwendet wird.",
+      "description": "Verbinden Sie Chat-Adapter mit derselben Vibe Crypto-Sitzungs-Laufzeit, die von Web-UI und CLI verwendet wird.",
       "runtime": "Laufzeit",
       "running": "Läuft",
       "stopped": "Gestoppt",
@@ -1084,7 +1084,7 @@
           "step3": "Trage die IMAP- und SMTP-Zugangsdaten oben ein, setze die Absenderadresse und nimm deine eigene Adresse in „Erlaubte Absender“ auf.",
           "step4": "Klicke auf „Verbindung testen“ – geprüft werden IMAP-Anmeldung, Postfachordner und SMTP-Anmeldung.",
           "step5": "Setze „Einwilligung erteilt“ und aktiviere den Kanal; automatische Antworten erreichen dann Absender, die die DKIM-/SPF-Prüfung bestehen.",
-          "docsLabel": "Vibe-Trading-Dokumentation öffnen"
+          "docsLabel": "Vibe Crypto-Dokumentation öffnen"
         },
         "websocket": {
           "title": "WebSocket-Einrichtungsanleitung",
@@ -1094,12 +1094,12 @@
           "step3": "Verbinde Clients mit ws://host:port/path?client_id=...&token=...",
           "step4": "Speichern im laufenden Betrieb tauscht den Server live aus: Verbundene Clients (einschließlich dieses Web-UI-Chats) verlieren kurz die Verbindung und verbinden sich neu.",
           "step5": "Klicke auf „Verbindung testen“ – Zertifikat/Schlüssel für SSL und die Verfügbarkeit der Adresse werden lokal geprüft.",
-          "docsLabel": "Vibe-Trading-Dokumentation öffnen"
+          "docsLabel": "Vibe Crypto-Dokumentation öffnen"
         },
         "feishu": {
           "title": "Feishu-/Lark-Bot einrichten",
           "intro": "Feishu-Bots nutzen die WebSocket-Long-Connection; eine öffentliche IP oder ein Webhook ist nicht nötig.",
-          "step1": "Erstelle eine benutzerdefinierte App in der Feishu Open Platform (open.feishu.cn) — oder per QR-Scan im Terminal mit vibe-trading channels login feishu; App ID und App Secret werden dabei automatisch gespeichert.",
+          "step1": "Erstelle eine benutzerdefinierte App in der Feishu Open Platform (open.feishu.cn) — oder per QR-Scan im Terminal mit vibe-crypto channels login feishu; App ID und App Secret werden dabei automatisch gespeichert.",
           "step2": "Füge der App die Bot-Funktion hinzu.",
           "step3": "Abonniere im Ereignisabo »Nachrichten empfangen im.message.receive_v1« und wähle den Long-Connection-Modus.",
           "step4": "Kopiere App ID und App Secret aus „Anmeldedaten & Basisinformationen“ und füge sie oben ein.",
@@ -1939,7 +1939,7 @@
     "unknown": "unbekannt",
     "justNow": "gerade eben",
     "loadingInstructions": "Connector-Autorisierungsanweisungen werden geladen...",
-    "fallbackInstruction": "`vibe-trading connector list` ausführen, Broker-Profil wählen, dann `vibe-trading connector authorize <profile>` aus der Desktop-Sitzung ausführen, die die Broker-Verbindung hält.",
+    "fallbackInstruction": "`vibe-crypto connector list` ausführen, Broker-Profil wählen, dann `vibe-crypto connector authorize <profile>` aus der Desktop-Sitzung ausführen, die die Broker-Verbindung hält.",
     "secondsAgo": "vor {{n}}s",
     "minutesAgo": "vor {{n}}m",
     "hoursAgo": "vor {{n}}h",

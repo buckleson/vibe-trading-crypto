@@ -102,7 +102,7 @@ describe("SwarmDashboard", () => {
       />,
     );
 
-    expect(html).toContain("Completed — details unavailable");
+    expect(html).toContain("Completed - details unavailable");
     expect(html).not.toContain("The team is spinning up");
     expect(html).not.toContain("animate-pulse");
     expect(html).not.toContain("animate-spin");

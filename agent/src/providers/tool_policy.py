@@ -90,7 +90,7 @@ def check_bash_command(command: str) -> tuple[Optional[str], Optional[str]]:
     Returns:
         ``(rewritten_command, None)`` when allowed, else ``(None, reason)``.
         An allowed ``python``/``python3`` call is rewritten to this process's
-        interpreter so scripts can import Vibe-Trading's own packages.
+        interpreter so scripts can import Vibe Crypto's own packages.
     """
     if "\n" in command or "`" in command or "$(" in command:
         return None, "newlines, backticks and $( ) are not allowed"

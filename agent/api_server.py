@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Vibe-Trading API Server - RESTful API for finance research and backtesting.
+"""Vibe Crypto API Server - RESTful API for finance research and backtesting.
 
 Thin assembler: creates the FastAPI app, mounts middleware, registers route
 modules, and re-exports symbols for test compatibility.  All shared
@@ -34,16 +34,12 @@ for _s in ("stdout", "stderr"):
 # ---------------------------------------------------------------------------
 
 from src.api.security import (  # noqa: F401, E402
-    _API_KEY,
     _CORS_ORIGINS,
     _DEFAULT_CORS_ORIGINS,
     _DEFAULT_LOOPBACK_HOSTS,
     _EXTRA_LOOPBACK_HOSTS,
     _SAFE_BROWSER_METHODS,
     _apply_security_headers,
-    _auth_credential_from_header_or_query,
-    _configured_api_key,
-    _consume_sse_ticket,
     _default_gateway_ips,
     _env_shell_tools_enabled,
     _host_without_port,
@@ -51,7 +47,6 @@ from src.api.security import (  # noqa: F401, E402
     _is_local_client,
     _is_loopback_bind_host,
     _is_loopback_origin,
-    _mint_sse_ticket,
     _origin_matches_request_host,
     _parse_cors_origins,
     _parse_extra_cors_origins,
@@ -60,10 +55,8 @@ from src.api.security import (  # noqa: F401, E402
     _reject_cross_site_browser_request,
     _reject_untrusted_loopback_host,
     _require_shutdown_authorization,
-    _security,
     _shell_tools_enabled_for_request,
     _trusted_docker_loopback_ip,
-    _validate_api_auth,
     install_access_log_redaction_filter,
     require_auth,
     require_event_stream_auth,
@@ -170,8 +163,8 @@ async def _lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(
-    title="Vibe-Trading API",
-    description="Vibe-Trading API: natural-language finance research, backtesting, and swarm workflows",
+    title="Vibe Crypto API",
+    description="Vibe Crypto API: natural-language finance research, backtesting, and swarm workflows",
     version=APP_VERSION,
     docs_url=None,  # docs/redoc/openapi re-registered behind require_auth
     redoc_url=None,  # in register_system_routes -- see the rationale there
@@ -278,6 +271,8 @@ from src.api.portfolio_routes import register_portfolio_routes  # noqa: E402
 register_portfolio_routes(app)
 from src.api.paper_trade_routes import register_paper_trade_routes  # noqa: E402
 register_paper_trade_routes(app)
+from src.api.claude_chat_routes import register_claude_chat_routes  # noqa: E402
+register_claude_chat_routes(app)
 
 from src.api.connection_routes import register_connection_routes  # noqa: E402
 register_connection_routes(app)
@@ -322,10 +317,6 @@ register_options_routes(app)
 
 from src.api.shannon_routes import register_shannon_routes  # noqa: E402
 register_shannon_routes(app, require_auth)
-
-# --- Auth helpers (SSE tickets) ---
-from src.api.auth_routes import register_auth_routes  # noqa: E402
-register_auth_routes(app)
 
 # --- OpenBB Workspace agent bridge (GET /agents.json, POST /v1/query) ---
 # No-op unless the optional `openbb` extra is installed; self-reports either way.

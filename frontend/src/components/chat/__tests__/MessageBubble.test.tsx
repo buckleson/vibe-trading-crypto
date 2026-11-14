@@ -44,11 +44,11 @@ describe("MessageBubble", () => {
         "max-h-[40vh]",
         "overflow-y-auto",
         "break-words",
-        "rounded-[18px]",
+        "rounded-lg",
         "bg-muted",
-        "px-4",
-        "py-3",
-        "text-[15px]",
+        "px-3",
+        "py-2",
+        "text-sm",
         "text-foreground",
       );
       expect(bubble).not.toHaveClass("rounded-tr-sm");
@@ -110,7 +110,7 @@ describe("MessageBubble", () => {
       );
       expect(screen.getByTestId("markdown").parentElement).toHaveClass(
         "prose",
-        "text-[15px]",
+        "text-sm",
       );
       expect(container.firstElementChild?.children[1]).toHaveClass(
         "flex-1",

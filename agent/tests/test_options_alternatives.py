@@ -126,8 +126,6 @@ def test_http_and_mcp_use_the_same_single_call_comparison(monkeypatch):
     import mcp_server
     from fastapi.testclient import TestClient
 
-    monkeypatch.setattr(api_server, "_API_KEY", "")
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
     expected = json.loads(OptionsPayoffTool().execute(**request()))["comparisons"]
     client = TestClient(api_server.app, client=("127.0.0.1", 50000))
     result = client.post("/options/payoff", json=request())

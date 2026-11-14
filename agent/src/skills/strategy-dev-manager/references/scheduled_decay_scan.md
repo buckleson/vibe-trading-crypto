@@ -13,7 +13,7 @@ Each scheduled fire creates a fresh agent session that runs the configured promp
 The background executor is **off by default**. Start the server with the environment flag:
 
 ```bash
-VIBE_TRADING_ENABLE_SCHEDULER=1 vibe-trading serve --port 8899
+VIBE_TRADING_ENABLE_SCHEDULER=1 vibe-crypto serve --port 8899
 ```
 
 Without this flag, the `/scheduled-runs` endpoints still record jobs but nothing fires.
@@ -54,17 +54,6 @@ curl -X POST http://localhost:8899/scheduled-runs \
     "schedule": "0 2 * * 2",
     "config": {}
   }'
-```
-
-### Authentication
-
-When `API_AUTH_KEY` is configured, include the bearer token:
-
-```bash
-curl -X POST http://localhost:8899/scheduled-runs \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <your-api-key>" \
-  -d '{ ... }'
 ```
 
 ## Schedule Examples

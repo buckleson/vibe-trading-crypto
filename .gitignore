@@ -107,13 +107,7 @@ agent/tests/*_result.json
 .ruff_cache/
 frontend/dist/
 frontend/tsconfig.tsbuildinfo
-wiki/node_modules/
-wiki/dist/
-wiki/.astro/
-wiki/.vite/
-wiki/.wrangler/
 .wrangler/
-wiki/.cache/
 .vibe-dev/
 .vibe-record/
 .cache/
@@ -128,8 +122,6 @@ data/backup/
 
 # Internal docs (plans, specs)
 docs/
-!wiki/docs/
-!wiki/docs/**
 docs/screenshots/agent-run.png
 docs/screenshots/boot.png
 data/minutes/
@@ -172,9 +164,6 @@ desktop/electron/.cache/
 desktop/electron/release/
 desktop/electron/runtime/
 
-# Alpha Zoo wiki artifacts (generated, not source)
-wiki/alpha-library/manifest.json
-wiki/alpha-library/content/
 bench_report.json
 
 # Grounding ledger persisted by ad-hoc verification scripts into tests/
@@ -192,6 +181,4 @@ agent/tests/artifacts/
 # Runtime background command previews and restart outcomes
 /background-tasks/
 
-# Prerendered docs pages (written by wiki/scripts/prerender_docs.mjs at deploy time)
-wiki/docs/latest/
-wiki/docs/zh/
+agent/vibe_crypto.egg-info/

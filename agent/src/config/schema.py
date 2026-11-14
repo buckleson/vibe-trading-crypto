@@ -198,7 +198,7 @@ ROBINHOOD_MCP_SERVER_SEED: dict[str, object] = {
     "auth": {
         "type": "oauth",
         "scopes": ["trading.read"],
-        "client_name": "Vibe-Trading",
+        "client_name": "Vibe Crypto",
         "cache_dir": "~/.vibe-trading/live/robinhood/oauth",
     },
     # Seed the OFF-by-default READ allowlist to EXACTLY the canonical curated
@@ -231,7 +231,7 @@ IBKR_MCP_SERVER_SEED: dict[str, object] = {
     "auth": {
         "type": "oauth",
         "scopes": ["mcp.read"],
-        "client_name": "Vibe-Trading",
+        "client_name": "Vibe Crypto",
         "cache_dir": "~/.vibe-trading/live/ibkr/oauth",
     },
     "enabled_tools": ["*"],
@@ -254,7 +254,7 @@ SCALABLE_MCP_SERVER_SEED: dict[str, object] = {
     "url": "https://mcp.scalable.capital/mcp",
     "auth": {
         "type": "oauth",
-        "client_name": "Vibe-Trading",
+        "client_name": "Vibe Crypto",
         "cache_dir": "~/.vibe-trading/live/scalable/oauth",
     },
     "enabled_tools": [
@@ -384,7 +384,7 @@ class MCPOAuthConfig(ConfigBase):
 
     type: Literal["oauth"] = "oauth"
     scopes: list[str] = Field(default_factory=list)
-    client_name: str = "Vibe-Trading"
+    client_name: str = "Vibe Crypto"
     cache_dir: str = "~/.vibe-trading/live/robinhood/oauth"
     callback_port: int | None = Field(default=None, ge=1, le=65535)
     client_id: str | None = None

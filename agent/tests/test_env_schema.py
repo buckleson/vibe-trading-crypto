@@ -158,8 +158,6 @@ class TestEnvConfigDefaults:
 
     def test_api_defaults(self) -> None:
         c = EnvConfig()
-        assert c.api.api_auth_key == ""
-        assert c.api.vibe_trading_api_key == ""
         assert c.api.cors_origins == ""
         assert c.api.api_allowed_hosts == ""
         assert c.api.enable_session_runtime is True
@@ -368,37 +366,6 @@ class TestEnvConfigOverride:
         assert c.swarm.swarm_max_workers == 8
         assert c.data.ccxt_exchange == "okx"
         assert c.api.cors_origins == "http://localhost:3000"
-
-
-# ===================================================================
-# TestAPIKeyAlias
-# ===================================================================
-
-
-class TestAPIKeyAlias:
-    """Verify VIBE_TRADING_API_KEY → api_auth_key alias resolution."""
-
-    def test_vibe_trading_api_key_only(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setenv("VIBE_TRADING_API_KEY", "secret")
-        c = EnvConfig()
-        assert c.api.api_auth_key == "secret"
-        assert c.api.vibe_trading_api_key == "secret"
-
-    def test_both_keys_explicit_wins(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setenv("VIBE_TRADING_API_KEY", "secret")
-        monkeypatch.setenv("API_AUTH_KEY", "other")
-        c = EnvConfig()
-        assert c.api.api_auth_key == "other"
-
-    def test_api_auth_key_only(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setenv("API_AUTH_KEY", "other")
-        c = EnvConfig()
-        assert c.api.api_auth_key == "other"
-
-    def test_neither_key_set(self) -> None:
-        c = EnvConfig()
-        assert c.api.api_auth_key == ""
-        assert c.api.vibe_trading_api_key == ""
 
 
 # ===================================================================

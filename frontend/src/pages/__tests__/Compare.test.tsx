@@ -105,7 +105,7 @@ describe("Compare page", () => {
 
     render(<Compare />);
 
-    expect(screen.getByRole("heading", { level: 1, name: "Strategy Comparison" })).toHaveClass("text-2xl", "font-semibold");
+    expect(screen.getByRole("heading", { level: 1, name: "Strategy Comparison" })).toHaveClass("text-xl", "font-semibold");
     expect(await screen.findByText("Better:")).toHaveClass("sr-only");
     expect(screen.getByText("Worse:")).toHaveClass("sr-only");
     expect(screen.getByText("\u2191")).toHaveAttribute("aria-hidden", "true");

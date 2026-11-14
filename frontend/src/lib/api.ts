@@ -1,5 +1,4 @@
 import i18n from "@/i18n";
-import { authHeaders, withAuthTicket } from "@/lib/apiAuth";
 import type {
   OptionsChainResponse,
   OptionsPayoffRequest,
@@ -51,7 +50,7 @@ async function performRequest<T>(
 }
 
 export async function downloadGeneratedReport(reportId: string, filename: string): Promise<void> {
-  const blob = await performRequest(`/api/reports/${encodeURIComponent(reportId)}`, { headers: authHeaders() }, (response) => response.blob());
+  const blob = await performRequest(`/api/reports/${encodeURIComponent(reportId)}`, {}, (response) => response.blob());
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
@@ -441,7 +440,7 @@ async function errorFromResponse(res: Response): Promise<ApiError> {
 
 export async function request<T>(path: string, options?: RequestInit, timeoutMs?: number): Promise<T> {
   const { headers, ...rest } = options ?? {};
-  const mergedHeaders: Record<string, string> = { "Content-Type": "application/json", ...authHeaders() };
+  const mergedHeaders: Record<string, string> = { "Content-Type": "application/json" };
   if (headers) {
     new Headers(headers).forEach((value, key) => {
       mergedHeaders[key] = value;
@@ -476,7 +475,7 @@ export interface UploadResult {
 async function uploadFile(file: File): Promise<UploadResult> {
   const form = new FormData();
   form.append("file", file);
-  return performRequest("/upload", { method: "POST", headers: authHeaders(), body: form }, (res) => res.json());
+  return performRequest("/upload", { method: "POST", body: form }, (res) => res.json());
 }
 
 function appendQueryParam(url: string, key: string, value: string): string {
@@ -689,7 +688,7 @@ export const api = {
   getPortfolioHistory: (limit = 180) =>
     request<{ status: string; history: PortfolioHistoryPoint[] }>(`/api/portfolio/history?limit=${encodeURIComponent(String(limit))}`),
   downloadPortfolioCsv: async () => {
-    return performRequest("/api/portfolio/export.csv", { headers: authHeaders() }, (response) => response.blob());
+    return performRequest("/api/portfolio/export.csv", {}, (response) => response.blob());
   },
   listRuns: (limit?: number) => request<RunListItem[]>(`/runs${limit ? `?limit=${encodeURIComponent(String(limit))}` : ""}`),
   getRun: (id: string, params: RunDetailParams = {}) => {
@@ -775,7 +774,7 @@ export const api = {
     }),
   listSwarmRuns: () => request<SwarmRunSummary[]>("/swarm/runs"),
   getSwarmRun: (id: string) => request<Record<string, unknown>>(`/swarm/runs/${id}`),
-  swarmSseUrl: (id: string) => withAuthTicket(`${BASE}/swarm/runs/${id}/events`),
+  swarmSseUrl: (id: string) => `${BASE}/swarm/runs/${id}/events`,
   cancelSwarmRun: (id: string) =>
     request<{ status: string }>(`/swarm/runs/${id}/cancel`, { method: "POST" }),
   retrySwarmRun: (id: string, resume = false) =>
@@ -857,14 +856,14 @@ export const api = {
       body: JSON.stringify(body),
     }),
   alphaBenchStreamUrl: (jobId: string) =>
-    withAuthTicket(`${BASE}/alpha/bench/${encodeURIComponent(jobId)}/stream`),
+    `${BASE}/alpha/bench/${encodeURIComponent(jobId)}/stream`,
   createAlphaCompare: (body: AlphaCompareRequest) =>
     request<{ status: string; job_id: string }>("/alpha/compare", {
       method: "POST",
       body: JSON.stringify(body),
     }),
   alphaCompareStreamUrl: (jobId: string) =>
-    withAuthTicket(`${BASE}/alpha/compare/${encodeURIComponent(jobId)}/stream`),
+    `${BASE}/alpha/compare/${encodeURIComponent(jobId)}/stream`,
 
   // Options Lab
   analyzeOptionsPayoff: (body: OptionsPayoffRequest, signal?: AbortSignal) =>

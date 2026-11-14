@@ -182,7 +182,7 @@ FALLBACK_CHAINS: dict[str, list[str]] = {
         # servers stopped answering the client protocol mootdx/tdxpy speak
         # (2026-07, mootdx/mootdx#157) and upstream is dormant, so the slot
         # only cost ~10s of dead time per miss. The loader stays registered
-        # for explicit source="mootdx" use. See HKUDS/Vibe-Trading#1729.
+        # for explicit source="mootdx" use. See upstream#1729.
         "eastmoney",
         "baostock",
         "akshare",
@@ -225,7 +225,7 @@ FALLBACK_CHAINS: dict[str, list[str]] = {
     "ar_equity": ["yahoo", "yfinance", "local"],
     # Brazil (B3 .SA): Yahoo public chart (adjusted) first, yfinance second,
     # then the official B3 COTAHIST files (unadjusted, daily, every listed
-    # instrument) synced by ``vibe-trading br-data sync``.
+    # instrument) synced by ``vibe-crypto br-data sync``.
     "br_equity": ["yahoo", "yfinance", "b3_cotahist", "local"],
     # UK (LSE .L): direct Yahoo first, SDK fallback second.
     "uk_equity": ["yahoo", "yfinance", "local"],

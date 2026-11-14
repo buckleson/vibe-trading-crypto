@@ -1,4 +1,4 @@
-"""Interactive CLI front door for Vibe-Trading.
+"""Interactive CLI front door for Vibe Crypto.
 
 Responsibilities:
 
@@ -13,7 +13,7 @@ Responsibilities:
    long tail of ``serve``, ``run``, ``mcp``, ``sessions``, ``swarm`` etc.
    keeps working without regression.
 
-The console script entry in ``pyproject.toml`` (``vibe-trading = "cli:main"``)
+The console script entry in ``pyproject.toml`` (``vibe-crypto = "cli:main"``)
 hits :func:`main`.
 """
 
@@ -319,7 +319,7 @@ def _show_banner() -> None:
     console.print(
         "  [dim]Live trading (opt-in, read-only by default): "
         "[/dim][bold]/connector[/bold][dim] in chat · "
-        "[/dim][bold]vibe-trading connector --help[/bold][dim] · "
+        "[/dim][bold]vibe-crypto connector --help[/bold][dim] · "
         "[/dim][bold]/halt[/bold][dim] = kill switch.[/dim]"
     )
     console.print()
@@ -748,7 +748,7 @@ def _run_one_turn(user_input: str, ctx: InteractiveContext) -> None:
             dashboard.finish(result, time.perf_counter() - start)
     except (KeyboardInterrupt, BrokenPipeError):
         dashboard.close()
-        # BrokenPipe: caller did ``vibe-trading chat | head`` and the
+        # BrokenPipe: caller did ``vibe-crypto chat | head`` and the
         # downstream pipe closed mid-render. Print may itself fail on
         # the closed fd, so swallow that defensively too.
         try:
@@ -819,7 +819,7 @@ def _print_interactive_result(console: Any, result: Dict[str, Any], elapsed: flo
         # Name the dashboard without starting a server: this is a print path, and
         # a process spawned here would outlive the command that created it.
         console.print(
-            f"[dim]Dashboard: run `vibe-trading serve`, then open "
+            f"[dim]Dashboard: run `vibe-crypto serve`, then open "
             f"/runs/{run_id}?view=dashboard[/dim]"
         )
     elif run_id:
@@ -906,7 +906,7 @@ def _trip_halt_from_repl(console: Any, *, reason: str) -> None:
         return
     console.print(
         "[bold red]Live trading halted[/bold red] — all live order tools are now "
-        "disabled until you run [bold]/resume[/bold] or [bold]vibe-trading connector resume[/bold]."
+        "disabled until you run [bold]/resume[/bold] or [bold]vibe-crypto connector resume[/bold]."
     )
     console.print(f"[dim]HALT sentinel: {path}[/dim]")
 
@@ -916,7 +916,7 @@ def _clear_halt_from_repl(console: Any) -> None:
 
     Clearing the halt is a privileged surface action — an explicit re-enable,
     never an agent tool (SPEC.md Consent §4). It is intercepted in the input
-    path so the model never performs it. Mirrors ``vibe-trading connector resume``
+    path so the model never performs it. Mirrors ``vibe-crypto connector resume``
     with no broker (the global scope).
 
     Args:
@@ -940,7 +940,7 @@ def _clear_halt_from_repl(console: Any) -> None:
 def _run_connector_command_from_repl(console: Any, args: list[str]) -> None:
     """Run a ``/connector ...`` subcommand from the REPL via the dispatcher.
 
-    ``/connector`` is a thin in-REPL bridge to the ``vibe-trading connector``
+    ``/connector`` is a thin in-REPL bridge to the ``vibe-crypto connector``
     subcommand group (SPEC.md §9 Decision 1): ``/connector status``,
     ``/connector start``, ``/connector stop``, ``/connector halt``, etc. It parses the
     arguments through the same argparse surface as the non-interactive CLI and
@@ -1115,12 +1115,9 @@ def _handle_scheduled_proposal_reply(text: str, ctx: InteractiveContext) -> bool
         reset_env_config()
         api_config = get_env_config().api
         base = api_config.vibe_trading_api_url.rstrip("/")
-        key = api_config.api_auth_key.strip()
-        headers = {"Authorization": f"Bearer {key}"} if key else {}
         endpoint = "commit" if token in {"y", "yes", "确认"} else "discard"
         response = httpx.post(
             f"{base}/scheduled-runs/proposals/{proposal_id}/{endpoint}",
-            headers=headers,
             timeout=15.0,
         )
         response.raise_for_status()
@@ -1209,8 +1206,6 @@ def _commit_mandate(
     reset_env_config()
     api_config = get_env_config().api
     base = api_config.vibe_trading_api_url.rstrip("/")
-    key = api_config.api_auth_key.strip()
-    headers = {"Authorization": f"Bearer {key}"} if key else {}
     try:
         account = proposal.get("account") or {}
         body = CommitMandateRequest.model_validate(
@@ -1228,7 +1223,6 @@ def _commit_mandate(
         listing = httpx.get(
             f"{base}/live/accounts",
             params={"broker": body["broker"]},
-            headers=headers,
             timeout=30.0,
         )
         listing.raise_for_status()
@@ -1242,7 +1236,6 @@ def _commit_mandate(
         response = httpx.post(
             f"{base}/mandate/commit",
             json=body,
-            headers=headers,
             timeout=30.0,
         )
         response.raise_for_status()
@@ -1321,7 +1314,7 @@ def _interactive_loop(max_iter: int, resume_session_id: Optional[str] = None) ->
     pending_input: Optional[str] = None
 
     if resume_session_id:
-        # Resume a specific session by ID (``vibe-trading resume <session-id>``).
+        # Resume a specific session by ID (``vibe-crypto resume <session-id>``).
         try:
             store = _session_store()
             session = store.get_session(resume_session_id)
@@ -1456,7 +1449,7 @@ def _interactive_loop(max_iter: int, resume_session_id: Optional[str] = None) ->
     console.print("[dim]Goodbye[/dim]")
     if ctx.session_id:
         console.print(
-            f"[dim]To resume this session:[/dim] [bold]vibe-trading resume {ctx.session_id}[/bold]"
+            f"[dim]To resume this session:[/dim] [bold]vibe-crypto resume {ctx.session_id}[/bold]"
         )
     return 0
 
@@ -1509,7 +1502,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         max_iter = _extract_max_iter(raw_argv, default=50)
         return _interactive_loop(max_iter)
 
-    # Handle ``vibe-trading resume <session-id>`` — enter the interactive
+    # Handle ``vibe-crypto resume <session-id>`` — enter the interactive
     # loop with a specific session loaded, bypassing the legacy dispatcher.
     if len(raw_argv) == 2 and raw_argv[0] == "resume":
         max_iter = _extract_max_iter(raw_argv, default=50)
@@ -1571,7 +1564,7 @@ def _build_typer_app():  # type: ignore[no-untyped-def]
     app = typer.Typer(
         add_completion=False,
         no_args_is_help=False,
-        help="Vibe-Trading — natural-language finance research agent.",
+        help="Vibe Crypto — natural-language finance research agent.",
         rich_markup_mode=None,
     )
 

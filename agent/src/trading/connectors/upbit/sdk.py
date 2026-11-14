@@ -207,7 +207,7 @@ def check_status(config: UpbitConfig | None = None) -> dict[str, Any]:
 
     if not report["sdk"]["installed"]:
         report["status"] = "error"
-        report["error"] = "Optional dependency missing: install with `pip install \"vibe-trading-ai[upbit]\"`."
+        report["error"] = "Optional dependency missing: install with `pip install \"vibe-crypto[upbit]\"`."
         return report
 
     try:
@@ -546,7 +546,7 @@ def _require_jwt() -> ModuleType:
         import jwt  # type: ignore
     except ModuleNotFoundError as exc:
         raise UpbitDependencyError(
-            "PyJWT is not installed; run `pip install \"vibe-trading-ai[upbit]\"`."
+            "PyJWT is not installed; run `pip install \"vibe-crypto[upbit]\"`."
         ) from exc
     return jwt
 

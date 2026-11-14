@@ -87,7 +87,7 @@
     "collapse": "Ciutkan",
     "expand": "Perluas",
     "skipToMain": "Lewati ke konten utama",
-    "sidebar": "Sidebar Vibe-Trading",
+    "sidebar": "Sidebar Vibe Crypto",
     "mainNavigation": "Navigasi utama",
     "about": "Tentang",
     "sessionsLoadFailed": "Percakapan tidak dapat dimuat.",
@@ -571,7 +571,7 @@
     "clearApiKey": "Hapus API key tersimpan",
     "channels": {
       "title": "Channel IM",
-      "description": "Hubungkan adapter chat ke runtime sesi Vibe-Trading yang sama dengan yang digunakan oleh Web UI dan CLI.",
+      "description": "Hubungkan adapter chat ke runtime sesi Vibe Crypto yang sama dengan yang digunakan oleh Web UI dan CLI.",
       "runtime": "Runtime",
       "running": "Berjalan",
       "stopped": "Berhenti",
@@ -1084,7 +1084,7 @@
           "step3": "Isi kredensial IMAP dan SMTP di atas, atur alamat pengirim, dan tambahkan alamat Anda ke «Pengirim yang diizinkan».",
           "step4": "Klik «Uji koneksi»; pengujian memeriksa login IMAP, folder kotak surat, dan login SMTP.",
           "step5": "Centang «Persetujuan diberikan» lalu aktifkan kanal; balasan otomatis akan sampai ke pengirim yang lolos pemeriksaan DKIM/SPF.",
-          "docsLabel": "Buka dokumentasi Vibe-Trading"
+          "docsLabel": "Buka dokumentasi Vibe Crypto"
         },
         "websocket": {
           "title": "Panduan penyiapan WebSocket",
@@ -1094,12 +1094,12 @@
           "step3": "Hubungkan klien dengan ws://host:port/path?client_id=...&token=...",
           "step4": "Menyimpan saat kanal berjalan akan menukar server secara panas: klien yang terhubung (termasuk obrolan Web UI ini) sempat terputus lalu tersambung kembali.",
           "step5": "Klik «Uji koneksi»; pengujian memvalidasi materi sertifikat/kunci SSL dan ketersediaan alamat secara lokal.",
-          "docsLabel": "Buka dokumentasi Vibe-Trading"
+          "docsLabel": "Buka dokumentasi Vibe Crypto"
         },
         "feishu": {
           "title": "Penyiapan bot Feishu / Lark",
           "intro": "Bot Feishu memakai long connection WebSocket, jadi tidak perlu IP publik maupun webhook.",
-          "step1": "Buat Custom App di Feishu Open Platform (open.feishu.cn), atau buat lewat pindaian QR dari terminal dengan vibe-trading channels login feishu — App ID dan App Secret tersimpan otomatis.",
+          "step1": "Buat Custom App di Feishu Open Platform (open.feishu.cn), atau buat lewat pindaian QR dari terminal dengan vibe-crypto channels login feishu — App ID dan App Secret tersimpan otomatis.",
           "step2": "Tambahkan kemampuan Bot ke aplikasi.",
           "step3": "Di Langganan Event, berlangganan «Menerima pesan im.message.receive_v1» dan pilih mode Long Connection.",
           "step4": "Salin App ID dan App Secret dari halaman Kredensial & Info Dasar, lalu tempel di kolom di atas.",
@@ -1939,7 +1939,7 @@
     "unknown": "tidak diketahui",
     "justNow": "baru saja",
     "loadingInstructions": "Memuat instruksi otorisasi connector...",
-    "fallbackInstruction": "Jalankan `vibe-trading connector list`, pilih profil broker, lalu jalankan `vibe-trading connector authorize <profile>` dari sesi desktop yang akan mempertahankan koneksi broker.",
+    "fallbackInstruction": "Jalankan `vibe-crypto connector list`, pilih profil broker, lalu jalankan `vibe-crypto connector authorize <profile>` dari sesi desktop yang akan mempertahankan koneksi broker.",
     "secondsAgo": "{{n}} dtk lalu",
     "minutesAgo": "{{n}} mnt lalu",
     "hoursAgo": "{{n}} jam lalu",

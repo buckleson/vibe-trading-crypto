@@ -2,7 +2,7 @@
 
 Each call starts one headless ``claude -p`` process with every built-in tool and
 MCP server disabled, and constrains its output with ``--json-schema`` to either
-"call these tools" or "final answer". Vibe-Trading executes the tools itself, so
+"call these tools" or "final answer". Vibe Crypto executes the tools itself, so
 the ReAct loop, the grounding ledger and the swarm deliverable checks see every
 tool result exactly as they would with an API provider.
 

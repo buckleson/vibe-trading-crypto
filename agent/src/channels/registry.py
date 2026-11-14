@@ -58,22 +58,22 @@ _GLOBAL_CONFIG_KEYS = (
 )
 
 _INSTALL_HINTS: dict[str, str] = {
-    "dingtalk": "pip install 'vibe-trading-ai[dingtalk]'",
-    "discord": "pip install 'vibe-trading-ai[discord]'",
+    "dingtalk": "pip install 'vibe-crypto[dingtalk]'",
+    "discord": "pip install 'vibe-crypto[discord]'",
     "email": "No extra Python package required; configure channels.email in the agent config.",
-    "feishu": "pip install 'vibe-trading-ai[feishu]'",
-    "matrix": "pip install 'vibe-trading-ai[matrix]'",
-    "mochat": "pip install 'vibe-trading-ai[mochat]'",
-    "msteams": "pip install 'vibe-trading-ai[msteams]'",
-    "napcat": "pip install 'vibe-trading-ai[napcat]'",
-    "qq": "pip install 'vibe-trading-ai[qq]'",
+    "feishu": "pip install 'vibe-crypto[feishu]'",
+    "matrix": "pip install 'vibe-crypto[matrix]'",
+    "mochat": "pip install 'vibe-crypto[mochat]'",
+    "msteams": "pip install 'vibe-crypto[msteams]'",
+    "napcat": "pip install 'vibe-crypto[napcat]'",
+    "qq": "pip install 'vibe-crypto[qq]'",
     "signal": "No extra Python package required; install and run signal-cli-rest-api separately.",
-    "slack": "pip install 'vibe-trading-ai[slack]'",
-    "telegram": "pip install 'vibe-trading-ai[telegram]'",
-    "wecom": "pip install 'vibe-trading-ai[wecom]'",
+    "slack": "pip install 'vibe-crypto[slack]'",
+    "telegram": "pip install 'vibe-crypto[telegram]'",
+    "wecom": "pip install 'vibe-crypto[wecom]'",
     "weixin": "No extra Python package required; configure channels.weixin in the agent config.",
-    "whatsapp": "pip install 'vibe-trading-ai[whatsapp]'",
-    "websocket": "pip install 'vibe-trading-ai[channels]'",
+    "whatsapp": "pip install 'vibe-crypto[whatsapp]'",
+    "websocket": "pip install 'vibe-crypto[channels]'",
 }
 
 _AVAILABILITY_FLAGS: dict[str, tuple[str, ...]] = {
@@ -201,7 +201,7 @@ def inspect_channel(name: str) -> ChannelAvailability:
                 display_name=str(display),
                 error=missing,
                 install_hint=_INSTALL_HINTS.get(
-                    name, f"pip install 'vibe-trading-ai[{name}]'"
+                    name, f"pip install 'vibe-crypto[{name}]'"
                 ),
                 delivery_target_label=delivery_target_label,
                 delivery_target_kind=delivery_target_kind,
@@ -224,7 +224,7 @@ def inspect_channel(name: str) -> ChannelAvailability:
             display_name=name.replace("_", " ").title(),
             error=f"{type(exc).__name__}: {exc}",
             install_hint=_INSTALL_HINTS.get(
-                name, f"pip install 'vibe-trading-ai[{name}]'"
+                name, f"pip install 'vibe-crypto[{name}]'"
             ),
         )
 

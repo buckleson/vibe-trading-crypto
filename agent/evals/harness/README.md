@@ -34,7 +34,7 @@ Cases keep the natural-language prompt unchanged. Everything below `expect` is e
 ## Financial tasks and measurement checks
 
 The Research Lab adds 20 synthetic-input financial tasks and a shared saved-run
-replay interface. `vibe-trading research-lab cases --json` lists exact original
+replay interface. `vibe-crypto research-lab cases --json` lists exact original
 prompts. `research-lab replay RUN --case ID --json` evaluates that saved run;
 `--bindings FILE.json` maps each task to its own run and optional trace directory.
 Web exposes the same case selector, report and coverage through `/research-lab`.

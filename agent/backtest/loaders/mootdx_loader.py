@@ -6,7 +6,7 @@ servers stopped answering the client protocol mootdx/tdxpy speak in 2026-07
 dormant since 2024. The loader remains registered so explicit
 ``source="mootdx"`` calls keep working if a compatible fork ever appears,
 but the default chain no longer routes through it. See
-HKUDS/Vibe-Trading#1729.
+upstream#1729.
 
 Mootdx (https://github.com/mootdx/mootdx) talks the native 通达信 binary
 protocol over TCP and is not subject to the HTTP scraping rate limits that
@@ -77,7 +77,7 @@ class DataLoader:
 
     name = "mootdx"
     markets = {"a_share"}
-    # Tongdaxin K-line convention is board lots (HKUDS/Vibe-Trading#1062).
+    # Tongdaxin K-line convention is board lots (upstream#1062).
     # Tentative declaration: TDX quote servers were unreachable from the
     # audit environment; the cross-source consistency test pins this at
     # runtime where TDX access exists.

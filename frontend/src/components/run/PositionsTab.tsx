@@ -71,8 +71,8 @@ function signedAxisBounds(values: Iterable<number>): { min: number; max: number 
 
 function categoryColors(t: ReturnType<typeof getChartTheme>): string[] {
   return [
-    t.infoColor, t.warningColor, "#8b5cf6", "#14b8a6", t.upColor, "#f97316",
-    "#06b6d4", t.downColor, "#84cc16", "#ec4899", "#6366f1", "#10b981",
+    t.infoColor, t.warningColor, "#0e7490", "#14b8a6", t.upColor, "#f97316",
+    "#06b6d4", t.downColor, "#84cc16", "#64748b", "#0d9488", "#10b981",
   ];
 }
 
@@ -107,7 +107,7 @@ export function PositionsTab({ run }: { run: RunData }) {
       const assetClass = classifyAssetClass(symbol);
       // The backend sector-map `_detect_market` defaults UNKNOWN symbols to
       // a_share, so symbols the frontend classifier buckets as "other" are
-      // still resolvable — include them in the gate.
+      // still resolvable - include them in the gate.
       return assetClass === "a_share" || assetClass === "other";
     }),
     [panel.symbols],
@@ -346,7 +346,7 @@ function PositionsPanelCard({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+    <section className="rounded-lg border border-border/60 bg-card p-4">
       {(title || subtitle) && (
         <header className="mb-3">
           {title && <h3 className="text-sm font-semibold">{title}</h3>}

@@ -27,18 +27,7 @@ def _panel() -> dict[str, pd.DataFrame]:
     return {"close": close, "open": close, "volume": close}
 
 
-class _FakeCfg:
-    def __init__(self, api_auth_key: str) -> None:
-        self.api = type("_Api", (), {"api_auth_key": api_auth_key})()
-
-
-@pytest.fixture
-def no_api_key(monkeypatch):
-    """Force the key-file fallback path (no API_AUTH_KEY configured)."""
-    monkeypatch.setattr(abt, "get_env_config", lambda: _FakeCfg(""))
-
-
-def test_cache_roundtrips_when_untampered(tmp_path, no_api_key):
+def test_cache_roundtrips_when_untampered(tmp_path):
     cache_path = tmp_path / "csi300_2020-01-01_2020-12-31.pkl"
     panel = _panel()
 
@@ -49,7 +38,7 @@ def test_cache_roundtrips_when_untampered(tmp_path, no_api_key):
     pd.testing.assert_frame_equal(loaded["close"], panel["close"])
 
 
-def test_tampered_pickle_with_unkeyed_sha256_is_rejected(tmp_path, no_api_key):
+def test_tampered_pickle_with_unkeyed_sha256_is_rejected(tmp_path):
     cache_path = tmp_path / "sp500_2020-01-01_2020-12-31.pkl"
     abt._write_pickle_cache(tmp_path, cache_path, _panel())
 
@@ -64,7 +53,7 @@ def test_tampered_pickle_with_unkeyed_sha256_is_rejected(tmp_path, no_api_key):
     assert abt._read_pickle_cache(cache_path) is None
 
 
-def test_fallback_key_is_stable_and_0600(tmp_path, no_api_key):
+def test_fallback_key_is_stable_and_0600(tmp_path):
     key1 = abt._cache_hmac_key(tmp_path)
     key2 = abt._cache_hmac_key(tmp_path)
 
@@ -75,13 +64,3 @@ def test_fallback_key_is_stable_and_0600(tmp_path, no_api_key):
     assert key_file.is_file()
     if os.name == "posix":
         assert stat.S_IMODE(key_file.stat().st_mode) == 0o600
-
-
-def test_configured_api_key_takes_priority(tmp_path, monkeypatch):
-    monkeypatch.setattr(abt, "get_env_config", lambda: _FakeCfg("super-secret-key"))
-
-    key = abt._cache_hmac_key(tmp_path)
-
-    assert key == b"super-secret-key"
-    # No key file is written when an explicit secret is configured.
-    assert not (tmp_path / ".hmac_key").exists()

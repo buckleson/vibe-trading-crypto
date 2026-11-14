@@ -8,7 +8,7 @@ and, for live, the mandate gate.
 
 Architecture is a LOCAL OpenD gateway (default ``127.0.0.1:11111``), exactly
 like IBKR's local TWS / IB Gateway: OpenD runs on the operator's machine, holds
-the Futu login, and the SDK speaks to it over a local socket. Vibe-Trading never
+the Futu login, and the SDK speaks to it over a local socket. Vibe Crypto never
 sees Futu credentials. A TCP-port-open probe runs before every connect so a
 missing gateway degrades to a clean error instead of an SDK stack trace.
 

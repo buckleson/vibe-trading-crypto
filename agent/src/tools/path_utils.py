@@ -157,6 +157,7 @@ def _default_run_roots() -> list[Path]:
         home / ".vibe-trading" / "runs",
         runtime_root / "shadow_runs",
         runtime_root / "runs",
+        runtime_root / "paper-runs",
     ]
 
 

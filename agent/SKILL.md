@@ -1,11 +1,11 @@
 ---
-name: vibe-trading
+name: vibe-crypto
 version: 0.1.19
 description: Professional finance research toolkit — backtesting (12 engines + benchmark comparison panel), factor analysis, Alpha Zoo (478 pre-built alphas across qlib158/alpha101/gtja191/academic/fundamental), options pricing, 89 finance skills, 30 multi-agent swarm teams, Trade Journal analyzer, and Shadow Account (extract → backtest → render) across 28 market-data sources (tushare, yfinance, okx, binance, akshare, baostock, tencent, mootdx, ccxt, futu, mt5, tickerall, local, eastmoney, sina, stooq, yahoo, pykrx, india_broker, longbridge, nobitex, wallex, plus optional-key finnhub/alphavantage/tiingo/fmp/gildata).
 dependencies:
   python: ">=3.11"
   pip:
-    - vibe-trading-ai
+    - vibe-crypto
 env:
   - name: TUSHARE_TOKEN
     description: "Tushare API token for China A-share data (optional — HK/US/Canada/crypto work without any key)"
@@ -17,35 +17,35 @@ env:
     description: "LLM model name for run_swarm (e.g. deepseek/deepseek-v4-pro). Only needed if using run_swarm."
     required: false
 mcp:
-  command: vibe-trading-mcp
+  command: vibe-crypto-mcp
   args: []
 ---
 
-# Vibe-Trading
+# Vibe Crypto
 
 Professional finance research toolkit with AI-powered backtesting (12 engines), multi-agent teams, 89 specialized skills, the **Alpha Zoo** (478 pre-built quantitative alphas across qlib158 / alpha101 / gtja191 / academic / fundamental with one-line CLI benchmarking), and the Shadow Account loop — extract your implicit trading rules from a journal, backtest them across A股/港股/美股/crypto, then see where they would have served you better.
 
 ## Setup
 
 ```bash
-pip install vibe-trading-ai
+pip install vibe-crypto
 ```
 
-> **Package name vs commands:** The PyPI package is `vibe-trading-ai`. Once installed, you get:
+> **Package name vs commands:** The PyPI package is `vibe-crypto`. Once installed, you get:
 >
 > | Command | Purpose |
 > |---------|---------|
-> | `vibe-trading` | Interactive CLI / TUI |
-> | `vibe-trading serve` | Launch FastAPI web server |
-> | `vibe-trading-mcp` | Start MCP server (for Claude Desktop, OpenClaw, Cursor, etc.) |
+> | `vibe-crypto` | Interactive CLI / TUI |
+> | `vibe-crypto serve` | Launch FastAPI web server |
+> | `vibe-crypto-mcp` | Start MCP server (for Claude Desktop, OpenClaw, Cursor, etc.) |
 
 Add to your agent's MCP config:
 
 ```json
 {
   "mcpServers": {
-    "vibe-trading": {
-      "command": "vibe-trading-mcp"
+    "vibe-crypto": {
+      "command": "vibe-crypto-mcp"
     }
   }
 }
@@ -78,7 +78,7 @@ Create and run quantitative strategies across 12 engines (ChinaA, GlobalEquity, 
 - **HK/US equities** via yfinance / stooq / yahoo (free, no API key); optionally via **Longbridge** historical OHLCV (`longbridge`, requires the optional SDK and `LONGBRIDGE_APP_KEY` / `LONGBRIDGE_APP_SECRET` / `LONGBRIDGE_ACCESS_TOKEN`). To force it for a run, set `"source": "longbridge"` in `config.json`.
 - **Canada equities (TSX/TSXV)** via yahoo / yfinance using Yahoo's canonical `<TICKER>.TO` (TSX, e.g. `TD.TO`) or `<TICKER>.V` (TSXV, e.g. `PNG.V`) suffixes — free, no API key. The GlobalEquity engine uses CAD identity, whole-share orders, configurable Canadian commission/slippage, and the TSX/TSXV price-increment grid.
 - **India equities (NSE/BSE)** via yahoo / yfinance using `<SYMBOL>.NS` (NSE, e.g. `RELIANCE.NS`) or `<SCRIP>.BO` (BSE, e.g. `500325.BO`) — free, no API key. The `IndiaEquityEngine` models T+1 delivery, no overnight shorts (set `allow_short` for intraday), configurable circuit bands, 1-share lots, and the STT/stamp-duty/exchange/GST cost stack. Optionally back-fill from your live broker via the `india_broker` source (Shoonya/Dhan; requires broker login).
-- **Korea equities (KRX: KOSPI/KOSDAQ)** via pykrx using `<CODE>.KS` (KOSPI, e.g. `005930.KS`) or `<CODE>.KQ` (KOSDAQ, e.g. `247540.KQ`) — free, no API key (`pip install "vibe-trading-ai[krx]"`; yahoo/yfinance fallback needs no extra). pykrx serves **daily bars only** (an intraday request falls through to another source) and its adjusted series is Naver-backed rather than a verbatim KRX print. The `KoreaEquityEngine` models same-day round trips (no T+1), the ±30% daily price limit measured from the previous close and quantized to the KRX tick grid, tick-rounded fills, the 0.20% sell-side transaction tax (2026 rate), and 1-share lots. It is **long-only**: `allow_short` is refused, because KRX covered-short and uptick rules cannot be enforced on daily bars.
+- **Korea equities (KRX: KOSPI/KOSDAQ)** via pykrx using `<CODE>.KS` (KOSPI, e.g. `005930.KS`) or `<CODE>.KQ` (KOSDAQ, e.g. `247540.KQ`) — free, no API key (`pip install "vibe-crypto[krx]"`; yahoo/yfinance fallback needs no extra). pykrx serves **daily bars only** (an intraday request falls through to another source) and its adjusted series is Naver-backed rather than a verbatim KRX print. The `KoreaEquityEngine` models same-day round trips (no T+1), the ±30% daily price limit measured from the previous close and quantized to the KRX tick grid, tick-rounded fills, the 0.20% sell-side transaction tax (2026 rate), and 1-share lots. It is **long-only**: `allow_short` is refused, because KRX covered-short and uptick rules cannot be enforced on daily bars.
 - **Vietnam equities (HOSE)** via yahoo / yfinance using `<TICKER>.VN` (e.g. `VIC.VN`) — no API key. Yahoo officially lists HOSE but not HNX or UPCOM; those venues are unsupported and need the `local` source. yfinance is an unofficial Yahoo client, so availability is best-effort and subject to Yahoo's personal-use terms. The `VietnamEquityEngine` approximates the formal T+2 settlement cycle — shares bought on day T normally become sellable during the afternoon session on T+2, informally called T+1.5 — as a two-bar hold on daily data (`vn_settlement_bars` covers scenario testing and future rule changes). It applies HOSE's normal ±7% band around the reference price, rounding the ceiling down and the floor up to the 10/50/100-VND tick grid, and uses 100-share round lots; odd-lot trading is not modelled. Costs are configurable brokerage plus, for individual investors, 0.1% sell-side personal income tax on gross proceeds. It is **long-only**, because operational cash-equity short selling is not generally available in Vietnam.
 - **Cryptocurrency** via OKX or CCXT/100+ exchanges (free, no API key)
 - **China A-shares** via AKShare / baostock / tencent / sina / eastmoney (free, no API key) — `TUSHARE_TOKEN` optional for premium quality
@@ -118,7 +118,7 @@ One-line cross-sectional IC / IR / alive-reversed-dead categorisation across fiv
 - **academic** (12 factors) — Fama-French 5 + Carhart momentum + Jegadeesh reversal + George-Hwang 52-week-high + Amihud illiquidity + Harvey-Siddique skew + Frazzini-Pedersen betting-against-beta (price-based proxies) + a correlation-rewiring stability score (from the in-repo correlation-regime skill).
 - **fundamental** (20 factors) — PIT-safe earnings yield, ROE, gross profitability and asset growth, plus ten SEC XBRL additions: book-to-market, FCF yield, accruals, ROA, CFO yield, operating margin, cash-to-assets, leverage, revenue growth and earnings growth, from daily fundamental panels; three CN A-share daily-valuation factors (PB, PS_TTM, dividend yield) fed by the ``val:*`` panel namespace from tushare daily_basic; and three industry-neutralized variants of those CN value factors, z-scored within Shenwan L1 peers against a PIT SW2021 industry tag from tushare index_member_all (membership is point-in-time; the SW2021 taxonomy itself is retroactive).
 
-Each alpha ships with `__alpha_meta__` (formula LaTeX + theme + universe + warmup + columns required), guarded by an AST purity gate + 300-row lookahead sentinel test. Use the `vibe-trading alpha {list,show,bench,compare,export-manifest}` CLI, the `/alpha/*` REST routes (browser at `/alpha-zoo`), or compose multi-factor signals via `ZooSignalEngine.from_zoo(...)`.
+Each alpha ships with `__alpha_meta__` (formula LaTeX + theme + universe + warmup + columns required), guarded by an AST purity gate + 300-row lookahead sentinel test. Use the `vibe-crypto alpha {list,show,bench,compare,export-manifest}` CLI, the `/alpha/*` REST routes (browser at `/alpha-zoo`), or compose multi-factor signals via `ZooSignalEngine.from_zoo(...)`.
 
 ### Finance Skills (89)
 Comprehensive knowledge base covering:
@@ -226,16 +226,16 @@ Use `load_skill(name)` to access full methodology docs with code templates.
 ## Quick Start
 
 ```bash
-pip install vibe-trading-ai
+pip install vibe-crypto
 ```
 
-That's it — no API keys needed for HK/US/Canada/crypto markets. Start using `backtest`, `get_market_data`, `analyze_options`, `analyze_trade_journal`, `extract_shadow_strategy`, `web_search`, the **Alpha Zoo** (`vibe-trading alpha bench --zoo gtja191 --universe csi300 --period 2018-2025`), and all 89 skills immediately.
+That's it — no API keys needed for HK/US/Canada/crypto markets. Start using `backtest`, `get_market_data`, `analyze_options`, `analyze_trade_journal`, `extract_shadow_strategy`, `web_search`, the **Alpha Zoo** (`vibe-crypto alpha bench --zoo gtja191 --universe csi300 --period 2018-2025`), and all 89 skills immediately.
 
 ## Loading Tools from External MCP Servers
 
 The built-in agent can load tools from your own external MCP servers in addition to its local toolset.
 
-> **Note:** This is the *MCP client* path — the opposite of the MCP plugin listed above. The plugin above makes Vibe-Trading's tools available to your agents. This section lets Vibe-Trading's own agent call tools from *your* servers.
+> **Note:** This is the *MCP client* path — the opposite of the MCP plugin listed above. The plugin above makes Vibe Crypto's tools available to your agents. This section lets Vibe Crypto's own agent call tools from *your* servers.
 
 ### Setup
 
@@ -254,7 +254,7 @@ Create `~/.vibe-trading/agent.json`:
 }
 ```
 
-Ordinary external MCP tools appear automatically in every `vibe-trading run` / `vibe-trading chat` call. They are injected after local tools under stable names: `mcp_<server>_<tool>`. Live-broker MCP servers are consumed through the connector-scoped `trading_*` tools instead of exposing raw `mcp_<broker>_*` tools to the agent.
+Ordinary external MCP tools appear automatically in every `vibe-crypto run` / `vibe-crypto chat` call. They are injected after local tools under stable names: `mcp_<server>_<tool>`. Live-broker MCP servers are consumed through the connector-scoped `trading_*` tools instead of exposing raw `mcp_<broker>_*` tools to the agent.
 
 ### Official IBKR MCP read-only probe
 
@@ -269,7 +269,7 @@ Add Interactive Brokers' official MCP endpoint as a read-only external server:
       "auth": {
         "type": "oauth",
         "scopes": ["mcp.read"],
-        "clientName": "Vibe-Trading",
+        "clientName": "Vibe Crypto",
         "cacheDir": "~/.vibe-trading/live/ibkr/oauth"
       },
       "enabledTools": ["*"]
@@ -278,9 +278,9 @@ Add Interactive Brokers' official MCP endpoint as a read-only external server:
 }
 ```
 
-Authorize it with `vibe-trading connector authorize ibkr-live-official-mcp-readonly`. The wildcard is accepted
+Authorize it with `vibe-crypto connector authorize ibkr-live-official-mcp-readonly`. The wildcard is accepted
 only for this `mcp.read` probe. Generic `trading_account` and `trading_positions`
-calls stay disabled until IBKR publishes stable read tool names that Vibe-Trading
+calls stay disabled until IBKR publishes stable read tool names that Vibe Crypto
 can map safely; `mcp.write` requires an explicit tool allowlist and live
 order-guard handling. If IBKR issues a pre-registered OAuth client, add
 `clientId` and `clientSecret` inside `auth`.
@@ -290,7 +290,7 @@ order-guard handling. If IBKR issues a pre-registered OAuth client, add
 eToro ships a hosted MCP at `https://mcp.public-api.etoro.com` with live OpenAPI
 route discovery (`get-all-routes`, `get-route-spec`) and optional execution
 (`execute-read`, `execute-write`). Use it for **API exploration and codegen** —
-production agent trading in Vibe-Trading goes through the built-in `etoro-*`
+production agent trading in Vibe Crypto goes through the built-in `etoro-*`
 connector profiles and `trading_*` / `etoro_*` tools (mandate gate on live writes).
 
 Add to `~/.vibe-trading/agent.json` (credentials on the connection, not in chat):
@@ -312,7 +312,7 @@ Add to `~/.vibe-trading/agent.json` (credentials on the connection, not in chat)
 ```
 
 Omit `execute-write` unless you want the MCP to place trades directly (bypasses
-Vibe-Trading's live mandate gate). Install skill:
+Vibe Crypto's live mandate gate). Install skill:
 `https://mcp.public-api.etoro.com/skill`
 
 ### Trading connector profiles
@@ -321,21 +321,21 @@ The public trading surface is connector-first. Choose a connector profile, then
 paper/live is just an attribute under that connector.
 
 ```bash
-pip install "vibe-trading-ai[ibkr]"
-vibe-trading connector list
-vibe-trading connector use ibkr-paper-local
-vibe-trading connector configure ibkr-paper-local --yes
-vibe-trading connector check
-vibe-trading connector account
-vibe-trading connector positions
-vibe-trading connector orders
-vibe-trading connector quote AAPL
-vibe-trading connector history AAPL --duration "30 D" --bar-size "1 day"
+pip install "vibe-crypto[ibkr]"
+vibe-crypto connector list
+vibe-crypto connector use ibkr-paper-local
+vibe-crypto connector configure ibkr-paper-local --yes
+vibe-crypto connector check
+vibe-crypto connector account
+vibe-crypto connector positions
+vibe-crypto connector orders
+vibe-crypto connector quote AAPL
+vibe-crypto connector history AAPL --duration "30 D" --bar-size "1 day"
 ```
 
 Live-runner model spending is independent of mandate trade limits. Operators
 configure it through Runtime / the chat runner panel, or
-`vibe-trading connector runner-settings --profile robinhood-live-mcp`
+`vibe-crypto connector runner-settings --profile robinhood-live-mcp`
 (`--file settings.json` saves settings while stopped). Defaults are one model
 decision every 15 minutes, 26 decisions and 1,000,000 reported tokens per UTC day,
 with fresh conversation context per decision. A once-daily time and IANA timezone

@@ -75,7 +75,7 @@ class LiveHaltRequest(BaseModel):
 class LiveAuthorizeRequest(BaseModel):
     """Kick off (or describe) the OAuth bootstrap for a live broker (C2).
 
-    Vibe-Trading never holds funds and never operates a venue, so the OAuth
+    Vibe Crypto never holds funds and never operates a venue, so the OAuth
     bootstrap runs through the broker's own user-authorized device flow on the
     client (CLI / desktop MCP), not a server-side redirect. This endpoint is the
     web on-ramp: it tells a Web UI user exactly how to discover/start the flow.
@@ -1301,9 +1301,9 @@ def register_live_routes(
             "connector_profile": connector_profile,
             "oauth_token_present": _oauth_token_present(broker),
             "instruction": (
-                f"Run `vibe-trading connector authorize {connector_profile}` "
+                f"Run `vibe-crypto connector authorize {connector_profile}` "
                 "from the device that will hold the broker session. This opens the "
-                "broker's own OAuth consent flow; Vibe-Trading never holds funds and "
+                "broker's own OAuth consent flow; Vibe Crypto never holds funds and "
                 "only relays intent once you authorize."
             ),
             "note": (

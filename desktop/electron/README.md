@@ -1,6 +1,6 @@
-# Vibe-Trading Desktop (Unofficial Community Build)
+# Vibe Crypto
 
-This directory contains an Electron host for the existing Vibe-Trading FastAPI
+This directory contains an Electron host for the existing Vibe Crypto FastAPI
 and React application. The Windows packaging layer can assemble an unsigned
 NSIS review artifact or require and verify Authenticode signing for a
 publishable installer. Both use an isolated Python runtime and encrypted
@@ -17,7 +17,7 @@ download an artifact, launch an installer, or enable updates. See
 ## What the shell does
 
 - Enforces a single desktop application instance.
-- Starts one owned `vibe-trading serve` process through a parent-death
+- Starts one owned `vibe-crypto serve` process through a parent-death
   watchdog.
 - Selects a free loopback port and binds the backend to `127.0.0.1`.
 - Generates a 256-bit authentication secret for each desktop process.
@@ -46,7 +46,7 @@ packaging-specific boundary and build commands.
 
 ## Run from source
 
-From a complete Vibe-Trading checkout:
+From a complete Vibe Crypto checkout:
 
 ```powershell
 python -m venv .venv
@@ -91,13 +91,13 @@ artifact mutation, concurrent journal creation, and failed-shutdown retry.
 Backend resolution is intentionally narrow. It checks an explicit
 `VIBE_TRADING_EXECUTABLE` override first, then exact application/resource
 locations used by packaged builds. In source mode only, it may use
-`.venv\Scripts\vibe-trading.exe` from an ancestor containing this project's
-`pyproject.toml` (`[project].name = "vibe-trading-ai"`). Its final fallback is
-`vibe-trading.exe` on `PATH`; arbitrary ancestor directories and the drive root
+`.venv\Scripts\vibe-crypto.exe` from an ancestor containing this project's
+`pyproject.toml` (`[project].name = "vibe-crypto"`). Its final fallback is
+`vibe-crypto.exe` on `PATH`; arbitrary ancestor directories and the drive root
 are never searched for executables. To select an explicit development backend:
 
 ```powershell
-$env:VIBE_TRADING_EXECUTABLE = "C:\path\to\vibe-trading.exe"
+$env:VIBE_TRADING_EXECUTABLE = "C:\path\to\vibe-crypto.exe"
 npm start
 ```
 
@@ -115,5 +115,5 @@ It intentionally excludes:
 - optional IM adapters and personal WeChat pairing;
 - broker-specific optional packages.
 
-The desktop shell remains unofficial. No release or distribution ownership is
+The desktop shell is a community build. No upstream release or distribution ownership is
 implied by this source directory.

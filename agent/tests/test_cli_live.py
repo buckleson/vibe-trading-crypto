@@ -228,7 +228,7 @@ class TestConnectorHaltResume:
         assert halt_flag_set("robinhood") is True
 
         out = capsys.readouterr().out
-        assert "vibe-trading connector resume" in out
+        assert "vibe-crypto connector resume" in out
         assert "vibe-trading live" not in out
 
     def test_resume_without_profile_uses_selected_connector(
@@ -495,7 +495,7 @@ class _AccountListing:
         self.payload = payload
         self.calls: list[Dict[str, Any]] = []
 
-    def __call__(self, url: str, params: Dict[str, Any], headers: Dict[str, str], timeout: float):
+    def __call__(self, url: str, params: Dict[str, Any], timeout: float):
         assert url.endswith("/live/accounts")
         self.calls.append(dict(params))
         return SimpleNamespace(raise_for_status=lambda: None, json=lambda: self.payload)
@@ -581,15 +581,12 @@ class TestProposalPickIntercept:
         def _fake_post(
             url: str,
             json: Dict[str, Any],  # noqa: A002
-            headers: Dict[str, str],
             timeout: float,
         ) -> _Resp:
             captured["url"] = url
             captured["body"] = json
-            captured["headers"] = headers
             return _Resp()
 
-        monkeypatch.setenv("API_AUTH_KEY", "cli-secret")
         listing = _AccountListing({"account_selection_required": False, "accounts": []})
         with patch("httpx.post", _fake_post), patch("httpx.get", listing):
             result = _commit_mandate(_proposal(), 2)
@@ -602,7 +599,6 @@ class TestProposalPickIntercept:
         assert captured["body"]["broker"] == "robinhood"
         assert captured["body"]["account_ref"] == "acct-demo"
         assert captured["body"]["consent_ack"] is True
-        assert captured["headers"] == {"Authorization": "Bearer cli-secret"}
 
     def test_commit_rejects_missing_broker_before_network_call(self) -> None:
         """The CLI validates the exact API request model before sending."""
@@ -630,11 +626,10 @@ class TestProposalPickIntercept:
             seen["accounts"] = accounts
             return "5QR12345"
 
-        def _fake_post(url, json, headers, timeout):  # noqa: A002, ANN001
+        def _fake_post(url, json, timeout):  # noqa: A002, ANN001
             posted.update(json)
             return SimpleNamespace(raise_for_status=lambda: None, json=lambda: {"status": "ok", "mandate_id": "m2"})
 
-        monkeypatch.delenv("API_AUTH_KEY", raising=False)
         with patch("httpx.post", _fake_post), patch("httpx.get", listing):
             result = _commit_mandate(_proposal(), 1, choose_account=_choose)
 

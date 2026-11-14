@@ -1,21 +1,16 @@
-"""Auth dependencies, CORS parsing, DNS-rebinding guard, and shell-tools gating."""
+"""Local request guards, CORS parsing, DNS-rebinding guard, and shell-tools gating."""
 
 from __future__ import annotations
 
-import hmac
 import ipaddress
 import logging
 import re
-import secrets
-import threading
-import time
 import urllib.parse
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import HTTPException, Query, Request, Security, status
+from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from src.session.models import AuthMethod, Principal
 
@@ -296,90 +291,6 @@ def install_access_log_redaction_filter() -> None:
         target.addFilter(_AccessLogRedactionFilter())
 
 
-# ============================================================================
-# SSE tickets (short-lived, single-use browser EventSource credentials)
-# ============================================================================
-
-# EventSource cannot send an Authorization header, so a browser exchanges the
-# header-authenticated API key for a one-shot ticket via POST /auth/sse-ticket
-# and passes it as ?ticket=. This keeps the long-lived key out of URLs and logs.
-_SSE_TICKET_TTL_SECONDS = 60.0
-_sse_tickets: dict[str, float] = {}  # ticket -> monotonic expiry timestamp
-_sse_tickets_lock = threading.Lock()
-
-
-def _sweep_expired_sse_tickets_locked(now: float) -> None:
-    """Drop expired tickets. Caller must hold ``_sse_tickets_lock``."""
-    expired = [t for t, exp in _sse_tickets.items() if exp <= now]
-    for t in expired:
-        _sse_tickets.pop(t, None)
-
-
-def _mint_sse_ticket() -> str:
-    """Mint a single-use, ~60s ticket for one browser EventSource connection."""
-    ticket = secrets.token_urlsafe(32)
-    now = time.monotonic()
-    with _sse_tickets_lock:
-        _sweep_expired_sse_tickets_locked(now)
-        _sse_tickets[ticket] = now + _SSE_TICKET_TTL_SECONDS
-    return ticket
-
-
-def _consume_sse_ticket(ticket: str) -> bool:
-    """Validate and invalidate a ticket; True iff it was valid and unexpired.
-
-    Single-use: the ticket is removed on the first lookup whether or not it had
-    expired, so a captured ticket can never be replayed.
-    """
-    if not ticket:
-        return False
-    now = time.monotonic()
-    with _sse_tickets_lock:
-        _sweep_expired_sse_tickets_locked(now)
-        expiry = _sse_tickets.pop(ticket, None)
-    return expiry is not None and expiry > now
-
-
-# ============================================================================
-# API Key Authentication
-# ============================================================================
-
-_security = HTTPBearer(auto_error=False)
-
-
-def _get_api_key() -> str:
-    from src.config.accessor import get_env_config
-    return get_env_config().api.api_auth_key
-
-
-def _configured_api_key() -> str:
-    """Return the current API auth key, if configured.
-
-    Resolves the ``VIBE_TRADING_API_KEY`` alias server-side via
-    :func:`get_env_config` so both ``API_AUTH_KEY`` and the legacy
-    alias produce the same key.
-    """
-    return (
-        get_env_config().api.api_auth_key
-        or _host_attr("_API_KEY", _get_api_key())
-        or ""
-    )
-
-
-def _auth_credential_from_header_or_query(
-    cred: Optional[HTTPAuthorizationCredentials],
-    query_api_key: Optional[str],
-    *,
-    allow_query: bool,
-) -> str:
-    """Return the supplied API credential from the permitted source."""
-    if cred and cred.credentials:
-        return cred.credentials
-    if allow_query and query_api_key:
-        return query_api_key
-    return ""
-
-
 def _is_loopback_origin(origin: str) -> bool:
     """Return whether a browser Origin header names a loopback web UI."""
     try:
@@ -431,77 +342,29 @@ def _reject_cross_site_browser_request(request: Request) -> None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cross-site request denied")
 
 
-def _require_shutdown_authorization(
-    *,
-    request: Request,
-    cred: Optional[HTTPAuthorizationCredentials],
-) -> None:
-    """Authorize the local shutdown control-plane action."""
-    _reject_cross_site_browser_request(request)
-    api_key = _configured_api_key()
-    if api_key:
-        token = _auth_credential_from_header_or_query(cred, None, allow_query=False)
-        if not token or not hmac.compare_digest(token, api_key):
-            raise HTTPException(status_code=401, detail="Invalid or missing API key")
-        return
-    if not _is_local_client(request):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="API_AUTH_KEY is required for non-local API access",
-        )
-
-
-#: Subject recorded when the caller proved possession of the shared API key.
-#: It is a role, not a person: every holder of that one secret authenticates
-#: identically, so this string must never be presented as an identity.
-SHARED_KEY_SUBJECT = "shared-key-holder"
-
-#: Subject recorded when no key is configured and a loopback client was trusted.
+#: Subject recorded for requests from this computer (loopback peer).
 LOOPBACK_SUBJECT = "loopback-operator"
 
 
-def _validate_api_auth(
-    *,
-    request: Request,
-    cred: Optional[HTTPAuthorizationCredentials],
-    query_api_key: Optional[str] = None,
-    allow_query: bool = False,
-) -> Principal:
-    """Validate configured auth, preserving loopback-only dev mode.
+def _require_local_request(request: Request) -> Principal:
+    """Local request guard (not authentication; see ADR 0002).
 
-    Key-first precedence: when an API key is configured every peer -- including
-    loopback -- must present a valid credential (GHSA-7wgj). Only when no key is
-    configured does the loopback dev-trust apply. Mirrors
-    :func:`require_settings_write_auth`.
-
-    Returns:
-        The :class:`~src.session.models.Principal` the request authenticated as.
-        Both paths available today authorise without identifying, so the
-        returned principal has ``attributable=False``; a caller that needs a
-        named human must check that flag and refuse rather than read ``subject``
-        as a person. Previously this function returned None; the return value is
-        additive and every existing caller that ignores it is unaffected.
-
-    Raises:
-        HTTPException: 401 on a bad or missing credential, 403 for a non-local
-            client when no key is configured.
+    Rejects cross-site browser writes and any peer that is not this computer,
+    then returns the loopback :class:`~src.session.models.Principal`.
     """
     if request.method.upper() not in _SAFE_BROWSER_METHODS:
         _reject_cross_site_browser_request(request)
-
-    api_key = _configured_api_key()
-    if api_key:
-        token = _auth_credential_from_header_or_query(cred, query_api_key, allow_query=allow_query)
-        if not token or not hmac.compare_digest(token, api_key):
-            raise HTTPException(status_code=401, detail="Invalid or missing API key")
-        return Principal(subject=SHARED_KEY_SUBJECT, auth_method=AuthMethod.SHARED_KEY)
-
     if _is_local_client(request):
         return Principal(subject=LOOPBACK_SUBJECT, auth_method=AuthMethod.LOOPBACK_TRUST)
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
-        detail="API_AUTH_KEY is required for non-local API access",
+        detail="Vibe Crypto only accepts requests from this computer",
     )
+
+
+def _require_shutdown_authorization(*, request: Request) -> None:
+    """Local request guard for the shutdown control-plane action."""
+    _require_local_request(request)
 
 
 def _is_local_client(request: Request) -> bool:
@@ -564,103 +427,41 @@ def _shell_tools_enabled_for_request(request: Request) -> bool:
 
 
 # ============================================================================
-# Auth dependencies (FastAPI Depends)
+# Local request guards (FastAPI Depends)
 # ============================================================================
+# Vibe Crypto has no login (ADR 0002). These dependencies keep their historical
+# names so route modules do not change; they only reject cross-site browser
+# writes and peers that are not this computer.
 
 
-async def require_auth(
-    request: Request,
-    cred: Optional[HTTPAuthorizationCredentials] = Security(_security),
-) -> Principal:
-    """Validate Bearer token for sensitive API endpoints.
+async def require_auth(request: Request) -> Principal:
+    """Local request guard, not authentication (ADR 0002).
 
-    Returns:
-        The authenticated :class:`~src.session.models.Principal`. Routes that
-        only need the check keep using ``dependencies=[Depends(require_auth)]``
-        and discard it; routes that need to record *who* acted declare
-        ``principal: Principal = Depends(require_auth)`` instead. The return
-        value is additive -- it was previously None and no existing caller
-        inspected it.
+    Returns the loopback :class:`~src.session.models.Principal`. Routes that
+    only need the check use ``dependencies=[Depends(require_auth)]``.
 
     Raises:
-        HTTPException: Propagated from :func:`_validate_api_auth`.
+        HTTPException: 403 for cross-site browser writes or non-local peers.
     """
-    return _validate_api_auth(request=request, cred=cred)
+    return _require_local_request(request)
 
 
-async def require_event_stream_auth(
-    request: Request,
-    ticket: Optional[str] = Query(None),
-    cred: Optional[HTTPAuthorizationCredentials] = Security(_security),
-) -> None:
-    """Validate auth for browser EventSource streams.
-
-    EventSource cannot send an ``Authorization`` header, so a browser first
-    mints a short-lived, single-use ticket via ``POST /auth/sse-ticket`` (which
-    is itself header-authenticated) and passes it as ``?ticket=``. Non-browser
-    callers keep using the bearer header unchanged. The long-lived API key is
-    never accepted in the query string — that would leak it into browser
-    history, proxy/access logs, and Referer headers.
-    """
-    if request.method.upper() not in _SAFE_BROWSER_METHODS:
-        _reject_cross_site_browser_request(request)
-
-    api_key = _configured_api_key()
-    if api_key:
-        token = cred.credentials if (cred and cred.credentials) else ""
-        if token and hmac.compare_digest(token, api_key):
-            return
-        if ticket and _consume_sse_ticket(ticket):
-            return
-        raise HTTPException(status_code=401, detail="Invalid or missing API key")
-
-    if _is_local_client(request):
-        return
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="API_AUTH_KEY is required for non-local API access",
-    )
+async def require_event_stream_auth(request: Request) -> None:
+    """Local request guard for browser EventSource streams (ADR 0002)."""
+    _require_local_request(request)
 
 
-async def require_local_or_auth(
-    request: Request,
-    cred: Optional[HTTPAuthorizationCredentials] = Security(_security),
-) -> None:
-    """Protect settings access when dev-mode auth is disabled."""
-    if _configured_api_key():
-        await require_auth(request, cred)
-        return
-    if not _is_local_client(request):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Settings access requires API_AUTH_KEY or a local loopback client",
-        )
+async def require_local_or_auth(request: Request) -> None:
+    """Local request guard for settings reads (ADR 0002)."""
+    _require_local_request(request)
 
 
-async def require_settings_write_auth(
-    request: Request,
-    cred: Optional[HTTPAuthorizationCredentials] = Security(_security),
-) -> None:
-    """Require explicit authorization before changing credential-routing settings."""
-    if request.method.upper() not in _SAFE_BROWSER_METHODS:
-        _reject_cross_site_browser_request(request)
-
-    api_key = _configured_api_key()
-    if api_key:
-        token = _auth_credential_from_header_or_query(cred, None, allow_query=False)
-        if not token or not hmac.compare_digest(token, api_key):
-            raise HTTPException(status_code=401, detail="Invalid or missing API key")
-        return
-
-    if not _is_local_client(request):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Settings writes require API_AUTH_KEY or a local loopback client",
-        )
+async def require_settings_write_auth(request: Request) -> None:
+    """Local request guard for settings writes (ADR 0002)."""
+    _require_local_request(request)
 
 
 _LEGACY_LAZY_NAMES = {
-    "_API_KEY": _get_api_key,
     "_CORS_ORIGINS": _get_cors_origins,
     "_EXTRA_LOOPBACK_HOSTS": _get_extra_loopback_hosts,
 }

@@ -46,7 +46,7 @@ describe("SwarmStatusCard token usage line", () => {
     expect(container.textContent).toContain("↑42 ↓0 tokens");
     const rows = container.querySelector('[role="rowgroup"]');
     expect(rows?.textContent).toContain("↑42 ↓0");
-    expect(rows?.textContent).toContain("↑12 ↓—");
+    expect(rows?.textContent).toContain("↑12 ↓-");
   });
 
   it("shows exact totals with a provider source and no caveat badge", () => {

@@ -88,7 +88,7 @@
     "collapse": "Collapse",
     "expand": "Expand",
     "skipToMain": "Skip to main content",
-    "sidebar": "Vibe-Trading sidebar",
+    "sidebar": "Vibe Crypto sidebar",
     "mainNavigation": "Main navigation",
     "about": "About",
     "sessionsLoadFailed": "Cannot load conversations.",
@@ -571,7 +571,7 @@
     "clearApiKey": "Clear saved API key",
     "channels": {
       "title": "IM Channels",
-      "description": "Connect chat adapters to the same Vibe-Trading session runtime used by the Web UI and CLI.",
+      "description": "Connect chat adapters to the same Vibe Crypto session runtime used by the Web UI and CLI.",
       "runtime": "Runtime",
       "running": "Running",
       "stopped": "Stopped",
@@ -1084,7 +1084,7 @@
           "step3": "Fill in the IMAP and SMTP credentials above, set From address, and add your own address to Allowed senders.",
           "step4": "Click Test connection — it probes the IMAP login, the mailbox folder, and the SMTP login.",
           "step5": "Tick Consent granted, then enable the channel; automatic replies then reach senders whose mail passes the DKIM/SPF checks.",
-          "docsLabel": "Open the Vibe-Trading docs"
+          "docsLabel": "Open the Vibe Crypto docs"
         },
         "websocket": {
           "title": "WebSocket setup guide",
@@ -1094,12 +1094,12 @@
           "step3": "Connect clients with ws://host:port/path?client_id=...&token=...",
           "step4": "Saving while the channel is running hot-swaps the server: connected clients (including this Web UI chat) briefly disconnect and reconnect.",
           "step5": "Click Test connection — it validates the SSL certificate/key material and the address availability locally.",
-          "docsLabel": "Open the Vibe-Trading docs"
+          "docsLabel": "Open the Vibe Crypto docs"
         },
         "feishu": {
           "title": "Feishu / Lark bot setup",
           "intro": "Feishu bots connect over a WebSocket long connection, so no public IP or webhook URL is needed.",
-          "step1": "Create a Custom App on the Feishu Open Platform (open.feishu.cn), or scan-to-create it from the terminal with vibe-trading channels login feishu, which saves the App ID and App Secret automatically.",
+          "step1": "Create a Custom App on the Feishu Open Platform (open.feishu.cn), or scan-to-create it from the terminal with vibe-crypto channels login feishu, which saves the App ID and App Secret automatically.",
           "step2": "Add the Bot capability to the app.",
           "step3": "Under Event Subscription, subscribe to receiving messages (im.message.receive_v1) and choose Long Connection mode.",
           "step4": "Copy the App ID and App Secret from Credentials & Basic Info and paste them into the fields above.",
@@ -1939,7 +1939,7 @@
     "unknown": "unknown",
     "justNow": "just now",
     "loadingInstructions": "Loading connector authorization instructions...",
-    "fallbackInstruction": "Run `vibe-trading connector list`, choose the broker profile, then run `vibe-trading connector authorize <profile>` from the desktop session that will hold the broker connection.",
+    "fallbackInstruction": "Run `vibe-crypto connector list`, choose the broker profile, then run `vibe-crypto connector authorize <profile>` from the desktop session that will hold the broker connection.",
     "secondsAgo": "{{n}}s ago",
     "minutesAgo": "{{n}}m ago",
     "hoursAgo": "{{n}}h ago",

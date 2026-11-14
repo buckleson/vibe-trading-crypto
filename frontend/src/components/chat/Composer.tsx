@@ -12,6 +12,7 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
+import { Button } from "@/components/ui";
 import { useTranslation } from "react-i18next";
 import {
   Download,
@@ -268,13 +269,13 @@ export const Composer = memo(forwardRef<ComposerHandle, Props>(function Composer
       className="relative space-y-2"
     >
       {draggingFiles && (
-        <div role="status" className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center rounded-2xl border-2 border-dashed border-primary bg-background/90 text-sm font-medium text-primary">
+        <div role="status" className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center rounded-lg border-2 border-dashed border-primary bg-background/90 text-sm font-medium text-primary">
           {t("agent.dropFiles")}
         </div>
       )}
       {swarmPreset && (
         <div className="flex items-center gap-1">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-medium">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-primary/10 text-primary text-xs font-medium">
             <Users className="h-3 w-3" />
             {swarmPreset.title}
             <button type="button" onClick={onCancelSwarm} className="hover:text-destructive transition-colors">
@@ -285,7 +286,7 @@ export const Composer = memo(forwardRef<ComposerHandle, Props>(function Composer
       )}
       {goalComposerActive && (
         <div className="flex items-center gap-1">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-medium">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-primary/10 text-primary text-xs font-medium">
             <Target className="h-3 w-3" />
             {t("agent.newResearchGoal")}
             <button type="button" onClick={onCancelGoal} className="hover:text-destructive transition-colors">
@@ -299,7 +300,7 @@ export const Composer = memo(forwardRef<ComposerHandle, Props>(function Composer
       {attachments.length > 0 && (
         <div className="flex flex-wrap items-center gap-1">
           {attachments.map((attachment, index) => (
-            <span key={attachment.filePath} className="inline-flex max-w-full items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-medium">
+            <span key={attachment.filePath} className="inline-flex max-w-full items-center gap-1.5 px-2.5 py-1 rounded-md bg-primary/10 text-primary text-xs font-medium">
               <Paperclip className="h-3 w-3 shrink-0" />
               <span className="truncate">{attachment.filename}</span>
               <button
@@ -316,31 +317,32 @@ export const Composer = memo(forwardRef<ComposerHandle, Props>(function Composer
       )}
       {uploading && (
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Loader2 className="h-3 w-3 animate-spin" />
+          <Loader2 className="h-4 w-4 animate-spin" />
           {t("agent.uploading")}
         </div>
       )}
       <LiveRuntimeControl />
-      <div className="flex items-end gap-2 rounded-2xl border border-border/60 bg-background p-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_24px_-12px_rgba(0,0,0,0.12)] transition-shadow focus-within:ring-2 focus-within:ring-primary/25 dark:bg-card">
+      <div className="flex items-end gap-2 rounded-lg border border-border bg-card p-1.5 transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/25">
         <div className="relative" ref={uploadMenuRef}>
-          <button
+          <Button
             ref={uploadMenuTriggerRef}
-            type="button"
+            variant="ghost"
+            size="icon"
             onClick={() => setShowUploadMenu((previous) => !previous)}
             disabled={streaming || uploading}
             aria-haspopup="menu"
             aria-expanded={showUploadMenu}
             aria-controls="agent-more-options-menu"
-            className="w-10 h-10 rounded-full border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-40 shrink-0"
+            className="text-muted-foreground"
             title={t("agent.moreOptions")}
           >
             <Plus className="h-4 w-4" />
-          </button>
+          </Button>
           {showUploadMenu && (
             <div
               id="agent-more-options-menu"
               role="menu"
-              className="absolute bottom-full left-0 mb-2 w-52 rounded-xl border bg-background/95 backdrop-blur-sm shadow-lg py-1 z-50"
+              className="absolute bottom-full left-0 mb-2 w-52 rounded-lg border border-border bg-popover text-popover-foreground py-1 z-50"
             >
               <button
                 type="button"
@@ -463,43 +465,46 @@ export const Composer = memo(forwardRef<ComposerHandle, Props>(function Composer
           aria-readonly={streaming}
           className={[
             "min-h-[52px] flex-1 resize-none overflow-y-auto bg-transparent px-3 py-3 text-sm outline-none max-h-32",
-            streaming ? "cursor-not-allowed text-muted-foreground/70" : "",
+            streaming ? "cursor-not-allowed text-muted-foreground" : "",
           ].join(" ")}
           readOnly={streaming}
         />
         {showExport && (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onExport}
             disabled={!canExport}
-            className="h-10 px-3 rounded-xl border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:pointer-events-none"
+            className="text-muted-foreground"
             title={t("agent.exportChat")}
+            aria-label={t("agent.exportChat")}
           >
             <Download className="h-4 w-4" />
-          </button>
+          </Button>
         )}
         {streaming ? (
-          <button
-            type="button"
+          <Button
+            variant="danger"
+            size="icon"
             onClick={onCancel}
-            className="h-10 px-4 rounded-xl bg-destructive text-destructive-foreground text-sm font-medium hover:opacity-90 transition-opacity"
             title={t("agent.stopGeneration")}
           >
             <Square className="h-4 w-4" />
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            size="icon"
             disabled={uploading || (goalComposerActive ? !input.trim() : (!input.trim() && attachments.length === 0))}
-            className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-medium disabled:opacity-40 hover:opacity-90 transition-opacity"
             title={t("agent.send")}
             aria-label={t("agent.send")}
           >
             <Send className="h-4 w-4" />
-          </button>
+          </Button>
         )}
       </div>
-      <p className="px-1 text-[11px] text-muted-foreground">{t("agent.inputHint")}</p>
+      <p className="px-1 text-xs text-muted-foreground">{t("agent.inputHint")}</p>
     </form>
   );
 }));

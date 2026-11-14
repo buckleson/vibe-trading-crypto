@@ -1,6 +1,6 @@
 """API contracts for the web IM channel-config surface (Task 5).
 
-Covers the contract from https://github.com/HKUDS/Vibe-Trading/issues/1519:
+Covers the contract from https://github.com/buckleson/vibe-trading-crypto/issues/1519:
 ``GET /channels/config``, ``PUT /channels/config/{name}`` and
 ``POST /channels/{name}/test`` — secret masking, the 422-before-write ordering
 (bad credentials never reach disk), hot-apply modes (hot_swapped / reset /

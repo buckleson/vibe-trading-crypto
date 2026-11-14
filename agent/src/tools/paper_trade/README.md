@@ -23,11 +23,11 @@ Create `initial-state.json` with your simulated ledger:
 ```
 
 ```bash
-vibe-trading paper create --label 'US research' --market us --state initial-state.json --start today
-vibe-trading paper list
-vibe-trading paper show ACCOUNT_ID
-vibe-trading paper advance ACCOUNT_ID --revision 0 --to-date YYYY-MM-DD --orders orders.json
-vibe-trading paper history ACCOUNT_ID
+vibe-crypto paper create --label 'US research' --market us --state initial-state.json --start today
+vibe-crypto paper list
+vibe-crypto paper show ACCOUNT_ID
+vibe-crypto paper advance ACCOUNT_ID --revision 0 --to-date YYYY-MM-DD --orders orders.json
+vibe-crypto paper history ACCOUNT_ID
 ```
 
 `orders.json` is an array, e.g. `[{"symbol":"AAPL.US","side":"buy","qty":10}]`.
@@ -55,7 +55,7 @@ Advance returns `{account, result, committed}`. Data/strategy errors return
 After a network timeout, read the account before retrying: the server may have
 committed. The Web client reloads it automatically on a request error.
 
-The pure `paper_trade_step` agent/MCP tool and `vibe-trading paper step payload.json`
+The pure `paper_trade_step` agent/MCP tool and `vibe-crypto paper step payload.json`
 remain stateless and accept historical dates for reproducible research. Their
 orders mode requires a single date. Saved accounts enforce forward-only dates.
 
@@ -183,7 +183,7 @@ daily bar it returns the same `PAPER_DATA_NOT_READY`; with the target daily bar
 it produces the NAV row from that day's closes.
 
 The 5m leg is stateless. It is exposed through the agent/MCP step tool,
-`POST /api/paper-trade/step` and `vibe-trading paper step`; saved accounts
+`POST /api/paper-trade/step` and `vibe-crypto paper step`; saved accounts
 remain daily-only. The persistent v1.2 runner/account/store layer is a follow-up
 branch (`paper-trade-v12-persistence`) and is not wired to any CLI, API or MCP
 surface in this PR.

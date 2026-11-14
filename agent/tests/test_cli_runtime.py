@@ -115,7 +115,7 @@ def spending_preview(monkeypatch: pytest.MonkeyPatch) -> list[str]:
 
     calls: list[str] = []
 
-    def get_settings(url: str, headers: Dict[str, str], timeout: float) -> _FakeResp:
+    def get_settings(url: str, timeout: float) -> _FakeResp:
         assert url.endswith("/live/runner/settings?broker=robinhood")
         calls.append(url)
         return _FakeResp({"settings": DecisionSettings().model_dump()})
@@ -172,24 +172,21 @@ class TestRunnerDispatch:
 
 
 class TestRunnerControlEndpoints:
-    def test_live_status_request_sends_configured_bearer_token(
+    def test_live_status_request_sends_no_auth_headers(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         from cli._legacy import _live_api_call
 
         captured: Dict[str, Any] = {}
 
-        def _get(url: str, headers: Dict[str, str], timeout: float) -> _FakeResp:
+        def _get(url: str, timeout: float) -> _FakeResp:
             captured["url"] = url
-            captured["headers"] = headers
             return _FakeResp({"status": "ok"})
 
-        monkeypatch.setenv("API_AUTH_KEY", "live-secret")
         with patch("httpx.get", _get):
             assert _live_api_call("GET", "/live/status") == {"status": "ok"}
 
         assert captured["url"].endswith("/live/status")
-        assert captured["headers"] == {"Authorization": "Bearer live-secret"}
 
     def test_start_posts_to_runner_start(self, spending_preview: list[str]) -> None:
         from cli._legacy import EXIT_SUCCESS, cmd_live_start
@@ -199,7 +196,6 @@ class TestRunnerControlEndpoints:
         def _post(
             url: str,
             json: Dict[str, Any],  # noqa: A002
-            headers: Dict[str, str],
             timeout: float,
         ) -> _FakeResp:
             assert len(spending_preview) == 1
@@ -221,7 +217,6 @@ class TestRunnerControlEndpoints:
         def _post(
             url: str,
             json: Dict[str, Any],  # noqa: A002
-            headers: Dict[str, str],
             timeout: float,
         ) -> _FakeResp:
             assert len(spending_preview) == 1
@@ -231,7 +226,7 @@ class TestRunnerControlEndpoints:
             assert cmd_connector_start("robinhood-live-mcp") == EXIT_SUCCESS
 
         out = capsys.readouterr().out
-        assert "vibe-trading connector status" in out
+        assert "vibe-crypto connector status" in out
         assert "vibe-trading live" not in out
 
     def test_connector_start_rejects_readonly_ibkr_mcp(
@@ -252,7 +247,6 @@ class TestRunnerControlEndpoints:
         def _post(
             url: str,
             json: Dict[str, Any],  # noqa: A002
-            headers: Dict[str, str],
             timeout: float,
         ) -> _FakeResp:
             captured["url"] = url
@@ -270,7 +264,6 @@ class TestRunnerControlEndpoints:
         def _boom(
             url: str,
             json: Dict[str, Any],  # noqa: A002
-            headers: Dict[str, str],
             timeout: float,
         ) -> _FakeResp:
             assert len(spending_preview) == 1
@@ -291,7 +284,6 @@ class TestRunnerControlEndpoints:
         def _post(
             url: str,
             json: Dict[str, Any],  # noqa: A002
-            headers: Dict[str, str],
             timeout: float,
         ) -> _FakeResp:
             assert len(spending_preview) == 1

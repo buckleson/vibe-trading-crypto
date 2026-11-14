@@ -37,7 +37,7 @@ vi.mock("react-i18next", () => ({
       "layout.runtime": "Runtime",
       "layout.sessions": "Sessions",
       "layout.settings": "Settings",
-      "layout.sidebar": "Vibe-Trading sidebar",
+      "layout.sidebar": "Vibe Crypto sidebar",
       "layout.skipToMain": "Skip to main content",
     })[key] ?? key,
     i18n: {
@@ -47,6 +47,8 @@ vi.mock("react-i18next", () => ({
     },
   }),
 }));
+
+vi.mock("@/components/claude/ChatPanel", () => ({ ChatPanel: () => <div>chat panel</div> }));
 
 vi.mock("@/hooks/useDarkMode", () => ({
   useDarkMode: () => ({ dark: false, toggle: vi.fn() }),
@@ -92,6 +94,7 @@ function renderLayout() {
 describe("Layout accessibility", () => {
   beforeEach(() => {
     window.localStorage.removeItem("qa-sidebar");
+    window.localStorage.removeItem("vc-dock-open");
     vi.mocked(toast.error).mockClear();
     vi.mocked(api.listSessions).mockReset().mockResolvedValue(sessions as never);
     vi.mocked(api.renameSession).mockReset().mockResolvedValue({ status: "ok" });
@@ -100,9 +103,9 @@ describe("Layout accessibility", () => {
   it("labels landmarks, brand, main content, and the new-chat affordance", () => {
     renderLayout();
 
-    expect(screen.getByRole("complementary", { name: "Vibe-Trading sidebar" })).toHaveClass("max-md:w-12");
+    expect(screen.getByRole("complementary", { name: "Vibe Crypto sidebar" })).toHaveClass("max-md:w-14");
     expect(screen.getByRole("navigation", { name: "Main navigation" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Vibe-Trading" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Vibe Crypto" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "New Chat" })).toHaveAttribute("title", "New Chat");
     expect(screen.getByText("Skip to main content")).toHaveAttribute("href", "#main");
     expect(screen.getByRole("main")).toHaveAttribute("id", "main");
@@ -113,7 +116,7 @@ describe("Layout accessibility", () => {
     // generated report) instead of respecting its own overflow-auto -- the
     // excess then gets hard-clipped by the parent's overflow-hidden with no
     // scrollbar at all, rather than scrolling into view.
-    expect(screen.getByRole("main")).toHaveClass("flex-1", "min-h-0", "overflow-auto");
+    expect(screen.getByRole("main")).toHaveClass("flex-1", "min-h-0", "min-w-0", "overflow-y-auto");
   });
 
   it("exposes session actions on keyboard focus and labels the rename input", async () => {
@@ -151,16 +154,32 @@ describe("Layout accessibility", () => {
     expect(languageButton).not.toHaveAttribute("aria-haspopup");
   });
 
+  it("pins settings at the bottom and shows no group headings", () => {
+    renderLayout();
+    const nav = screen.getByRole("navigation", { name: "Main navigation" });
+    expect(nav.querySelector('a[href="/settings"]')).toBeNull();
+    const settings = screen.getByRole("link", { name: "Settings" });
+    expect(settings).toHaveAttribute("href", "/settings");
+    expect(nav.querySelectorAll("p")).toHaveLength(0);
+  });
+
+  it("persists the collapse toggle under qa-sidebar", () => {
+    renderLayout();
+    fireEvent.click(screen.getByRole("button", { name: "Collapse" }));
+    expect(window.localStorage.getItem("qa-sidebar")).toBe("collapsed");
+    expect(screen.getByRole("complementary", { name: "Vibe Crypto sidebar" })).toHaveClass("w-14");
+  });
+
   it("synchronizes the sidebar preference from another tab", () => {
     window.localStorage.setItem("qa-sidebar", "expanded");
     renderLayout();
-    const sidebar = screen.getByRole("complementary", { name: "Vibe-Trading sidebar" });
-    expect(sidebar).toHaveClass("w-64");
+    const sidebar = screen.getByRole("complementary", { name: "Vibe Crypto sidebar" });
+    expect(sidebar).toHaveClass("w-60");
 
     window.localStorage.setItem("qa-sidebar", "collapsed");
     fireEvent(window, new StorageEvent("storage", { key: "qa-sidebar" }));
 
-    expect(sidebar).toHaveClass("w-12");
+    expect(sidebar).toHaveClass("w-14");
   });
 
   it("shows a connection failure instead of an empty history, and retries", async () => {

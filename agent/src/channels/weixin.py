@@ -479,7 +479,7 @@ class WeixinChannel(BaseChannel):
             self._token = self.config.token
         elif not self._load_state():
             if not await self._qr_login():
-                self.logger.error("login failed. Run 'vibe-trading channels login weixin' to authenticate.")
+                self.logger.error("login failed. Run 'vibe-crypto channels login weixin' to authenticate.")
                 self._running = False
                 return
 

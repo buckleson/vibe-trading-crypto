@@ -7,6 +7,7 @@ export default {
     extend: {
       colors: {
         border: "hsl(var(--border))",
+        ring: "hsl(var(--primary))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         muted: { DEFAULT: "hsl(var(--muted))", foreground: "hsl(var(--muted-foreground))" },
@@ -21,9 +22,8 @@ export default {
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
-        // Display serif for the hero greeting only — system stack, no webfont.
-        // Deliberately NOT used for answers/tables (numeric content stays sans/mono).
-        serif: ["Georgia", "Songti SC", "Noto Serif SC", "serif"],
+        // serif is banned by cook/BRIEF.md; pages will drop `font-serif`. Mapped to sans meanwhile.
+        serif: ["Inter", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
       borderRadius: { lg: "var(--radius)", md: "calc(var(--radius) - 2px)", sm: "calc(var(--radius) - 4px)" },

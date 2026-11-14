@@ -14,8 +14,6 @@ from src.scheduled_research.store import ScheduledResearchJobStore
 def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
     store = ScheduledResearchJobStore(path=tmp_path / "scheduled_jobs.json")
     monkeypatch.setattr(scheduled_routes, "_scheduled_research_store", store)
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
-    monkeypatch.setattr(api_server, "_API_KEY", "")
     return TestClient(api_server.app, client=("127.0.0.1", 50000))
 
 

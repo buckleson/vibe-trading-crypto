@@ -1,7 +1,7 @@
-"""Single source of truth for all Vibe-Trading environment variable defaults.
+"""Single source of truth for all Vibe Crypto environment variable defaults.
 
 This module defines Pydantic models for every environment variable consumed by
-the Vibe-Trading agent, grouped by functional category.  Each field carries the
+the Vibe Crypto agent, grouped by functional category.  Each field carries the
 correct type, default value, and env-var alias so that ``EnvConfig()`` with no
 arguments reads from ``os.environ`` and applies the documented defaults.
 
@@ -360,14 +360,12 @@ class OcrConfig(_EnvBase):
 
 
 class APIConfig(_EnvBase):
-    """API server authentication, CORS, and security toggles.
+    """API server CORS, and security toggles.
 
     Sources: ``src/api/security.py``, ``src/api/state.py``,
     ``mcp_server.py``, ``src/tools/path_utils.py``.
     """
 
-    api_auth_key: str = Field(alias="API_AUTH_KEY", default="")
-    vibe_trading_api_key: str = Field(alias="VIBE_TRADING_API_KEY", default="")
     cors_origins: str = Field(alias="CORS_ORIGINS", default="")
     # Additive, unlike CORS_ORIGINS: these origins are appended to the loopback
     # defaults instead of replacing them. Used to admit a hosted console (e.g.
@@ -762,16 +760,3 @@ class EnvConfig(_EnvBase):
     paths: PathConfig = Field(default_factory=PathConfig)
     ocr: OcrConfig = Field(default_factory=OcrConfig)
     memory: MemoryConfig = Field(default_factory=MemoryConfig)
-
-    @model_validator(mode="after")
-    def _resolve_api_key_alias(self) -> "EnvConfig":
-        """Copy ``VIBE_TRADING_API_KEY`` to ``api_auth_key`` when only the alias is set.
-
-        The CLI historically reads ``VIBE_TRADING_API_KEY`` first and falls back to
-        ``API_AUTH_KEY`` (``cli/_legacy.py:2834``).  The API server only reads
-        ``API_AUTH_KEY`` (``src/api/security.py:126``).  This validator closes
-        the semantic gap so both surfaces agree.
-        """
-        if self.api.vibe_trading_api_key and not self.api.api_auth_key:
-            self.api.api_auth_key = self.api.vibe_trading_api_key
-        return self

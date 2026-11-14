@@ -1,10 +1,10 @@
 {
-  "name": "vibe-trading-desktop-unofficial-community",
+  "name": "vibe-crypto-desktop",
   "version": "0.3.0",
   "private": true,
-  "author": "Vibe-Trading Desktop Community Contributors",
+  "author": "Vibe Crypto contributors",
   "license": "MIT",
-  "description": "Vibe-Trading Desktop (Unofficial Community Build)",
+  "description": "Vibe Crypto desktop app",
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc && node scripts/copy-static.mjs",
@@ -39,10 +39,10 @@
     "typescript": "^5.9.3"
   },
   "build": {
-    "appId": "io.github.vibetrading.community.desktop",
-    "productName": "Vibe-Trading Desktop (Unofficial Community Build)",
+    "appId": "io.github.buckleson.vibecrypto",
+    "productName": "Vibe Crypto",
     "compression": "normal",
-    "artifactName": "Vibe-Trading-Desktop-Unofficial-${version}-${arch}.${ext}",
+    "artifactName": "Vibe-Crypto-${version}-${os}-${arch}.${ext}",
     "asar": true,
     "electronLanguages": [
       "ar",
@@ -68,11 +68,11 @@
       },
       {
         "from": "../../LICENSE",
-        "to": "licenses/Vibe-Trading-LICENSE.txt"
+        "to": "licenses/Vibe-Crypto-LICENSE.txt"
       },
       {
         "from": "../../NOTICE",
-        "to": "licenses/Vibe-Trading-NOTICE.txt"
+        "to": "licenses/Vibe-Crypto-NOTICE.txt"
       }
     ],
     "win": {

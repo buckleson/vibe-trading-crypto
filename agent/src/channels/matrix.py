@@ -46,7 +46,7 @@ try:
     from nio.exceptions import EncryptionError
 except ImportError as e:
     raise ImportError(
-        "Matrix dependencies not installed. Run: pip install vibe-trading-ai[matrix]"
+        "Matrix dependencies not installed. Run: pip install vibe-crypto[matrix]"
     ) from e
 
 from src.channels.bus.events import OutboundMessage

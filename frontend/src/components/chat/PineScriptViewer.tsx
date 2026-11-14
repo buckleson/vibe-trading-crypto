@@ -47,12 +47,12 @@ export const PineScriptViewer = memo(function PineScriptViewer({ code, onClose }
   }, [code]);
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label={t("pineViewer.pineScript")}
-        className="relative w-full max-w-3xl max-h-[80vh] mx-4 rounded-xl border bg-background shadow-2xl flex flex-col"
+        className="relative w-full max-w-3xl max-h-[80vh] mx-4 rounded-lg border bg-background flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

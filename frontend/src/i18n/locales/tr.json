@@ -47,7 +47,7 @@
     "collapse": "Daralt",
     "expand": "Genişlet",
     "skipToMain": "Ana içeriğe geç",
-    "sidebar": "Vibe-Trading kenar çubuğu",
+    "sidebar": "Vibe Crypto kenar çubuğu",
     "mainNavigation": "Ana gezinme",
     "about": "Hakkında",
     "sessionsLoadFailed": "Konuşmalar yüklenemiyor.",
@@ -529,7 +529,7 @@
     "clearApiKey": "Kaydedilmiş API anahtarını sil",
     "channels": {
       "title": "Mesajlaşma kanalları",
-      "description": "Sohbet bağdaştırıcılarını web arayüzü ve CLI ile aynı Vibe-Trading oturum çalışma ortamına bağlayın.",
+      "description": "Sohbet bağdaştırıcılarını web arayüzü ve CLI ile aynı Vibe Crypto oturum çalışma ortamına bağlayın.",
       "runtime": "Çalışma Zamanı",
       "running": "Çalışıyor",
       "stopped": "Durduruldu",
@@ -1042,7 +1042,7 @@
           "step3": "Yukarıdaki IMAP ve SMTP kimlik bilgilerini doldurun, gönderen adresini ayarlayın ve kendi adresinizi izin verilen gönderenlere ekleyin.",
           "step4": "Bağlantıyı test et’e tıklayın; IMAP girişi, posta klasörü ve SMTP girişi kontrol edilir.",
           "step5": "Onay verildi kutusunu işaretleyip kanalı etkinleştirin; otomatik yanıtlar DKIM/SPF kontrollerini geçen iletilerin gönderenlerine ulaşır.",
-          "docsLabel": "Vibe-Trading belgelerini aç"
+          "docsLabel": "Vibe Crypto belgelerini aç"
         },
         "websocket": {
           "title": "WebSocket kurulum rehberi",
@@ -1052,12 +1052,12 @@
           "step3": "İstemcileri ws://host:port/path?client_id=...&token=... ile bağlayın.",
           "step4": "Kanal çalışırken kaydetmek sunucuyu anında değiştirir; bağlı istemciler (bu web sohbeti dahil) kısa süreliğine kopup yeniden bağlanır.",
           "step5": "Bağlantıyı test et’e tıklayın; SSL sertifika/anahtar verileri ve adres kullanılabilirliği yerel olarak doğrulanır.",
-          "docsLabel": "Vibe-Trading belgelerini aç"
+          "docsLabel": "Vibe Crypto belgelerini aç"
         },
         "feishu": {
           "title": "Feishu / Lark bot kurulumu",
           "intro": "Feishu botları kalıcı WebSocket bağlantısı kullanır; genel IP veya webhook URL’si gerekmez.",
-          "step1": "Feishu Open Platform’da (open.feishu.cn) bir Custom App oluşturun veya terminalde vibe-trading channels login feishu ile tarayarak oluşturun; App ID ve App Secret otomatik kaydedilir.",
+          "step1": "Feishu Open Platform’da (open.feishu.cn) bir Custom App oluşturun veya terminalde vibe-crypto channels login feishu ile tarayarak oluşturun; App ID ve App Secret otomatik kaydedilir.",
           "step2": "Uygulamaya Bot özelliğini ekleyin.",
           "step3": "Event Subscription’da mesaj alma olayına (im.message.receive_v1) abone olun ve Long Connection modunu seçin.",
           "step4": "Credentials & Basic Info’dan App ID ve App Secret değerlerini kopyalayıp yukarıdaki alanlara yapıştırın.",
@@ -1899,7 +1899,7 @@
     "unknown": "Bilinmiyor",
     "justNow": "az önce",
     "loadingInstructions": "Bağlantı yetkilendirme talimatları yükleniyor…",
-    "fallbackInstruction": "Bağlantıyı tutacak masaüstü oturumunda `vibe-trading connector list` çalıştırın, aracı kurum profilini seçin ve `vibe-trading connector authorize <profile>` çalıştırın.",
+    "fallbackInstruction": "Bağlantıyı tutacak masaüstü oturumunda `vibe-crypto connector list` çalıştırın, aracı kurum profilini seçin ve `vibe-crypto connector authorize <profile>` çalıştırın.",
     "secondsAgo": "{{n}} sn önce",
     "minutesAgo": "{{n}} dk önce",
     "hoursAgo": "{{n}} sa önce",

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Card, Table, TBody, TR, TD } from "@/components/ui";
 
 /**
  * Shared Run-Card building blocks. Extracted from pages/RunDetail.tsx so that
@@ -9,21 +10,21 @@ import { cn } from "@/lib/utils";
  */
 export function RunCardStat({ label, value, tone = "normal" }: { label: string; value: string; tone?: "normal" | "warning" | "positive" | "negative" }) {
   return (
-    <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+    <Card className="p-4">
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className={cn(
-        "mt-1 truncate text-sm font-medium",
+        "mt-1 truncate text-sm font-medium tabular-nums",
         tone === "warning" && "text-warning",
         tone === "positive" && "text-success",
         tone === "negative" && "text-danger",
       )}>{value}</div>
-    </div>
+    </Card>
   );
 }
 
 export function RunCardPanel({ title, icon: Icon, children }: { title: string; icon: LucideIcon; children: ReactNode }) {
   return (
-    <section className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+    <section className="rounded-lg border border-border bg-card p-4 text-card-foreground">
       <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
         <Icon className="h-4 w-4 text-muted-foreground" />
         {title}
@@ -51,17 +52,17 @@ export function KeyValueTable({ data, empty, monospaceValues = false }: { data: 
     return <p className="text-sm text-muted-foreground">{empty}</p>;
   }
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full table-fixed text-sm">
-        <tbody>
+    <div>
+      <Table className="table-fixed">
+        <TBody>
           {entries.map(([key, value]) => (
-            <tr key={key} className="border-b last:border-0 hover:bg-muted/40">
-              <td className="w-36 break-words py-2 ps-4 pr-4 align-top text-muted-foreground">{key}</td>
-              <td className={cn("py-2 align-top", monospaceValues ? "break-all font-mono text-xs" : "break-words text-right tabular-nums")}>{formatRunCardValue(value)}</td>
-            </tr>
+            <TR key={key}>
+              <TD className="w-36 break-words ps-4 align-top text-muted-foreground">{key}</TD>
+              <TD className={cn("align-top", monospaceValues ? "break-all font-mono text-xs" : "break-words text-right tabular-nums")}>{formatRunCardValue(value)}</TD>
+            </TR>
           ))}
-        </tbody>
-      </table>
+        </TBody>
+      </Table>
     </div>
   );
 }

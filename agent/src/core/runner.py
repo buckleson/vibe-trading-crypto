@@ -85,7 +85,7 @@ def _rlimit_as_bytes() -> int:
 
 # Applied by the freshly-exec'd child, NOT by a ``preexec_fn``. ``preexec_fn``
 # runs Python bytecode between fork() and exec(); when the parent is
-# multi-threaded — which ``vibe-trading serve`` always is (uvicorn workers plus
+# multi-threaded — which ``vibe-crypto serve`` always is (uvicorn workers plus
 # the background agent loops) — that is undefined behaviour per POSIX and
 # CPython documents it as unsafe. On aarch64/glibc 2.34 it reliably SIGSEGVs the
 # child, so every backtest launched from the Web UI died before exec (#1355).

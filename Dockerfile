@@ -59,10 +59,10 @@ RUN pip install --no-cache-dir --no-deps -e .
 FROM python:3.11-slim@sha256:e031123e3d85762b141ad1cbc56452ba69c6e722ebf2f042cc0dc86c47c0d8b3 AS runtime
 # python:3.11-slim digest resolved 2026-07-13
 
-LABEL org.opencontainers.image.title="Vibe-Trading" \
+LABEL org.opencontainers.image.title="Vibe Crypto" \
     org.opencontainers.image.description="Natural-language finance research AI agent with backtesting" \
     org.opencontainers.image.version="0.1.19" \
-    org.opencontainers.image.source="https://github.com/HKUDS/Vibe-Trading" \
+    org.opencontainers.image.source="https://github.com/buckleson/vibe-trading-crypto" \
     org.opencontainers.image.licenses="MIT"
 
 WORKDIR /app
@@ -117,4 +117,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8899/live')" || exit 1
 
 # Run API server (serves frontend/dist as static files)
-CMD ["vibe-trading", "serve", "--host", "0.0.0.0", "--port", "8899"]
+CMD ["vibe-crypto", "serve", "--host", "0.0.0.0", "--port", "8899"]

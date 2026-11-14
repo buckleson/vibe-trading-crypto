@@ -1,5 +1,6 @@
 import { Suspense, lazy, type ComponentType } from "react";
 import { createBrowserRouter } from "react-router";
+import { Loader2 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 
 const Home = lazy(() => import("@/pages/Home").then((m) => ({ default: m.Home })));
@@ -45,8 +46,9 @@ const PixelOffice = lazy(() =>
 
 function PageLoader() {
   return (
-    <div className="flex h-[60vh] items-center justify-center text-muted-foreground">
-      Loading…
+    <div className="flex h-[60vh] items-center justify-center gap-2 text-[13px] text-muted-foreground" role="status">
+      <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+      Loading
     </div>
   );
 }

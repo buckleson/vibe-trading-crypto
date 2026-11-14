@@ -8,7 +8,7 @@ interface LlmUsageCounterProps {
 
 /**
  * Live token counter for the in-flight attempt, fed by `llm_usage` SSE
- * events. Renders nothing before the first usage delta arrives — a chat
+ * events. Renders nothing before the first usage delta arrives - a chat
  * stream that never measured a call shows no fabricated zero.
  */
 export function LlmUsageCounter({ input, output }: LlmUsageCounterProps) {

@@ -36,7 +36,7 @@ _FORWARD_POST_TIMEOUT = 60  # the POST returns 202 fast; approval is polled asyn
 _POLL_INTERVAL = 2
 
 
-# Project .env locations, mirroring Vibe-Trading's own loader
+# Project .env locations, mirroring Vibe Crypto's own loader
 # (src/providers/llm.py ``_ENV_CANDIDATES``): first existing file wins.
 # tap_forward.py lives at agent/src/trading/ -> parents[2] is the agent dir.
 _ENV_CANDIDATES = (

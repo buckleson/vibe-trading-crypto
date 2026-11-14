@@ -71,9 +71,9 @@ async function run() {
     }
 
     const migratedDotenv = await fs.readFile(path.join(configDirectory, ".env"), "utf8");
-    assert.match(migratedDotenv, /OPENAI_API_KEY is stored by Vibe-Trading Desktop/u);
-    assert.match(migratedDotenv, /MODELSCOPE_API_KEY is stored by Vibe-Trading Desktop/u);
-    assert.match(migratedDotenv, /TUSHARE_TOKEN is stored by Vibe-Trading Desktop/u);
+    assert.match(migratedDotenv, /OPENAI_API_KEY is stored by Vibe Crypto/u);
+    assert.match(migratedDotenv, /MODELSCOPE_API_KEY is stored by Vibe Crypto/u);
+    assert.match(migratedDotenv, /TUSHARE_TOKEN is stored by Vibe Crypto/u);
     assert.match(migratedDotenv, /ANTHROPIC_API_KEY=sk-xxx/u);
     assert.match(migratedDotenv, /NON_SECRET_SETTING=preserved/u);
     assert.ok(!migratedDotenv.includes("desktop-smoke-openai-secret"));

@@ -42,8 +42,8 @@ export const ScheduledResearchProposalCard = memo(function ScheduledResearchProp
 
   if (status !== "pending") {
     return (
-      <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-xl border border-border/60 bg-muted/35 px-4 py-3 text-sm">
-        <CalendarClock className="h-4 w-4 text-orange-500" />
+      <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-lg border border-border/60 bg-muted/35 px-4 py-3 text-sm">
+        <CalendarClock className="h-4 w-4 text-primary" />
         <span className="font-medium">{job.title}</span>
         <span className="text-muted-foreground">
           {status === "committed"
@@ -57,13 +57,13 @@ export const ScheduledResearchProposalCard = memo(function ScheduledResearchProp
   }
 
   return (
-    <section className="mx-auto max-w-2xl rounded-2xl border border-orange-500/25 bg-card p-5 shadow-sm">
+    <section className="mx-auto max-w-2xl rounded-lg border border-border bg-card p-5">
       <div className="flex items-start gap-3">
-        <div className="rounded-xl bg-orange-500/10 p-2 text-orange-500">
+        <div className="rounded-lg bg-primary/10 p-2 text-primary">
           <CalendarClock className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold uppercase tracking-wide text-orange-500">
+          <p className="text-[13px] font-medium text-primary">
             {i18n.t(
               isCreate ? "scheduled.proposalCreateTitle" : "scheduled.proposalCancelTitle",
             )}
@@ -73,7 +73,7 @@ export const ScheduledResearchProposalCard = memo(function ScheduledResearchProp
       </div>
 
       {isCreate && (
-        <dl className="mt-4 grid gap-2 rounded-xl bg-muted/40 p-3 text-sm sm:grid-cols-2">
+        <dl className="mt-4 grid gap-2 rounded-lg bg-muted/40 p-3 text-sm sm:grid-cols-2">
           <div>
             <dt className="text-muted-foreground">{i18n.t("scheduled.proposalCadence")}</dt>
             <dd>{job.schedule.expression}</dd>

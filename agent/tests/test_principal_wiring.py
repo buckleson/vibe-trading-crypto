@@ -125,6 +125,6 @@ def test_require_auth_hands_back_a_principal(runtime_root):
         class client:  # noqa: N801
             host = "127.0.0.1"
 
-    principal = asyncio.run(require_auth(_Req(), None))
+    principal = asyncio.run(require_auth(_Req()))
     assert isinstance(principal, Principal)
     assert principal.attributable is False

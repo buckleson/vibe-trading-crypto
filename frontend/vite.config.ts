@@ -4,7 +4,6 @@ import path from "path";
 
 const PROXY_PATHS = [
   "/api",
-  "/auth",
   "/sessions",
   "/swarm/presets",
   "/swarm/runs",

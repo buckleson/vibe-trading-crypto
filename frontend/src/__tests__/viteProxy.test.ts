@@ -19,7 +19,7 @@ describe("Vite API proxy config", () => {
     expect(config).toContain('"/settings/data-sources"');
   });
 
-  it("proxies authentication endpoints", () => {
-    expect(config).toContain('"/auth"');
+  it("does not proxy an auth endpoint (the app has no login)", () => {
+    expect(config).not.toContain('"/auth"');
   });
 });

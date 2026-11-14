@@ -22,7 +22,6 @@ def test_security_reexports():
     assert api_server._parse_cors_origins is security._parse_cors_origins
     assert api_server._is_loopback_bind_host is security._is_loopback_bind_host
     assert api_server._is_local_client is security._is_local_client
-    assert api_server._configured_api_key is security._configured_api_key
 
 
 def test_models_reexports():
@@ -44,12 +43,6 @@ def test_helpers_reexports():
 
 def test_state_reexports():
     assert api_server._get_session_service is state._get_session_service
-
-
-def test_api_key_monkeypatch(monkeypatch):
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
-    monkeypatch.setattr(api_server, "_API_KEY", "test-secret")
-    assert security._configured_api_key() == "test-secret"
 
 
 def test_no_circular_imports():
@@ -78,7 +71,6 @@ def test_api_server_is_thin_assembler():
 
 def test_compat_host_attr_reads_api_server():
     """host_attr should read attributes from the api_server module when present."""
-    assert _compat.host_attr("_API_KEY", "fallback") is not None or True
 
 
 def test_compat_host_attr_fallback():

@@ -2,7 +2,7 @@
 
 ## Upstream baseline
 
-- Repository: `HKUDS/Vibe-Trading`
+- Repository: `buckleson/vibe-trading-crypto`
 - Baseline commit: `261f007c410f7a6ff015a17f6830c8f809cd7413`
 - Baseline version metadata: `0.1.12`
 - Rebuilt directly from current upstream `main`; no `0.1.11` source overlay is
@@ -106,7 +106,7 @@ Host development validation on Windows:
   `Windows desktop source lifecycle` job on a fresh `windows-2025` runner
 
 The clean-Windows job installs Python 3.12 and Node 22 into a fresh runner,
-installs Vibe-Trading from the checked-out source, runs `npm ci`, performs a
+installs Vibe Crypto from the checked-out source, runs `npm ci`, performs a
 strict production build, starts the source backend through Electron, verifies
 the authenticated loopback boundary and graceful shutdown, then kills only
 the Electron main PID and asserts that the Python PID and listener disappear.
@@ -117,4 +117,4 @@ This replaces the older unchecked manual-VM entry with a reproducible CI gate.
 This change is source-only and intentionally produces no installer. A later
 packaging review must cover Authenticode signing, installer reputation, bundled
 license notices, Python SBOM, update authenticity, and release ownership.
-Nothing in this change creates or claims an HKUDS release channel.
+Nothing in this change creates or claims an upstream release channel.

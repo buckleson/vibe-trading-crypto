@@ -632,7 +632,7 @@ def _assert_profile(config: IBKRLocalConfig, accounts: Iterable[str]) -> None:
     if account_list and (not has_paper or has_live):
         raise IBKRProfileMismatchError(
             "Configured profile is paper, but connected accounts do not look like IBKR paper accounts. "
-            "Use `vibe-trading connector configure ibkr-live-local-readonly` only if you intend "
+            "Use `vibe-crypto connector configure ibkr-live-local-readonly` only if you intend "
             "read-only live-account access."
         )
 

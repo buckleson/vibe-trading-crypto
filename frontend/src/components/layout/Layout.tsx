@@ -1,18 +1,19 @@
 import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useSearchParams } from "react-router";
-import { Check, ChevronDown, Languages, Moon, Sun, Plus, Trash2, Pencil, MessageSquare, ChevronsLeft, ChevronsRight, Loader2, X } from "lucide-react";
+import { Plus, Trash2, Pencil, MessageSquare, ChevronsLeft, ChevronsRight, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useDarkMode } from "@/hooks/useDarkMode";
 import { api, type SessionItem } from "@/lib/api";
 import { safeGet, safeSet } from "@/lib/storage";
 import { useAgentStore } from "@/stores/agent";
 import { BrandMark } from "@/components/common/BrandMark";
 import { ConnectionBanner } from "@/components/layout/ConnectionBanner";
-import { SUPPORTED_LANGUAGES } from "@/i18n";
 import i18n from "@/i18n";
 import { toast } from "sonner";
-import { SidebarNavigation } from "./SidebarNavigation";
+import { SidebarNavigation, SettingsLink } from "./SidebarNavigation";
+import { TopBar } from "./TopBar";
+import { AssistantDock } from "./AssistantDock";
+import { Button } from "@/components/ui";
 import { PageHelp } from "./PageHelp";
 
 // APP_VERSION is sourced from i18n locale files (app.version key) to keep a
@@ -23,7 +24,6 @@ export function Layout() {
 
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
-  const { dark, toggle } = useDarkMode();
   const [sessions, setSessions] = useState<SessionItem[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
   const [sessionsError, setSessionsError] = useState<string | null>(null);
@@ -32,6 +32,7 @@ export function Layout() {
   const sseStatus = useAgentStore(s => s.sseStatus);
   const sseRetryAttempt = useAgentStore(s => s.sseRetryAttempt);
   const [collapsed, setCollapsed] = useState(() => safeGet("qa-sidebar") === "collapsed");
+  const [dockOpen, setDockOpen] = useState(() => safeGet("vc-dock-open") === "1");
   const [sessionsOpen, setSessionsOpen] = useState(false);
   const sessionsPanelRef = useRef<HTMLDivElement>(null);
   const sessionsTriggerRef = useRef<HTMLButtonElement>(null);
@@ -58,6 +59,21 @@ export function Layout() {
       document.removeEventListener("keydown", onKey);
     };
   }, [sessionsOpen]);
+
+  useEffect(() => { safeSet("vc-dock-open", dockOpen ? "1" : "0"); }, [dockOpen]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "j") {
+        e.preventDefault();
+        setDockOpen((v) => !v);
+      } else if (e.key === "Escape" && window.innerWidth < 1024) {
+        setDockOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
 
   useEffect(() => {
     safeSet("qa-sidebar", collapsed ? "collapsed" : "expanded");
@@ -151,22 +167,22 @@ export function Layout() {
       </a>
       {/* Sidebar */}
       <aside
-        aria-label={t('layout.sidebar', { defaultValue: 'Vibe-Trading sidebar' })}
+        aria-label={t('layout.sidebar', { defaultValue: 'Vibe Crypto sidebar' })}
         className={cn(
-          "max-md:w-12 border-e border-border/60 bg-card flex flex-col shrink-0 transition-all duration-200 overflow-visible",
-          collapsed ? "w-12" : "w-64"
+          "max-md:w-14 border-e border-border bg-card flex flex-col shrink-0 transition-[width] duration-200 ease-out overflow-visible",
+          collapsed ? "w-14" : "w-60"
         )}
       >
         {/* Brand */}
-        <div className={cn("border-b border-border/60", collapsed ? "p-2 flex justify-center" : "p-4 max-md:p-2 max-md:flex max-md:justify-center")}>
+        <div className={cn("flex h-12 shrink-0 items-center border-b border-border", collapsed ? "justify-center px-2" : "px-4 max-md:justify-center max-md:px-2")}>
           <Link
             to="/"
-            aria-label="Vibe-Trading"
+            aria-label="Vibe Crypto"
             className={cn("flex items-center", collapsed ? "justify-center" : "gap-2 max-md:justify-center")}
           >
             <BrandMark className="h-6 w-6 shrink-0" />
             {!collapsed && (
-              <span className="text-[15px] font-semibold tracking-tight max-md:hidden">Vibe-Trading</span>
+              <span className="text-[15px] font-semibold tracking-tight max-md:hidden">Vibe Crypto</span>
             )}
           </Link>
         </div>
@@ -182,7 +198,7 @@ export function Layout() {
           aria-controls="sidebar-sessions"
           title={t("layout.sessions")}
           onClick={() => setSessionsOpen((open) => !open)}
-          className={cn("mx-1 mt-2 flex items-center justify-center rounded-md border-t p-2 text-muted-foreground hover:bg-muted", !collapsed && "md:hidden")}
+          className={cn("mx-2 mt-2 flex h-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted", !collapsed && "md:hidden")}
         >
           <MessageSquare className="h-4 w-4" />
         </button>
@@ -193,8 +209,8 @@ export function Layout() {
             ref={sessionsPanelRef}
             id="sidebar-sessions"
             aria-label={t("layout.sessions")}
-            className={cn("overflow-auto flex flex-col border-border/60", sessionsOpen
-              ? "fixed inset-y-0 start-12 z-40 w-[min(18rem,calc(100vw-3rem))] border-e bg-card shadow-xl"
+            className={cn("overflow-auto flex flex-col border-border", sessionsOpen
+              ? "fixed inset-y-0 start-14 z-40 w-[min(18rem,calc(100vw-3.5rem))] border-e bg-popover shadow-lg"
               : "flex-1 border-t mt-2 max-md:hidden")}
           >
             <div className="flex items-center justify-between px-4 py-2">
@@ -217,7 +233,7 @@ export function Layout() {
             {sessionsOpen && sessionsError && (
               <div className="mx-3 mb-3 rounded-md border border-warning/30 bg-warning/10 p-3 text-xs">
                 <p>{t("layout.sessionsLoadFailed")} {sessionsError}</p>
-                <button type="button" onClick={loadSessions} disabled={sessionsLoading} className="mt-2 rounded border px-2 py-1 disabled:opacity-50">{t("connection.retry")}</button>
+                <button type="button" onClick={loadSessions} disabled={sessionsLoading} className="mt-2 rounded-md border border-border px-2 py-1 disabled:opacity-50">{t("connection.retry")}</button>
               </div>
             )}
 
@@ -229,7 +245,7 @@ export function Layout() {
                   ))}
                 </div>
               ) : !sessionsError && sessions.length === 0 ? (
-                <p className="px-3 py-2 text-xs text-muted-foreground/60">{t('layout.noSessions')}</p>
+                <p className="px-3 py-2 text-xs text-muted-foreground">{t('layout.noSessions')}</p>
               ) : null}
               {sessions.map((s) => {
                 const isActive = s.session_id === activeSessionId;
@@ -252,10 +268,10 @@ export function Layout() {
                         to={`/agent?session=${s.session_id}`}
                         onClick={() => setSessionsOpen(false)}
                         className={cn(
-                          "flex-1 min-w-0 ps-3 pe-14 py-1.5 rounded-md text-xs transition-colors truncate block border-s-2",
+                          "flex-1 min-w-0 ps-3 pe-14 py-1.5 rounded-md text-[13px] transition-colors truncate block border-s-2",
                           isActive
-                            ? "border-s-primary bg-primary/10 text-primary font-medium"
-                            : "border-s-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
+                            ? "border-s-primary bg-muted text-foreground font-medium"
+                            : "border-s-transparent text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                         )}
                         title={s.title || s.session_id}
                       >
@@ -307,57 +323,34 @@ export function Layout() {
         {/* Spacer when collapsed */}
         {collapsed && <div className="flex-1" />}
 
-        {/* Footer */}
-        <div className={cn("mt-auto border-t border-border/60", collapsed ? "p-1 flex flex-col items-center gap-1" : "p-3 space-y-2 max-md:p-1 max-md:flex max-md:flex-col max-md:items-center max-md:gap-1 max-md:space-y-0")}>
-          {collapsed ? (
-            <>
-              <button onClick={toggle} className="p-1.5 text-muted-foreground hover:text-foreground rounded transition-colors" title={dark ? t('layout.light') : t('layout.dark')}>
-                {dark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
-              </button>
-              <button onClick={() => setCollapsed(false)} className="p-1.5 text-muted-foreground hover:text-foreground rounded transition-colors" title={t('layout.expand')}>
-                <ChevronsRight className="h-3.5 w-3.5" />
-              </button>
-              <LanguageSwitcher compact />
-            </>
-          ) : (
-            <>
-              <div className="flex items-center justify-between max-md:flex-col">
-                <button
-                  onClick={toggle}
-                  className="flex items-center gap-1.5 p-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {dark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
-                  <span className="max-md:hidden">{dark ? t('layout.light') : t('layout.dark')}</span>
-                </button>
-                <div className="flex items-center gap-1 max-md:hidden">
-                  <button
-                    onClick={() => setCollapsed(true)}
-                    className="p-1.5 text-muted-foreground hover:text-foreground rounded transition-colors"
-                    title={t('layout.collapse')}
-                  >
-                    <ChevronsLeft className="h-3.5 w-3.5" />
-                  </button>
-                </div>
+        {/* Footer: Settings pinned above the collapse toggle */}
+        <div className={cn("mt-auto shrink-0 space-y-1 border-t border-border p-2")}>
+          <SettingsLink collapsed={collapsed} />
+          <div className={cn("flex items-center gap-2", collapsed ? "justify-center" : "justify-between max-md:justify-center")}>
+            {!collapsed && (
+              <div className="flex min-w-0 items-center gap-1.5 ps-2.5 text-xs text-muted-foreground max-md:hidden">
+                <span>{t('app.version')}</span>
+                <span aria-hidden="true">/</span>
+                <Link to="/about" className="transition-colors hover:text-foreground">{t('layout.about')}</Link>
               </div>
-              <div className="flex flex-col gap-1 max-md:items-center">
-                <LanguageSwitcher />
-                {/* About is marketing, not a work surface — it lives here by
-                    the version stamp instead of in the primary nav. */}
-                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 max-md:hidden">
-                  <span>{t('app.version')}</span>
-                  <span aria-hidden="true">·</span>
-                  <Link to="/about" className="transition-colors hover:text-foreground">
-                    {t('layout.about')}
-                  </Link>
-                </div>
-              </div>
-            </>
-          )}
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn("h-8 w-8", !collapsed && "max-md:hidden")}
+              onClick={() => setCollapsed((c) => !c)}
+              aria-label={collapsed ? t('layout.expand') : t('layout.collapse')}
+              title={collapsed ? t('layout.expand') : t('layout.collapse')}
+            >
+              {collapsed ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
+            </Button>
+          </div>
         </div>
       </aside>
 
       {/* Main */}
-      <div className="relative flex-1 flex flex-col overflow-hidden">
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
+        <TopBar dockOpen={dockOpen} onToggleDock={() => setDockOpen((v) => !v)} />
         {sessionsError ? (
           <div role="alert" className="flex flex-wrap items-center gap-2 border-b border-warning/30 bg-warning/10 px-4 py-2 text-xs">
             <span className="font-medium">{t("layout.sessionsLoadFailed")}</span>
@@ -368,153 +361,12 @@ export function Layout() {
             <Link to="/settings" className="text-primary underline">{t("layout.settings")}</Link>
           </div>
         ) : <ConnectionBanner status={sseStatus} retryAttempt={sseRetryAttempt} />}
-        <main id="main" className="flex-1 min-h-0 overflow-auto">
+        <main id="main" className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <PageHelp />
           <Outlet />
         </main>
       </div>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Language switcher — dropdown listing every language registered in
-// src/i18n/index.ts. Persists the choice via i18next's localStorage detector
-// and emits the `languageChanged` event handled in the i18n module to flip
-// <html dir/lang> for RTL languages.
-//
-// Positioning: the menu uses `position: fixed` and is placed at
-// `(triggerLeft, triggerTop - gap)`. This bypasses every ancestor's
-// `overflow: hidden/auto/scroll`, stacking contexts, and CSS direction
-// rules, so the dropdown is *always* fully visible regardless of where
-// the trigger sits in the layout or which language is active. We measure
-// the trigger with getBoundingClientRect() and update on resize/scroll.
-// ---------------------------------------------------------------------------
-function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
-  const { i18n, t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const [menuStyle, setMenuStyle] = useState<{ left: number; bottom: number; minWidth: number } | null>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onClick = (e: MouseEvent | TouchEvent) => {
-      if (
-        triggerRef.current &&
-        !triggerRef.current.contains(e.target as Node) &&
-        !(e.target as HTMLElement).closest?.("[data-lang-menu]")
-      ) {
-        setOpen(false);
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", onClick);
-    document.addEventListener("touchstart", onClick, { passive: true });
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onClick);
-      document.removeEventListener("touchstart", onClick);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
-  // Recompute the menu's fixed coordinates whenever it opens, or whenever
-  // the viewport changes (resize / scroll / language switch). The menu is
-  // anchored to the trigger's *left edge* and sits *above* the trigger.
-  useEffect(() => {
-    if (!open || !triggerRef.current) return;
-    const place = () => {
-      const r = triggerRef.current?.getBoundingClientRect();
-      if (!r) return;
-      // Anchor: align the menu's right edge with the trigger's right edge,
-      // then clamp to the viewport so the menu never overflows the screen.
-      const menuWidth = 160; // px — approx longest label "العربية" + padding
-      const gap = 4; // mb-1
-      const desiredLeft = r.right - menuWidth;
-      const maxLeft = window.innerWidth - menuWidth - 8;
-      const minLeft = 8;
-      const left = Math.max(minLeft, Math.min(maxLeft, desiredLeft));
-      setMenuStyle({
-        left,
-        // distance from viewport bottom: viewport height − trigger top + gap
-        bottom: window.innerHeight - r.top + gap,
-        minWidth: menuWidth,
-      });
-    };
-    place();
-    window.addEventListener("resize", place);
-    window.addEventListener("scroll", place, true);
-    return () => {
-      window.removeEventListener("resize", place);
-      window.removeEventListener("scroll", place, true);
-    };
-  }, [open]);
-
-  // i18n.language (singular) is the primary active language. We try an exact
-  // match first against SUPPORTED_LANGUAGES. If that fails (e.g. a regional
-  // variant like "ja-JP"), we fall back to i18n.languages (plural) which
-  // includes both the detected and resolved codes. NOTE: i18n.languages
-  // always contains the fallback language ("en"), so it must NOT be the
-  // primary match — otherwise "en" being first in SUPPORTED_LANGUAGES
-  // would always win and the switcher would never show any other language.
-  const current =
-    SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language) ??
-    SUPPORTED_LANGUAGES.find((l) => i18n.languages?.includes(l.code)) ??
-    SUPPORTED_LANGUAGES[0];
-
-  return (
-    <div>
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-label={t("layout.language")}
-        className="flex items-center gap-1 p-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors max-md:justify-center"
-      >
-        <Languages className="h-3.5 w-3.5 shrink-0" />
-        {!compact && <span className="whitespace-nowrap max-md:hidden">{current.label}</span>}
-        {!compact && <ChevronDown className={cn("h-3 w-3 shrink-0 transition-transform max-md:hidden", open && "rotate-180")} />}
-      </button>
-      {open && menuStyle && (
-        <ul
-          data-lang-menu
-          aria-label="Select language"
-          style={{
-            position: "fixed",
-            left: menuStyle.left,
-            bottom: menuStyle.bottom,
-            minWidth: menuStyle.minWidth,
-            zIndex: 60,
-          }}
-          className="rounded-md border border-border/60 bg-popover shadow-lg ring-1 ring-black/5"
-        >
-          {SUPPORTED_LANGUAGES.map((lang) => {
-            const active = lang.code === current.code;
-            return (
-              <li key={lang.code}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    i18n.changeLanguage(lang.code).catch(console.error);
-                    setOpen(false);
-                  }}
-                  aria-current={active || undefined}
-                  className={cn(
-                    "w-full flex items-center gap-2 px-2.5 py-1.5 text-xs hover:bg-muted hover:text-foreground transition-colors",
-                    active && "text-foreground",
-                  )}
-                >
-                  <span className="flex-1 text-start whitespace-nowrap">{lang.label}</span>
-                  {active && <Check className="h-3 w-3 shrink-0" />}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      <AssistantDock open={dockOpen} onClose={() => setDockOpen(false)} />
     </div>
   );
 }

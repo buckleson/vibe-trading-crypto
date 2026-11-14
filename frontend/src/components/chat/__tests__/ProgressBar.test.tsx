@@ -43,10 +43,10 @@ describe("ProgressBar", () => {
     expect(container.querySelector("span")).not.toBeInTheDocument();
   });
 
-  it("uses h-1 height class by default (xs)", () => {
+  it("uses h-0.5 height class by default (xs)", () => {
     const { container } = render(<ProgressBar current={3} total={10} />);
     const track = container.querySelector(".bg-muted");
-    expect(track?.classList.contains("h-1")).toBe(true);
+    expect(track?.classList.contains("h-0.5")).toBe(true);
   });
 
   it("uses h-2 height class when height=sm", () => {

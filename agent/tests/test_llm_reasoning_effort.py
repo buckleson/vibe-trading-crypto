@@ -70,7 +70,6 @@ def settings_client(tmp_path: Path, settings_env_path: Path, monkeypatch: pytest
     monkeypatch.setattr(api_server, "ENV_PATH", settings_env_path)
     monkeypatch.setattr(api_server, "LEGACY_ENV_PATH", tmp_path / "legacy" / ".env", raising=False)
     monkeypatch.setattr(api_server, "ENV_EXAMPLE_PATH", env_example)
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
     return TestClient(api_server.app, client=("127.0.0.1", 50000))
 
 

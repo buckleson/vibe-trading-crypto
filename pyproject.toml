@@ -1,14 +1,15 @@
 [project]
-name = "vibe-trading-ai"
+name = "vibe-crypto"
 version = "0.1.19"
-description = "Natural-language finance research AI agent with backtesting"
+description = "Vibe Crypto: AI research, backtesting and paper trading for crypto, stocks and more"
 requires-python = ">=3.11"
 license = "MIT"
 readme = "README.md"
 authors = [
-    {name = "HKUDS", email = "hkuds@connect.hku.hk"},
+    {name = "Vibe Crypto contributors"},
+    {name = "HKUDS (upstream Vibe-Trading)", email = "hkuds@connect.hku.hk"},
 ]
-keywords = ["finance", "trading", "backtesting", "agent", "swarm", "quantitative"]
+keywords = ["finance", "trading", "backtesting", "agent", "swarm", "quantitative", "crypto", "paper-trading"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Financial and Insurance Industry",
@@ -19,6 +20,7 @@ classifiers = [
 ]
 dependencies = [
     "rich>=13.0.0",
+    "claude-agent-sdk>=0.2.172,<0.3",
     "pyyaml>=6.0.0",
     "langchain>=1.3.9,<2",
     "langchain-core>=1.0.0,<2",
@@ -99,12 +101,15 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://vibetrading.wiki/"
-Documentation = "https://vibetrading.wiki/docs/"
-Repository = "https://github.com/HKUDS/Vibe-Trading"
-Issues = "https://github.com/HKUDS/Vibe-Trading/issues"
+Homepage = "https://github.com/buckleson/vibe-trading-crypto#readme"
+Documentation = "https://github.com/buckleson/vibe-trading-crypto#readme"
+Repository = "https://github.com/buckleson/vibe-trading-crypto"
+Issues = "https://github.com/buckleson/vibe-trading-crypto/issues"
 
 [project.scripts]
+vibe-crypto = "cli:main"
+vibe-crypto-mcp = "mcp_server:main"
+# legacy aliases, see docs/vibe-crypto/ADR/0001-rebrand.md
 vibe-trading = "cli:main"
 vibe-trading-mcp = "mcp_server:main"
 

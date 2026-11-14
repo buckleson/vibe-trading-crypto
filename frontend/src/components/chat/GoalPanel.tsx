@@ -39,10 +39,6 @@ function statusLabel(status: string): string {
   return status.replace(/_/g, " ");
 }
 
-function criterionIndexLabel(index: number): string {
-  return String(index + 1);
-}
-
 function latestGoalEvidence(snapshot: GoalSnapshot) {
   return [...snapshot.evidence]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
@@ -125,19 +121,19 @@ export const GoalPanel = memo(function GoalPanel({
         aria-label={t("agent.activeResearchGoal")}
         aria-expanded={detailsOpen}
       >
-        <Target className="h-3 w-3 shrink-0" />
+        <Target className="h-4 w-4 shrink-0" />
         <span className="shrink-0">{t("agent.goal")}</span>
         <span className="truncate text-muted-foreground">
           {snapshot.goal.ui_summary || snapshot.goal.objective}
         </span>
         {goalProgress.metLabel && (
-          <span className="shrink-0 font-mono text-[11px] text-emerald-600 dark:text-emerald-400">
+          <span className="shrink-0 text-xs text-success tabular-nums">
             {goalProgress.metLabel}
           </span>
         )}
         {goalProgress.evidenceTotal > 0 && (
           <span
-            className="shrink-0 rounded bg-background px-1 font-mono text-[10px] text-primary"
+            className="shrink-0 rounded-sm bg-primary/10 px-1.5 text-xs text-primary tabular-nums"
             title={t("agent.evidenceCollectedTitle")}
           >
             {t("agent.evidenceCount", { count: goalProgress.evidenceTotal })}
@@ -145,14 +141,14 @@ export const GoalPanel = memo(function GoalPanel({
         )}
         <ChevronDown
           className={[
-            "h-3 w-3 shrink-0 transition-transform",
+            "h-4 w-4 shrink-0 transition-transform",
             detailsOpen ? "rotate-180" : "",
           ].join(" ")}
           aria-hidden="true"
         />
       </button>
       {detailsOpen && (
-        <div className="grid gap-3 rounded-xl border border-primary/20 bg-background/95 p-3 text-xs shadow-sm">
+        <div className="grid gap-3 rounded-lg border border-border bg-card p-3 text-xs">
           {editActive ? (
             <div className="grid gap-2">
               <textarea
@@ -166,47 +162,47 @@ export const GoalPanel = memo(function GoalPanel({
                 <button
                   type="button"
                   onClick={() => setEditActive(false)}
-                  className="inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-card px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 >
-                  <X className="h-3 w-3" />
+                  <X className="h-4 w-4" />
                   {t("agent.cancel")}
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveEdit}
                   disabled={!editValue.trim()}
-                  className="inline-flex items-center gap-1 rounded-lg bg-primary px-2 py-1 text-[11px] font-medium text-primary-foreground transition-opacity disabled:opacity-40"
+                  className="inline-flex h-8 items-center gap-2 rounded-md bg-primary px-3 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50"
                 >
-                  <Check className="h-3 w-3" />
+                  <Check className="h-4 w-4" />
                   {t("agent.save")}
                 </button>
               </div>
             </div>
           ) : (
-            <div className="rounded-lg border bg-muted/20 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
+            <div className="rounded-lg border bg-muted/50 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
               {snapshot.goal.objective}
             </div>
           )}
           <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-lg border bg-muted/20 p-2.5">
-              <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <div className="rounded-lg border bg-muted/50 p-2.5">
+              <div className="text-xs font-medium text-muted-foreground">
                 {t("agent.criteria")}
               </div>
-              <div className="mt-1 font-mono text-base font-semibold text-foreground">
+              <div className="mt-1 text-base font-semibold tabular-nums text-foreground">
                 {goalProgress.label || "0/0"}
               </div>
             </div>
-            <div className="rounded-lg border bg-muted/20 p-2.5">
-              <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <div className="rounded-lg border bg-muted/50 p-2.5">
+              <div className="text-xs font-medium text-muted-foreground">
                 {t("agent.evidence")}
               </div>
-              <div className="mt-1 font-mono text-base font-semibold text-foreground">
+              <div className="mt-1 text-base font-semibold tabular-nums text-foreground">
                 {goalProgress.evidenceTotal}
               </div>
             </div>
           </div>
           <div className="grid gap-1.5">
-            {snapshot.criteria.map((criterion, index) => {
+            {snapshot.criteria.map((criterion) => {
               const evidenceCount = criterionEvidenceCount(snapshot, criterion.criterion_id);
               const displayStatus = criterionCovered(snapshot, criterion) && !isCriterionStatusMet(criterion.status)
                 ? "covered"
@@ -214,18 +210,15 @@ export const GoalPanel = memo(function GoalPanel({
               return (
                 <div
                   key={criterion.criterion_id}
-                  className="grid grid-cols-[1.25rem_minmax(0,1fr)_auto] items-start gap-2 rounded-lg border bg-muted/20 p-2"
+                  className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 rounded-lg border bg-muted/50 p-2"
                 >
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-[10px] text-muted-foreground">
-                    {criterionIndexLabel(index)}
-                  </span>
                   <span className="min-w-0">
                     <span className="block truncate font-medium text-foreground">{criterion.text}</span>
-                    <span className="block text-[11px] text-muted-foreground">
+                    <span className="block text-xs text-muted-foreground">
                       {displayStatus}
                     </span>
                   </span>
-                  <span className="rounded-full border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                  <span className="rounded-sm bg-muted px-1.5 py-0.5 text-xs text-muted-foreground tabular-nums">
                     {evidenceCount} ev
                   </span>
                 </div>
@@ -234,16 +227,16 @@ export const GoalPanel = memo(function GoalPanel({
           </div>
           {snapshot.evidence.length > 0 && (
             <div className="grid gap-1.5 border-t pt-2">
-              <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <div className="text-xs font-medium text-muted-foreground">
                 {t("agent.recentEvidence")}
               </div>
               {latestGoalEvidence(snapshot).map((item) => (
-                <div key={item.evidence_id} className="rounded-lg bg-muted/20 px-2 py-1.5">
-                  <div className="mb-0.5 flex items-center justify-between gap-2 text-[10px] text-muted-foreground">
+                <div key={item.evidence_id} className="rounded-lg bg-muted/50 px-2 py-1.5">
+                  <div className="mb-0.5 flex items-center justify-between gap-2 text-xs text-muted-foreground">
                     <span className="truncate">{item.source_provider || "evidence"}</span>
                     <span>{statusLabel(item.verification_status)}</span>
                   </div>
-                  <div className="line-clamp-2 text-[11px] leading-relaxed text-foreground">
+                  <div className="line-clamp-2 text-xs leading-relaxed text-foreground">
                     {item.text}
                   </div>
                 </div>
@@ -255,26 +248,26 @@ export const GoalPanel = memo(function GoalPanel({
               type="button"
               onClick={onContinue}
               disabled={streaming}
-              className="inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40"
+              className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-card px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50"
             >
-              <Play className="h-3 w-3" />
+              <Play className="h-4 w-4" />
               {t("agent.continue")}
             </button>
             <button
               type="button"
               onClick={handleStartEdit}
               disabled={editActive}
-              className="inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40"
+              className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-card px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50"
             >
-              <Pencil className="h-3 w-3" />
+              <Pencil className="h-4 w-4" />
               {t("agent.edit")}
             </button>
             <button
               type="button"
               onClick={handleCancel}
-              className="inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive"
+              className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-card px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 hover:border-destructive/40 hover:text-destructive"
             >
-              <X className="h-3 w-3" />
+              <X className="h-4 w-4" />
               {t("agent.cancelGoal")}
             </button>
           </div>

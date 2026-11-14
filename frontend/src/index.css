@@ -4,83 +4,71 @@
 
 @layer base {
   :root {
-    /* Light mode surfaces */
-    --background: 38 24% 97%;
-    --foreground: 28 18% 14%;
-    --card: 40 30% 99%;
-    --card-foreground: 28 18% 14%;
+    --background: 220 20% 98%;
+    --foreground: 222 30% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 30% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 30% 10%;
 
-    /* Popover: a slightly elevated surface used for floating menus,
-       tooltips, and the language switcher dropdown. Falls back to a
-       solid white (light) or surface-1 (dark) so dropdowns never
-       appear transparent and let underlying content bleed through. */
-    --popover: 40 30% 99%;
-    --popover-foreground: 28 18% 14%;
-
-    /* Brand accent */
-    --primary: 24 45% 38%;
+    --primary: 221 83% 48%;
     --primary-foreground: 0 0% 100%;
 
-    --muted: 36 16% 92%;
-    --muted-foreground: 28 10% 46%;
-    --destructive: 0 84% 60%;
+    --muted: 220 16% 94%;
+    --muted-foreground: 220 10% 40%;
+    --destructive: 0 72% 45%;
     --destructive-foreground: 0 0% 100%;
-    --border: 32 16% 85%;
-    --radius: 0.5rem;
+    --border: 220 14% 88%;
+    --radius: 0.625rem;
 
-    /* Semantic colors */
-    --success: 142 71% 45%;
-    --danger: 0 84% 60%;
-    --warning: 38 92% 50%;
-    --info: 217 91% 60%;
+    --success: 152 62% 30%;
+    --danger: 0 72% 45%;
+    --warning: 32 95% 34%;
+    --info: 199 89% 34%;
 
-    /* Chart tokens */
-    --chart-grid: 32 16% 89%;
-    --chart-text: 28 10% 46%;
-    --chart-axis: 32 16% 79%;
-    --chart-compare-a: #3b82f6;
-    --chart-compare-b: #f59e0b;
+    --chart-grid: 220 14% 92%;
+    --chart-text: 220 10% 40%;
+    --chart-axis: 220 14% 82%;
+    --chart-compare-a: #1555E0;
+    --chart-compare-b: #B36205;
   }
 
   .dark {
-    /* Dark mode: 4-level surface system. Keep >=5 lightness points between
-       adjacent surfaces — smaller deltas are indistinguishable on most
-       panels (sidebar vs main blended at 5%/8%). */
-    --background: 28 16% 6%;       /* bg-base */
-    --foreground: 32 20% 93%;
-    --card: 28 15% 11%;            /* surface-1 */
-    --card-foreground: 32 20% 93%;
+    --background: 222 24% 7%;
+    --foreground: 220 20% 94%;
+    --card: 222 20% 11%;
+    --card-foreground: 220 20% 94%;
+    --popover: 222 20% 13%;
+    --popover-foreground: 220 20% 94%;
 
-    --popover: 28 15% 13%;         /* surface-1.5 (slightly lighter than card) */
-    --popover-foreground: 32 20% 93%;
+    --primary: 217 91% 64%;
+    --primary-foreground: 222 47% 9%;
 
-    --primary: 28 52% 65%;
-    /* Dark ink, not white: white on this light umber measures 2.3:1, below
-       the 3:1 floor for a control; this ink measures 7.7:1. */
-    --primary-foreground: 28 30% 10%;
-
-    --muted: 28 14% 17%;           /* surface-2 */
-    --muted-foreground: 32 12% 64%;
-    --destructive: 0 62% 50%;
+    --muted: 222 16% 16%;
+    --muted-foreground: 220 12% 64%;
+    --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 28 12% 25%;          /* surface-3 */
+    --border: 222 14% 22%;
 
-    /* Semantic colors */
-    --success: 142 71% 45%;
-    --danger: 0 62% 50%;
-    --warning: 38 92% 50%;
-    --info: 217 91% 60%;
+    --success: 152 55% 50%;
+    --danger: 0 80% 66%;
+    --warning: 38 92% 56%;
+    --info: 199 89% 60%;
 
-    /* Chart tokens */
-    --chart-grid: 28 16% 15%;
-    --chart-text: 32 12% 55%;
-    --chart-axis: 28 16% 27%;
-    --chart-compare-a: #60a5fa;
-    --chart-compare-b: #fbbf24;
+    --chart-grid: 222 16% 15%;
+    --chart-text: 220 12% 60%;
+    --chart-axis: 222 14% 26%;
+    --chart-compare-a: #5090F7;
+    --chart-compare-b: #F6AA28;
   }
 
   * { @apply border-border; }
-  body { @apply bg-background text-foreground; }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible { outline: none; }
 
   /* Prose table enhancements */
   .prose table { border-collapse: collapse; width: 100%; }
@@ -225,4 +213,11 @@
 .vt-bidi .katex,
 .vt-bidi .katex * {
   direction: ltr;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *:not(.animate-spin) {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

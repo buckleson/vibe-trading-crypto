@@ -276,7 +276,7 @@ def build_registry(
                         )
                         skip_msg = (
                             f"{server_name} live connector configured but not authorized — "
-                            f"run `vibe-trading connector authorize {profile_hint}` "
+                            f"run `vibe-crypto connector authorize {profile_hint}` "
                             f"on a desktop session"
                         )
                         logger.warning(skip_msg)

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Vibe-Trading CLI for natural-language finance research and backtesting.
+"""Vibe Crypto CLI for natural-language finance research and backtesting.
 
 Usage:
-    vibe-trading                           Interactive mode (default)
-    vibe-trading -p "Backtest AAPL MACD"   Single run
-    vibe-trading serve --port 8899         Start API server
-    vibe-trading chat                      Interactive mode
-    vibe-trading list                      List runs
-    vibe-trading show <run_id>             Show run details
+    vibe-crypto                           Interactive mode (default)
+    vibe-crypto -p "Backtest AAPL MACD"   Single run
+    vibe-crypto serve --port 8899         Start API server
+    vibe-crypto chat                      Interactive mode
+    vibe-crypto list                      List runs
+    vibe-crypto show <run_id>             Show run details
 """
 
 from __future__ import annotations
@@ -72,7 +72,7 @@ EXIT_SUCCESS = 0
 EXIT_RUN_FAILED = 1
 EXIT_USAGE_ERROR = 2
 
-# Rows printed by `vibe-trading portfolio show` before the combined-holdings table is cut.
+# Rows printed by `vibe-crypto portfolio show` before the combined-holdings table is cut.
 _PORTFOLIO_CLI_MAX_HOLDINGS = 25
 RICH_TAG_PATTERN = re.compile(r"\[/?[^\]]+\]")
 SWARM_RUN_USAGE = """--swarm-run PRESET '{"k":"v"}'"""
@@ -880,7 +880,7 @@ class _RunDashboard:
             body.add_row("")
             body.add_row(Panel(Text(latest, style="dim"), title="Latest answer", border_style="dim", padding=(0, 1)))
 
-        return Panel(body, title="Vibe-Trading", border_style="cyan", padding=(1, 1 if compact else 2))
+        return Panel(body, title="Vibe Crypto", border_style="cyan", padding=(1, 1 if compact else 2))
 
 
 from cli.ui.rail import RailRunDashboard as _RunDashboard  # noqa: E402,F811
@@ -1485,9 +1485,9 @@ def _print_result(result: dict, elapsed: float, *, no_rich: bool = False) -> Non
         actions = Table(box=None, show_header=False, padding=(0, 1))
         actions.add_column(style="cyan", no_wrap=True)
         actions.add_column(style="dim")
-        actions.add_row(f"vibe-trading show {rid}", "details")
-        actions.add_row(f"vibe-trading code {rid}", "generated Python")
-        actions.add_row(f"vibe-trading continue {rid} \"...\"", "refine this run")
+        actions.add_row(f"vibe-crypto show {rid}", "details")
+        actions.add_row(f"vibe-crypto code {rid}", "generated Python")
+        actions.add_row(f"vibe-crypto continue {rid} \"...\"", "refine this run")
         panels.append(Panel(actions, border_style="dim", title="Next", padding=(0, 1)))
 
     if _terminal_width() < 104:
@@ -1569,7 +1569,7 @@ def cmd_run(prompt: str, max_iter: int, *, json_mode: bool = False, no_rich: boo
         # after the command exits.
         if _read_metric_values(Path(result["run_dir"]) / "artifacts" / "metrics.csv"):
             hint = (
-                f"Dashboard: run `vibe-trading serve`, then open "
+                f"Dashboard: run `vibe-crypto serve`, then open "
                 f"/runs/{result['run_id']}?view=dashboard"
             )
             if no_rich:
@@ -1719,7 +1719,7 @@ def _build_welcome_panel(term_width: Optional[int] = None) -> Panel:
     content_width = widths["content"]
 
     header_lines: list[Text] = []
-    title = f"Vibe-Trading v{_VERSION}"
+    title = f"Vibe Crypto v{_VERSION}"
     subtitle = "finance agent CLI"
     if term_width < 78:
         header_lines.append(Text(title, style="bold cyan"))
@@ -1845,7 +1845,7 @@ def _build_welcome_panel(term_width: Optional[int] = None) -> Panel:
     body.add_row("")
     body.add_row(Text(_clip_inline("Example: analyze AAPL momentum with risk controls", content_width), style="dim"))
 
-    return Panel(body, title="[bold cyan]Vibe-Trading[/bold cyan]", border_style="cyan", padding=(1, 1))
+    return Panel(body, title="[bold cyan]Vibe Crypto[/bold cyan]", border_style="cyan", padding=(1, 1))
 
 
 def _print_welcome() -> None:
@@ -1947,7 +1947,7 @@ def _show_settings() -> None:
             console.print(panel)
     else:
         console.print(Columns(panels, expand=True, equal=True))
-    console.print("[dim]Edit configuration in ~/.vibe-trading/.env, or run vibe-trading init.[/dim]")
+    console.print("[dim]Edit configuration in ~/.vibe-trading/.env, or run vibe-crypto init.[/dim]")
 
 
 def _handle_slash_command(input_str: str, *, max_iter: int) -> None:
@@ -3053,8 +3053,8 @@ def cmd_provider_login(provider: str) -> int:
             "interactive terminal to paste the callback URL."
         )
         console.print(
-            "[yellow]Docker:[/yellow] run `docker compose exec vibe-trading "
-            "vibe-trading provider login openai-codex` or add `-it` to "
+            "[yellow]Docker:[/yellow] run `docker compose exec vibe-crypto "
+            "vibe-crypto provider login openai-codex` or add `-it` to "
             "`docker exec`."
         )
         return EXIT_RUN_FAILED
@@ -3106,7 +3106,7 @@ def _login_claude_cli() -> int:
 # reachable from the agent loop / tool registry. There is deliberately NO
 # `live commit` verb — committing a mandate happens only through the consent
 # flow's `POST /mandate/commit`, never a CLI command (the CLI cannot create or
-# widen a mandate). The public CLI surface is `vibe-trading connector ...`;
+# widen a mandate). The public CLI surface is `vibe-crypto connector ...`;
 # `cmd_live_*` helpers remain only as the broker-runtime implementation behind
 # connector profiles.
 # ---------------------------------------------------------------------------
@@ -3148,13 +3148,6 @@ def _live_api_base() -> str:
     return get_env_config().api.vibe_trading_api_url.rstrip("/")
 
 
-def _api_auth_headers() -> Dict[str, str]:
-    """Return Bearer auth headers for CLI-to-API control calls."""
-    reset_env_config()  # ensure fresh read of auth credentials
-    key = get_env_config().api.api_auth_key.strip()
-    return {"Authorization": f"Bearer {key}"} if key else {}
-
-
 def _live_api_call(
     method: str, path: str, *, body: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
@@ -3174,12 +3167,11 @@ def _live_api_call(
     import httpx
 
     url = f"{_live_api_base()}{path}"
-    headers = _api_auth_headers()
     try:
         if method.upper() == "GET":
-            response = httpx.get(url, headers=headers, timeout=30.0)
+            response = httpx.get(url, timeout=30.0)
         else:
-            response = httpx.post(url, json=body or {}, headers=headers, timeout=30.0)
+            response = httpx.post(url, json=body or {}, timeout=30.0)
         response.raise_for_status()
         return response.json()
     except Exception as exc:  # noqa: BLE001 — surface a clean error to the user
@@ -3191,12 +3183,11 @@ def _channels_api_call(method: str, path: str, *, body: Optional[Dict[str, Any]]
     import httpx
 
     url = f"{_live_api_base()}{path}"
-    headers = _api_auth_headers()
     try:
         if method.upper() == "GET":
-            response = httpx.get(url, headers=headers, timeout=10.0)
+            response = httpx.get(url, timeout=10.0)
         else:
-            response = httpx.post(url, json=body or {}, headers=headers, timeout=10.0)
+            response = httpx.post(url, json=body or {}, timeout=10.0)
         response.raise_for_status()
         return response.json()
     except Exception as exc:  # noqa: BLE001 - CLI should explain offline API cleanly
@@ -3245,7 +3236,7 @@ def _print_channels_status(payload: Dict[str, Any]) -> None:
     console.print(table)
     if payload.get("status") == "error":
         console.print(f"[yellow]API unavailable:[/yellow] {payload.get('error')}")
-        console.print("[dim]Start the backend with `vibe-trading serve --port 8000`, or inspect local config with this status output.[/dim]")
+        console.print("[dim]Start the backend with `vibe-crypto serve --port 8000`, or inspect local config with this status output.[/dim]")
 
 
 def cmd_channels_status(*, json_mode: bool = False, local: bool = False) -> int:
@@ -3272,7 +3263,7 @@ def cmd_channels_start(*, json_mode: bool = False) -> int:
     elif failed:
         console.print(f"[red]Failed to start IM channels:[/red] {payload.get('error')}")
         console.print(
-            "[dim]Run `vibe-trading serve --port 8000` first, or set VIBE_TRADING_API_URL.[/dim]"
+            "[dim]Run `vibe-crypto serve --port 8000` first, or set VIBE_TRADING_API_URL.[/dim]"
         )
     else:
         console.print("[green]IM channels started.[/green]")
@@ -3289,7 +3280,7 @@ def cmd_channels_stop(*, json_mode: bool = False) -> int:
     elif failed:
         console.print(f"[red]Failed to stop IM channels:[/red] {payload.get('error')}")
         console.print(
-            "[dim]Run `vibe-trading serve --port 8000` first, or set VIBE_TRADING_API_URL.[/dim]"
+            "[dim]Run `vibe-crypto serve --port 8000` first, or set VIBE_TRADING_API_URL.[/dim]"
         )
     else:
         console.print("[green]IM channels stopped.[/green]")
@@ -3317,7 +3308,7 @@ def cmd_channels_login(channel_name: str, *, force: bool = False) -> int:
     section = dict(config.get(channel_name, {})) if isinstance(config.get(channel_name), dict) else {}
     if channel_name == "websocket":
         console.print("[green]WebSocket channel does not require interactive login.[/green]")
-        console.print("[dim]Configure channels.websocket in ~/.vibe-trading/agent.json, then run `vibe-trading channels start`.[/dim]")
+        console.print("[dim]Configure channels.websocket in ~/.vibe-trading/agent.json, then run `vibe-crypto channels start`.[/dim]")
         return EXIT_SUCCESS
     if not section:
         console.print(f"[red]No config found for channel '{channel_name}'.[/red]")
@@ -3353,7 +3344,7 @@ def _dispatch_channels(args: argparse.Namespace) -> int:
         return cmd_channels_pairing(args.channel, text or "list")
     if command == "login":
         return cmd_channels_login(args.channel_name, force=args.force)
-    console.print("[red]channels requires a subcommand.[/red] Try: vibe-trading channels status")
+    console.print("[red]channels requires a subcommand.[/red] Try: vibe-crypto channels status")
     return EXIT_USAGE_ERROR
 def _dispatch_data(args: argparse.Namespace) -> int:
     """Show the optional data partner and the features selected for this process."""
@@ -3520,7 +3511,7 @@ def cmd_live_authorize(broker: str) -> int:
     )
     console.print(
         "[dim]The channel is read-only until you commit a mandate and enable "
-        "order tools. Use `vibe-trading connector status` to check state.[/dim]"
+        "order tools. Use `vibe-crypto connector status` to check state.[/dim]"
     )
     return EXIT_SUCCESS
 
@@ -3737,7 +3728,7 @@ def cmd_live_halt(broker: Optional[str] = None) -> int:
 
     With no broker, trips the global switch (halts all brokers); with a broker,
     trips only that broker's sentinel. The gate rejects all order attempts until
-    the switch is cleared with ``vibe-trading connector resume``.
+    the switch is cleared with ``vibe-crypto connector resume``.
 
     Args:
         broker: Broker key, or ``None`` for the global switch.
@@ -3752,7 +3743,7 @@ def cmd_live_halt(broker: Optional[str] = None) -> int:
     scope = target or "ALL brokers"
     console.print(f"[bold red]Live trading halted[/bold red] for {scope}.")
     console.print(f"[dim]Sentinel: {path}[/dim]")
-    console.print("[dim]Run `vibe-trading connector resume` to re-enable.[/dim]")
+    console.print("[dim]Run `vibe-crypto connector resume` to re-enable.[/dim]")
     return EXIT_SUCCESS
 
 
@@ -3869,13 +3860,13 @@ def cmd_live_start(broker: Optional[str] = None) -> int:
     if result.get("status") == "error":
         console.print(f"[red]Could not start the live runner:[/red] {result.get('error')}")
         console.print(
-            "[dim]Is the API server running? Start it with `vibe-trading serve`.[/dim]"
+            "[dim]Is the API server running? Start it with `vibe-crypto serve`.[/dim]"
         )
         return EXIT_RUN_FAILED
 
     runner_id = result.get("runner_id") or _runner_id_for(key)
     console.print(f"[green]Live runner started[/green] for {key} [dim]({runner_id})[/dim].")
-    console.print("[dim]Check it with `vibe-trading connector status`.[/dim]")
+    console.print("[dim]Check it with `vibe-crypto connector status`.[/dim]")
     return EXIT_SUCCESS
 
 
@@ -3897,7 +3888,7 @@ def cmd_live_stop(broker: Optional[str] = None) -> int:
     if result.get("status") == "error":
         console.print(f"[red]Could not stop the live runner:[/red] {result.get('error')}")
         console.print(
-            "[dim]Is the API server running? Start it with `vibe-trading serve`.[/dim]"
+            "[dim]Is the API server running? Start it with `vibe-crypto serve`.[/dim]"
         )
         return EXIT_RUN_FAILED
 
@@ -3932,7 +3923,7 @@ def cmd_live_run(broker: Optional[str] = None) -> int:
     if result.get("status") == "error":
         console.print(f"[red]Could not start the live runner:[/red] {result.get('error')}")
         console.print(
-            "[dim]Is the API server running? Start it with `vibe-trading serve`.[/dim]"
+            "[dim]Is the API server running? Start it with `vibe-crypto serve`.[/dim]"
         )
         return EXIT_RUN_FAILED
 
@@ -4019,7 +4010,7 @@ def cmd_connector_list() -> int:
             ", ".join(profile.capabilities),
         )
     console.print(table)
-    console.print("[dim]Use `vibe-trading connector use <profile>` to set the default profile.[/dim]")
+    console.print("[dim]Use `vibe-crypto connector use <profile>` to set the default profile.[/dim]")
     return EXIT_SUCCESS
 
 
@@ -4185,7 +4176,7 @@ def cmd_portfolio_show(service: Any | None = None, snapshot_id: str | None = Non
             return EXIT_RUN_FAILED
         console.print(
             "[dim]No portfolio snapshot yet. Select sources on the Web UI Portfolio page "
-            "(or `vibe-trading portfolio sources`), then run `vibe-trading portfolio refresh`.[/dim]"
+            "(or `vibe-crypto portfolio sources`), then run `vibe-crypto portfolio refresh`.[/dim]"
         )
         return EXIT_SUCCESS
     _print_portfolio_snapshot(snapshot)
@@ -4255,7 +4246,7 @@ def cmd_portfolio_sources(service: Any | None = None) -> int:
 
 
 def _dispatch_portfolio(args: argparse.Namespace) -> int:
-    """Route ``vibe-trading portfolio <subcommand>``; bare ``portfolio`` shows.
+    """Route ``vibe-crypto portfolio <subcommand>``; bare ``portfolio`` shows.
 
     Args:
         args: Parsed CLI arguments.
@@ -4368,7 +4359,7 @@ def cmd_connector_configure(
     )
     path = save_config(cfg)
     console.print(f"[green]Configured[/green] {profile.id} [dim]({path})[/dim]")
-    console.print(f"[dim]Run `vibe-trading connector check {profile.id}` to verify it.[/dim]")
+    console.print(f"[dim]Run `vibe-crypto connector check {profile.id}` to verify it.[/dim]")
     return EXIT_SUCCESS
 
 
@@ -4544,7 +4535,7 @@ def cmd_connector_setup(
         if needs_account and not connection.account_ref:
             console.print(
                 f"[yellow]Select the account this connection reads:[/yellow] "
-                f"vibe-trading connector select-account {connection.id}"
+                f"vibe-crypto connector select-account {connection.id}"
             )
         return EXIT_SUCCESS
     try:
@@ -5445,7 +5436,7 @@ def _dispatch_connector(args: argparse.Namespace) -> int:
         return cmd_connector_resume(args.profile)
     if sub == "revoke":
         return cmd_connector_revoke(args.profile)
-    console.print("[red]connector requires a subcommand.[/red] Try: vibe-trading connector list")
+    console.print("[red]connector requires a subcommand.[/red] Try: vibe-crypto connector list")
     return EXIT_USAGE_ERROR
 
 
@@ -5466,8 +5457,8 @@ def _positive_int(value: str) -> int:
 
 def _build_parser() -> argparse.ArgumentParser:
     """Build the CLI parser with subcommands and compatibility flags."""
-    parser = argparse.ArgumentParser(description="Vibe-Trading CLI")
-    parser.add_argument("--version", action="version", version=f"vibe-trading {_VERSION}")
+    parser = argparse.ArgumentParser(description="Vibe Crypto CLI")
+    parser.add_argument("--version", action="version", version=f"vibe-crypto {_VERSION}")
     parser.add_argument("-p", "--prompt", type=str, help="Prompt text")
     parser.add_argument("-f", "--prompt-file", type=Path, help="Read prompt text from a file")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output")
@@ -5523,6 +5514,12 @@ def _build_parser() -> argparse.ArgumentParser:
     data_parser = subparsers.add_parser("data", help="Show research data partner settings")
     data_subparsers = data_parser.add_subparsers(dest="data_command", required=True)
     data_subparsers.add_parser("status", help="Show selected Gildata features")
+    mcp_parser = subparsers.add_parser("mcp", help="Connect the MCP server to Claude Code")
+    mcp_subparsers = mcp_parser.add_subparsers(dest="mcp_command", required=True)
+    mcp_subparsers.add_parser("config", help="Print an mcpServers JSON config for claude --mcp-config")
+    mcp_install = mcp_subparsers.add_parser("install", help="Run claude mcp add for this install")
+    mcp_install.add_argument("--scope", choices=["local", "user", "project"], default="user")
+    mcp_install.add_argument("--dry-run", action="store_true", help="Print the command without running it")
     channels_parser = subparsers.add_parser("channels", help="Manage IM channel adapters")
     channels_subparsers = channels_parser.add_subparsers(dest="channels_command")
     channels_status = channels_subparsers.add_parser("status", help="Show IM channel status")
@@ -5556,7 +5553,7 @@ def _build_parser() -> argparse.ArgumentParser:
     chat_parser.add_argument("--max-iter", dest="chat_max_iter", type=int, default=50, help="Maximum agent iterations")
 
     subparsers.add_parser(
-        "update", help="Check for and install the latest vibe-trading-ai release from PyPI"
+        "update", help="Check for and install the latest vibe-crypto release from PyPI"
     )
 
     subparsers.add_parser("init", help="Interactive setup: create ~/.vibe-trading/.env")
@@ -6158,7 +6155,7 @@ def cmd_memory_show(name: str, *, memory_dir: Optional[Path] = None) -> int:
     entry = pm.find(name)
     if entry is None:
         console.print(f"[red]Memory not found:[/red] {rich_escape(name)}")
-        console.print("[dim]Run `vibe-trading memory list` to see available titles.[/dim]")
+        console.print("[dim]Run `vibe-crypto memory list` to see available titles.[/dim]")
         return EXIT_USAGE_ERROR
 
     style = _MEMORY_TYPE_STYLES.get(entry.memory_type, "white")
@@ -6235,7 +6232,7 @@ def cmd_memory_forget(name: str, *, yes: bool = False, memory_dir: Optional[Path
 
 def cmd_init() -> int:
     """Interactive setup: create ~/.vibe-trading/.env."""
-    console.print(Panel("[bold cyan]Vibe-Trading setup[/bold cyan]\n[dim]Configure the default LLM provider and data tokens.[/dim]", border_style="cyan"))
+    console.print(Panel("[bold cyan]Vibe Crypto setup[/bold cyan]\n[dim]Configure the default LLM provider and data tokens.[/dim]", border_style="cyan"))
 
     if _INIT_ENV_PATH.exists():
         console.print(f"[yellow]Config already exists:[/yellow] {_INIT_ENV_PATH}")
@@ -6293,7 +6290,7 @@ def cmd_init() -> int:
             )
     elif provider == "openai-codex":
         console.print("[dim]OpenAI Codex uses ChatGPT OAuth, not an API key.[/dim]")
-        console.print("[dim]After setup, run: vibe-trading provider login openai-codex[/dim]")
+        console.print("[dim]After setup, run: vibe-crypto provider login openai-codex[/dim]")
     else:
         console.print("[dim]Ollama does not require an API key.[/dim]")
 
@@ -6328,9 +6325,9 @@ def cmd_init() -> int:
     next_steps.add_column(width=10, style="dim")
     next_steps.add_column(ratio=1)
     next_steps.add_row("Config", f"[cyan]{_INIT_ENV_PATH}[/cyan]")
-    next_steps.add_row("Run", "[bold]vibe-trading[/bold]")
+    next_steps.add_row("Run", "[bold]vibe-crypto[/bold]")
     if provider == "openai-codex":
-        next_steps.add_row("OAuth", "[bold]vibe-trading provider login openai-codex[/bold]")
+        next_steps.add_row("OAuth", "[bold]vibe-crypto provider login openai-codex[/bold]")
     console.print(Panel(next_steps, title="Setup complete", border_style="green", padding=(0, 1)))
     return 0
 
@@ -6440,7 +6437,7 @@ def cmd_setup(frontend_dir: Path) -> int:
     """
     console.print(
         Panel(
-            f"[bold cyan]Vibe-Trading frontend setup[/bold cyan]\n"
+            f"[bold cyan]Vibe Crypto frontend setup[/bold cyan]\n"
             f"[dim]{frontend_dir}[/dim]",
             border_style="cyan",
             padding=(0, 1),
@@ -6484,7 +6481,7 @@ def cmd_setup(frontend_dir: Path) -> int:
         Panel(
             "[green]Frontend built.[/green]\n"
             f"  Artifacts: [cyan]{frontend_dir / 'dist'}[/cyan]\n"
-            "[dim]Run [bold]vibe-trading serve[/bold] to serve everything on one port.[/dim]",
+            "[dim]Run [bold]vibe-crypto serve[/bold] to serve everything on one port.[/dim]",
             border_style="green",
             padding=(0, 1),
         )
@@ -6526,7 +6523,7 @@ def cmd_dev(
     # exist (or is missing the Vite package), npm's bare-script
     # resolution will print a confusing "vite is not a command" error
     # and exit. Detect this case up front and point the user at
-    # ``vibe-trading setup`` instead.
+    # ``vibe-crypto setup`` instead.
     vite_bin = frontend_dir / "node_modules" / ".bin" / ("vite.cmd" if _is_windows() else "vite")
     if not vite_bin.exists():
         console.print(
@@ -6534,10 +6531,10 @@ def cmd_dev(
                 f"[red]Frontend dependencies not installed.[/red]\n"
                 f"  Missing: [dim]{frontend_dir / 'node_modules'}[/dim]\n\n"
                 "Run this first:\n"
-                "  [cyan]vibe-trading setup[/cyan]\n\n"
+                "  [cyan]vibe-crypto setup[/cyan]\n\n"
                 "[dim]Or, to start the dev mode anyway and install on the fly,\n"
-                "run [bold]vibe-trading setup[/bold] in another terminal.[/dim]",
-                title="vibe-trading dev",
+                "run [bold]vibe-crypto setup[/bold] in another terminal.[/dim]",
+                title="vibe-crypto dev",
                 border_style="red",
                 padding=(0, 1),
             )
@@ -6563,7 +6560,7 @@ def cmd_dev(
 
     console.print(
         Panel(
-            f"[bold cyan]Vibe-Trading dev[/bold cyan]\n"
+            f"[bold cyan]Vibe Crypto dev[/bold cyan]\n"
             f"  Backend  → [cyan]http://127.0.0.1:{backend_port}[/cyan]  "
             f"(cwd: {AGENT_DIR})\n"
             f"  Frontend → [cyan]http://localhost:{frontend_port}[/cyan]  "
@@ -6682,8 +6679,14 @@ def main(argv: list[str] | None = None) -> int:
         if args.provider_command == "custom":
             from cli.custom_providers import run as run_custom_providers
             return run_custom_providers(args)
-        console.print("[red]provider requires a subcommand.[/red] Try: vibe-trading provider doctor")
+        console.print("[red]provider requires a subcommand.[/red] Try: vibe-crypto provider doctor")
         return EXIT_USAGE_ERROR
+    if args.command == "mcp":
+        from cli.commands import mcp_setup
+
+        if args.mcp_command == "config":
+            return mcp_setup.print_config()
+        return mcp_setup.run_install(args.scope, args.dry_run)
     if args.command == "channels":
         return _coerce_exit_code(_dispatch_channels(args))
     if args.command == "data":
@@ -6740,7 +6743,7 @@ def main(argv: list[str] | None = None) -> int:
             return _coerce_exit_code(cmd_memory_search(args.query, args.memory_limit))
         if args.memory_command == "forget":
             return _coerce_exit_code(cmd_memory_forget(args.name, yes=args.yes))
-        console.print("[red]memory requires a subcommand.[/red] Try: vibe-trading memory list")
+        console.print("[red]memory requires a subcommand.[/red] Try: vibe-crypto memory list")
         return EXIT_USAGE_ERROR
 
     if args.list:

@@ -5,10 +5,10 @@
 Open **Portfolio → Manage accounts → Import extraETF Investments**, choose the official Investments CSV, confirm the number of holdings in extraETF, and choose the maximum file age you accept. Add the imported source, save, and refresh. Transactions, dividends and X-Ray exports are not holdings and are refused. Imports are local file evidence, separate from broker connections; no extraETF login or browser scraping is used.
 
 ```bash
-vibe-trading portfolio import-extraetf ~/Downloads/Investments.csv \
+vibe-crypto portfolio import-extraetf ~/Downloads/Investments.csv \
   --label "extraETF export" --expected-positions 27 --max-age-days 7 --select
-vibe-trading portfolio refresh
-vibe-trading portfolio show
+vibe-crypto portfolio refresh
+vibe-crypto portfolio show
 ```
 
 The row count and age above are examples to replace with your own. The entire import fails on an unreadable row, count mismatch, missing price, future file time or expired freshness policy. File mtime is labelled as file mtime, never as a price observation; copying a file can change it. `Portfolio ID` keeps accounts separate even when they hold the same ISIN. Imported totals are quantity × exported price and **exclude cash and other assets absent from the export**. Select disjoint sources: an extraETF view can include accounts already selected through broker connections.
@@ -19,7 +19,7 @@ USD, CNY, HKD and EUR display values use [Frankfurter reference rates](https://f
 
 ```bash
 # targets.json maps the snapshot's holdings canonical_id (or CASH) to fractions.
-vibe-trading portfolio rebalance --snapshot-id <snapshot-id> --targets targets.json
+vibe-crypto portfolio rebalance --snapshot-id <snapshot-id> --targets targets.json
 ```
 
 ### Portfolio connector compatibility
@@ -32,7 +32,7 @@ vibe-trading portfolio rebalance --snapshot-id <snapshot-id> --targets targets.j
 
 Every position row must provide a symbol and quantity. Portfolio can display totals in USD, HKD, CNY or EUR when the required FX rate is available. An unsupported position currency fails the source. IBKR, Longbridge and Binance have native adapters. Alpaca and OKX have common-contract coverage. OKX includes spot balances alongside open positions.
 
-For Robinhood, pick an account from the broker's list with `vibe-trading connector select-account <id>` or the connection center. Each eligible equity position uses the more recent regular-hours or extended-hours trade and shows its quote time. An unusable quote leaves the row unpriced. Accounts with non-zero or unreported options, crypto, futures, event-contract, mutual-fund or fixed-income values fail the source because an equity-only view would be incomplete.
+For Robinhood, pick an account from the broker's list with `vibe-crypto connector select-account <id>` or the connection center. Each eligible equity position uses the more recent regular-hours or extended-hours trade and shows its quote time. An unusable quote leaves the row unpriced. Accounts with non-zero or unreported options, crypto, futures, event-contract, mutual-fund or fixed-income values fail the source because an equity-only view would be incomplete.
 
 ### AI-friendly connector onboarding
 
@@ -41,7 +41,7 @@ Built-in SDK connectors publish one machine-readable onboarding contract: authen
 For a terminal-first setup, let the CLI collect secrets locally instead of putting them in a prompt or shell arguments:
 
 ```bash
-vibe-trading connector setup okx-live-sdk-readonly \
+vibe-crypto connector setup okx-live-sdk-readonly \
   --connection-id main-okx \
   --label "Main OKX"
 ```
@@ -53,7 +53,7 @@ card, then click **Test** to save the address and check it. The CLI equivalent
 uses the same saved endpoint:
 
 ```bash
-vibe-trading connector setup ibkr-paper-local --connection-id my-gateway --host 127.0.0.1 --port 4002 --skip-check
+vibe-crypto connector setup ibkr-paper-local --connection-id my-gateway --host 127.0.0.1 --port 4002 --skip-check
 ```
 
 The address is scoped to that connection and is also used by agent reads with
@@ -142,19 +142,19 @@ use a broker sandbox or local simulation. See each profile's notes and the
 Read-only connectors you install yourself stay outside the checkout, in `~/.vibe-trading/connectors/<name>/`: a `connector.json` manifest plus an `adapter.py` implementing `check_status` / `get_account_snapshot` / `get_positions`. A manifest declaring any write capability is rejected.
 
 ```bash
-vibe-trading connector init my-broker --destination /tmp
-vibe-trading connector validate /tmp/my-broker
-vibe-trading connector install /tmp/my-broker
+vibe-crypto connector init my-broker --destination /tmp
+vibe-crypto connector validate /tmp/my-broker
+vibe-crypto connector install /tmp/my-broker
 ```
 
-Their credentials go to the OS keyring (macOS Keychain, Windows Credential Manager, Linux Secret Service) with `pip install "vibe-trading-ai[keyring]"`, never into the config files. Nothing on this path can place or cancel an order.
+Their credentials go to the OS keyring (macOS Keychain, Windows Credential Manager, Linux Secret Service) with `pip install "vibe-crypto[keyring]"`, never into the config files. Nothing on this path can place or cancel an order.
 
 ### MetaTrader 5 (Exness and other MT5 brokers)
 
 Connects to a **locally running MT5 terminal** through the official `MetaTrader5` package (**Windows only**):
 
 ```bash
-pip install "vibe-trading-ai[mt5]"
+pip install "vibe-crypto[mt5]"
 ```
 
 Configure `~/.vibe-trading/mt5.json` (create it yourself; `chmod 600` where supported):
@@ -184,11 +184,11 @@ or substitutes a web-search result. Backtest sandboxes receive only a validated
 Then:
 
 ```bash
-vibe-trading connector use mt5-paper-sdk
-vibe-trading connector check
-vibe-trading connector account
-vibe-trading connector quote EURUSD
-vibe-trading connector history EURUSD
+vibe-crypto connector use mt5-paper-sdk
+vibe-crypto connector check
+vibe-crypto connector account
+vibe-crypto connector quote EURUSD
+vibe-crypto connector history EURUSD
 ```
 
 | Profile | Account | Orders |
@@ -223,11 +223,11 @@ Alternatively set `ETORO_API_KEY` and `ETORO_USER_KEY` in `~/.vibe-trading/.env`
 Then:
 
 ```bash
-vibe-trading connector use etoro-paper-sdk
-vibe-trading connector check
-vibe-trading connector account
-vibe-trading connector positions
-vibe-trading connector quote BTC
+vibe-crypto connector use etoro-paper-sdk
+vibe-crypto connector check
+vibe-crypto connector account
+vibe-crypto connector positions
+vibe-crypto connector quote BTC
 ```
 
 | Profile | Account | Orders |
@@ -250,21 +250,21 @@ Trading only connects to `127.0.0.1` and exposes it as a connector profile.
 Install the optional SDK:
 
 ```bash
-pip install "vibe-trading-ai[ibkr]"
+pip install "vibe-crypto[ibkr]"
 ```
 
 Open TWS paper trading or IB Gateway paper, enable API socket clients, then run:
 
 ```bash
-vibe-trading connector list
-vibe-trading connector use ibkr-paper-local
-vibe-trading connector configure ibkr-paper-local --yes
-vibe-trading connector check
-vibe-trading connector account
-vibe-trading connector positions
-vibe-trading connector orders
-vibe-trading connector quote AAPL
-vibe-trading connector history AAPL --duration "30 D" --bar-size "1 day"
+vibe-crypto connector list
+vibe-crypto connector use ibkr-paper-local
+vibe-crypto connector configure ibkr-paper-local --yes
+vibe-crypto connector check
+vibe-crypto connector account
+vibe-crypto connector positions
+vibe-crypto connector orders
+vibe-crypto connector quote AAPL
+vibe-crypto connector history AAPL --duration "30 D" --bar-size "1 day"
 ```
 
 Default local ports:
@@ -293,8 +293,8 @@ Configure cadence, a once-daily wall-clock time/timezone, and daily budgets in
 Stop the runner before editing. The CLI uses the same authenticated API:
 
 ```bash
-vibe-trading connector runner-settings --profile robinhood-live-mcp
-vibe-trading connector runner-settings --profile robinhood-live-mcp --file runner-settings.json
+vibe-crypto connector runner-settings --profile robinhood-live-mcp
+vibe-crypto connector runner-settings --profile robinhood-live-mcp --file runner-settings.json
 ```
 
 The JSON accepts `interval_seconds`, optional `daily_at` (`HH:MM`) and `timezone`

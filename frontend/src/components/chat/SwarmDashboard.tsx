@@ -49,13 +49,13 @@ function formatElapsed(
 function statusTone(status: SwarmAgentDisplayStatus): string {
   switch (status) {
     case "done":
-      return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
+      return "bg-success/10 text-success";
     case "failed":
       return "bg-destructive/10 text-destructive";
     case "blocked":
-      return "bg-amber-500/10 text-amber-600 dark:text-amber-400";
+      return "bg-warning/10 text-warning";
     case "retry":
-      return "bg-sky-500/10 text-sky-600 dark:text-sky-400";
+      return "bg-info/10 text-info";
     case "running":
       return "bg-primary/10 text-primary";
     case "cancelled":
@@ -74,22 +74,22 @@ function StatusIcon({
 }) {
   switch (status) {
     case "done":
-      return <CheckCircle2 className="h-3 w-3" />;
+      return <CheckCircle2 className="h-4 w-4" />;
     case "failed":
-      return <XCircle className="h-3 w-3" />;
+      return <XCircle className="h-4 w-4" />;
     case "blocked":
-      return <ShieldAlert className="h-3 w-3" />;
+      return <ShieldAlert className="h-4 w-4" />;
     case "retry":
-      return <RotateCcw className="h-3 w-3" />;
+      return <RotateCcw className="h-4 w-4" />;
     case "running":
       return (
-        <Loader2 className={animate ? "h-3 w-3 animate-spin" : "h-3 w-3"} />
+        <Loader2 className={animate ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
       );
     case "cancelled":
-      return <XCircle className="h-3 w-3" />;
+      return <XCircle className="h-4 w-4" />;
     case "waiting":
     default:
-      return <Circle className="h-3 w-3" />;
+      return <Circle className="h-4 w-4" />;
   }
 }
 
@@ -105,7 +105,7 @@ function StatusPill({
   return (
     <span
       className={[
-        "inline-flex max-w-full min-w-0 items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium capitalize",
+        "inline-flex max-w-full min-w-0 items-center gap-1 rounded-sm px-1.5 py-0.5 text-xs font-medium capitalize",
         "transition-colors duration-300",
         statusTone(agentStatus),
       ].join(" ")}
@@ -131,7 +131,7 @@ function agentTokenText(agent: SwarmAgentStatus): string | null {
     ? abbreviateNum(agent.output_tokens)
     : null;
   if (!input && !output) return null;
-  return `↑${input ?? "—"} ↓${output ?? "—"}`;
+  return `↑${input ?? "-"} ↓${output ?? "-"}`;
 }
 
 function AgentTokens({
@@ -177,7 +177,7 @@ function WideAgentRow({
           {agent.agentId}
         </div>
         {agent.role && (
-          <div className="truncate text-[10px] text-muted-foreground">
+          <div className="truncate text-xs text-muted-foreground">
             {agent.role}
           </div>
         )}
@@ -190,20 +190,20 @@ function WideAgentRow({
         />
       </div>
       <div
-        className="truncate font-mono text-[11px] text-muted-foreground"
+        className="truncate font-mono text-xs text-muted-foreground"
         role="cell"
         title={agent.tool || ""}
       >
         {agent.tool ? localizeToolName(agent.tool, agent.tool) : "-"}
       </div>
       <div
-        className="min-w-0 text-end font-mono text-[11px] text-muted-foreground"
+        className="min-w-0 text-end font-mono text-xs text-muted-foreground"
         role="cell"
       >
         <div className="truncate">{formatElapsed(agent.elapsed_s, t)}</div>
         {agent.iterations != null && (
           <div
-            className="inline-flex items-center justify-end gap-1 text-[10px]"
+            className="inline-flex items-center justify-end gap-1 text-xs"
             title={t("swarmStatus.iters")}
           >
             <RotateCcw className="h-2.5 w-2.5" aria-hidden="true" />
@@ -212,13 +212,13 @@ function WideAgentRow({
         )}
         <AgentTokens
           agent={agent}
-          className="truncate text-[10px]"
+          className="truncate text-xs"
           t={t}
         />
       </div>
       <div
         className={[
-          "min-w-0 truncate text-[11px]",
+          "min-w-0 truncate text-xs",
           agent.error ? "text-destructive" : "text-muted-foreground",
         ].join(" ")}
         role="cell"
@@ -252,7 +252,7 @@ function NarrowAgentCard({
             {agent.agentId}
           </div>
           {agent.role && (
-            <div className="truncate text-[10px] text-muted-foreground">
+            <div className="truncate text-xs text-muted-foreground">
               {agent.role}
             </div>
           )}
@@ -263,7 +263,7 @@ function NarrowAgentCard({
           t={t}
         />
       </div>
-      <div className="mt-2 flex min-w-0 items-center justify-between gap-3 font-mono text-[10px] text-muted-foreground">
+      <div className="mt-2 flex min-w-0 items-center justify-between gap-3 font-mono text-xs text-muted-foreground">
         <span className="min-w-0 truncate" title={agent.tool || ""}>
           <span className="sr-only">{t("swarmStatus.tool")}</span>
           {agent.tool ? localizeToolName(agent.tool, agent.tool) : "-"}
@@ -299,7 +299,7 @@ export const SwarmDashboard = memo(function SwarmDashboard({
           ) : (
             <>
               {emptyStatus || localizeStatus("unknown", t)}
-              {" — "}
+              {" - "}
               {t("swarmStatus.detailsUnavailable")}
             </>
           )}
@@ -313,7 +313,7 @@ export const SwarmDashboard = memo(function SwarmDashboard({
           >
             <div
               className={[
-                "grid min-w-0 gap-2 border-b px-2 pb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground",
+                "grid min-w-0 gap-2 border-b px-2 pb-1 text-xs font-semibold text-muted-foreground",
                 WIDE_GRID_COLUMNS,
               ].join(" ")}
               role="row"

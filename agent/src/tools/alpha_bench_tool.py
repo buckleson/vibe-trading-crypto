@@ -17,7 +17,7 @@ Cache integrity note: the universe panel cache lives in ``~/.vibe-trading/cache/
 as pickle blobs. Each pickle is paired with a ``<name>.sha256`` sidecar holding a
 **keyed HMAC-SHA256 tag** (not a bare digest) computed over the blob. On load we
 recompute the tag with the same key and refuse the cache on mismatch before the
-``pickle.loads`` call. The key is ``API_AUTH_KEY`` when configured, else a
+``pickle.loads`` call. The key is a
 machine-local random 32-byte secret persisted at ``cache/.hmac_key`` (mode 0600).
 Because the tag is keyed, a local attacker who rewrites the pickle cannot forge a
 matching sidecar without the secret — so this is an authenticity guard against
@@ -178,15 +178,10 @@ def _sha256_path(cache_path: Path) -> Path:
 def _cache_hmac_key(cache_dir: Path) -> bytes:
     """Return the secret backing the cache sidecar HMAC.
 
-    Priority: ``API_AUTH_KEY`` (UTF-8) when configured, else a persisted
-    machine-local 32-byte random key. The fallback is required because an empty
+    A persisted machine-local 32-byte random key. An empty
     HMAC key would let any local attacker forge a matching sidecar for a
     malicious pickle — defeating the whole point of the tag.
     """
-    configured = get_env_config().api.api_auth_key.strip()
-    if configured:
-        return configured.encode("utf-8")
-
     key_path = cache_dir / ".hmac_key"
     try:
         return bytes.fromhex(key_path.read_text(encoding="utf-8").strip())
@@ -589,8 +584,8 @@ def _fetch_sp500_constituents() -> tuple[list[str], dict[str, str]]:
             url,
             headers={
                 "User-Agent": (
-                    "Vibe-Trading/0.1 (research bench; "
-                    "https://github.com/HKUDS/Vibe-Trading)"
+                    "VibeCrypto/0.1 (research bench; "
+                    "https://github.com/buckleson/vibe-trading-crypto)"
                 )
             },
             timeout=20,

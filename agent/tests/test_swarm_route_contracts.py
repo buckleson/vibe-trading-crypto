@@ -18,8 +18,6 @@ from src.swarm.store import SwarmStore
 def swarm_store(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> SwarmStore:
     """Route the process-wide swarm endpoint at an isolated on-disk store."""
     store = SwarmStore(base_dir=tmp_path / "runs")
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
-    monkeypatch.setattr(api_server, "_API_KEY", "")
     monkeypatch.setattr(swarm_routes, "_swarm_runtime", SimpleNamespace(_store=store))
     return store
 

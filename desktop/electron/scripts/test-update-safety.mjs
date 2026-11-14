@@ -32,7 +32,7 @@ const policy = {
 const validSignature = () => ({
   status: "Valid",
   artifactSha256: fixtureHash,
-  signerSubject: "CN=Vibe-Trading Test Publisher",
+  signerSubject: "CN=Vibe Crypto Test Publisher",
   certificateSha256: publisher,
 });
 
@@ -220,7 +220,6 @@ const retainedManager = new BackendManager({
   resourcesPath: testRoot,
   allowSourceDiscovery: false,
   logDirectory: testRoot,
-  apiAuthKey: "test-auth-key",
   messages: getDesktopMessages("en"),
   shutdownEvidenceTimeoutMilliseconds: 25,
   onStatus: () => {},

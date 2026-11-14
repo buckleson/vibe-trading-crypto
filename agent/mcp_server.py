@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Vibe-Trading MCP Server — expose finance research tools to any MCP client.
+"""Vibe Crypto MCP Server — expose finance research tools to any MCP client.
 
 Works with OpenClaw, Claude Desktop, Cursor, and any MCP-compatible client.
 Zero API key required for HK/US/crypto research markets (yfinance, OKX,
@@ -38,13 +38,13 @@ at ``http://<host>:<port>/mcp`` (NOT ``/sse``, which is a legacy-SSE artifact).
 
 OpenClaw config (~/.openclaw/config.yaml):
     skills:
-      - name: vibe-trading
+      - name: vibe-crypto
         command: python /path/to/agent/mcp_server.py
 
 Claude Desktop config:
     {
       "mcpServers": {
-        "vibe-trading": {
+        "vibe-crypto": {
           "command": "python",
           "args": ["/path/to/agent/mcp_server.py"]
         }
@@ -83,7 +83,7 @@ from src.market_data import (
 )
 from src.factors.research_contract import RESEARCH_MODES, RESEARCH_STAGES
 
-mcp = FastMCP("Vibe-Trading", version=APP_VERSION)
+mcp = FastMCP("Vibe Crypto", version=APP_VERSION)
 
 logger = logging.getLogger(__name__)
 
@@ -685,7 +685,7 @@ def add_goal_evidence(
         claim_id: Optional claim this evidence supports or contradicts.
         evidence_type: Evidence category, default evidence.
         tool_call_id: Source tool call id for traceability; it does not verify evidence by itself.
-        run_id: Vibe-Trading run id. It verifies evidence only when the run directory exists.
+        run_id: Vibe Crypto run id. It verifies evidence only when the run directory exists.
         source_provider: Data/provider name such as yfinance, OKX, tushare.
             Defaults to "agent_tool" when omitted.
         source_type: Source category such as market_data, document, backtest.
@@ -986,6 +986,127 @@ def paper_trade_reconcile(account_state: _lenient_dict_any, result: _lenient_dic
     return registry.execute(
         "paper_trade_reconcile", {"account_state": account_state, "result": result}
     )
+
+
+# ---------------------------------------------------------------------------
+# Forward paper runs (backtested strategies run on live data, no real orders)
+# ---------------------------------------------------------------------------
+
+_PAPER_RUN_KEYS = (
+    "id", "label", "codes", "interval", "status", "state",
+    "started_at", "last_refreshed_at", "summary",
+)
+
+
+def _paper_run_brief(doc: dict) -> dict:
+    return {k: doc.get(k) for k in _PAPER_RUN_KEYS}
+
+
+def _downsample(rows: list, limit: int) -> list:
+    """Keep at most ``limit`` rows, always including the first and the last."""
+    n = len(rows)
+    if n <= limit:
+        return rows
+    idx = sorted({round(i * (n - 1) / (limit - 1)) for i in range(limit)})
+    return [rows[i] for i in idx]
+
+
+@mcp.tool
+def paper_run_list() -> str:
+    """List forward paper runs: backtested strategies running on live data without placing real orders.
+
+    Returns each run's id, label, codes, interval, status (active or stopped),
+    state (waiting, ok or error), started_at, last_refreshed_at and summary
+    (equity, pnl, total_return, max_drawdown, sharpe, trade_count). Newest first.
+    """
+    from src.paper_runs import PaperRuns
+
+    try:
+        runs = [_paper_run_brief(r) for r in PaperRuns().list()]
+    except Exception as exc:  # noqa: BLE001
+        return _json_error(str(exc), error_type="internal")
+    return _json_ok(runs=runs)
+
+
+@mcp.tool
+def paper_run_start(run_id: str, label: str = "", initial_cash: float | None = None) -> str:
+    """Start a paper run from a finished backtest run id (see list_backtest_runs). Results count only from the first bar after now.
+
+    The strategy code and settings of the backtest are reused and evaluated
+    forward on new market data. No real orders are placed.
+
+    Args:
+        run_id: Id of a finished backtest run that has config.json and code/signal_engine.py.
+        label: Optional display name (max 80 characters).
+        initial_cash: Optional starting cash; defaults to the backtest's initial cash.
+    """
+    from src.paper_runs import PaperRuns
+
+    try:
+        run = PaperRuns().create(run_id=run_id, label=label or None, initial_cash=initial_cash)
+    except ValueError as exc:
+        return _json_error(str(exc), error_type="invalid")
+    except Exception as exc:  # noqa: BLE001
+        return _json_error(str(exc), error_type="internal")
+    return _json_ok(run=run)
+
+
+@mcp.tool
+def paper_run_status(paper_run_id: str, refresh: bool = True, max_trades: int = 20) -> str:
+    """Show a paper run: run document, summary, current positions, recent trades and the equity curve.
+
+    With refresh=True (default) the strategy is recomputed on the latest data
+    first, which can take several seconds. With refresh=False the last saved
+    result is returned. State "waiting" means fewer than 2 forward bars exist yet.
+
+    Args:
+        paper_run_id: Id from paper_run_list or paper_run_start.
+        refresh: Recompute before returning (default True).
+        max_trades: Most recent trades to return, clamped to 0..200 (default 20).
+    """
+    from src.paper_runs import PaperRunNotFound, PaperRuns
+
+    try:
+        svc = PaperRuns()
+        if refresh:
+            svc.refresh(paper_run_id)
+        detail = svc.detail(paper_run_id)
+    except PaperRunNotFound:
+        return _json_error(f"Paper run not found: {paper_run_id}", error_type="not_found")
+    except ValueError as exc:
+        return _json_error(str(exc), error_type="invalid")
+    except Exception as exc:  # noqa: BLE001
+        return _json_error(str(exc), error_type="internal")
+    try:
+        limit = max(0, min(200, int(max_trades)))
+    except (TypeError, ValueError):
+        limit = 20
+    run = detail.get("run") or {}
+    return _json_ok(
+        run=run,
+        summary=run.get("summary"),
+        positions=detail.get("positions", []),
+        trades=(detail.get("trades") or [])[:limit],
+        equity=_downsample(detail.get("equity") or [], 50),
+    )
+
+
+@mcp.tool
+def paper_run_stop(paper_run_id: str) -> str:
+    """Stop a paper run. Its results are frozen at the stop date and stay readable.
+
+    Args:
+        paper_run_id: Id from paper_run_list.
+    """
+    from src.paper_runs import PaperRunNotFound, PaperRuns
+
+    try:
+        detail = PaperRuns().stop(paper_run_id)
+    except PaperRunNotFound:
+        return _json_error(f"Paper run not found: {paper_run_id}", error_type="not_found")
+    except Exception as exc:  # noqa: BLE001
+        return _json_error(str(exc), error_type="internal")
+    return _json_ok(run=detail.get("run", detail) if isinstance(detail, dict) else detail)
 
 
 # ---------------------------------------------------------------------------
@@ -3389,11 +3510,11 @@ def research_lab(action: str, request: dict | None = None) -> str:
 
 
 def main():
-    """Entry point for `vibe-trading-mcp` CLI command."""
+    """Entry point for `vibe-crypto-mcp` CLI command."""
     global _include_shell_tools, _registry
     import argparse
 
-    parser = argparse.ArgumentParser(description="Vibe-Trading MCP Server")
+    parser = argparse.ArgumentParser(description="Vibe Crypto MCP Server")
     parser.add_argument(
         "--transport",
         choices=["stdio", "sse", "http"],

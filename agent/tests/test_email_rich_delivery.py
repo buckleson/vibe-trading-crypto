@@ -130,7 +130,7 @@ def test_per_message_pdf_keeps_report_out_of_body(monkeypatch):
         if part.get_content_type() == "application/pdf"
     ]
     assert len(pdf_parts) == 1
-    assert pdf_parts[0].get_filename() == "vibe-trading-report.pdf"
+    assert pdf_parts[0].get_filename() == "vibe-crypto-report.pdf"
     pdf_data = pdf_parts[0].get_payload(decode=True)
     assert pdf_data.startswith(b"%PDF")
     assert not PdfReader(BytesIO(pdf_data)).is_encrypted

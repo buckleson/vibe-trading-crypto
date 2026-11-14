@@ -23,7 +23,7 @@ interface Props {
 }
 
 function formatUsd(value: number): string {
-  if (!Number.isFinite(value)) return "—";
+  if (!Number.isFinite(value)) return "-";
   return `$${value.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 }
 
@@ -79,32 +79,29 @@ function ProfileTile({
   return (
     <div
       className={[
-        "rounded-xl border p-3 transition-colors",
+        "rounded-lg border p-3 transition-colors",
         active
           ? "border-primary/60 bg-primary/5"
-          : "border-border/60 bg-muted/20 hover:border-primary/40",
+          : "border-border bg-card hover:border-primary/40",
       ].join(" ")}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-1.5">
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 font-mono text-[11px] font-semibold text-primary">
-            {profile.ordinal}
-          </span>
           <span className="text-sm font-semibold text-foreground">{profile.label}</span>
         </div>
         <button
           type="button"
           onClick={onAdjustToggle}
           disabled={disabled}
-          className="inline-flex items-center gap-1 rounded-lg border px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40"
+          className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-card px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50"
           title={i18n.t("mandate.adjustTitle")}
         >
-          <SlidersHorizontal className="h-3 w-3" />
+          <SlidersHorizontal className="h-4 w-4" />
           {i18n.t("mandate.adjust")}
         </button>
       </div>
 
-      <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11px]">
+      <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
         <div className="col-span-2">
           <dt className="text-muted-foreground">{i18n.t("mandate.universe")}</dt>
           <dd className="font-medium text-foreground">{formatUniverse(profile.universe)}</dd>
@@ -125,12 +122,12 @@ function ProfileTile({
         </div>
         <div>
           <dt className="text-muted-foreground">{i18n.t("mandate.instruments")}</dt>
-          <dd className="font-medium text-foreground">{profile.instruments.join(", ") || "—"}</dd>
+          <dd className="font-medium text-foreground">{profile.instruments.join(", ") || "-"}</dd>
         </div>
       </dl>
 
       {profile.notes && (
-        <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{profile.notes}</p>
+        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{profile.notes}</p>
       )}
 
       {adjusting ? (
@@ -156,18 +153,18 @@ function ProfileTile({
             <button
               type="button"
               onClick={onAdjustCancel}
-              className="inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-card px-3 text-[13px] font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
-              <X className="h-3 w-3" />
+              <X className="h-4 w-4" />
               {i18n.t("mandate.cancel")}
             </button>
             <button
               type="button"
               onClick={submit}
               disabled={!adjustText.trim()}
-              className="inline-flex items-center gap-1 rounded-lg bg-primary px-2 py-1 text-[11px] font-medium text-primary-foreground transition-opacity disabled:opacity-40"
+              className="inline-flex h-8 items-center gap-2 rounded-md bg-primary px-3 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50"
             >
-              <Check className="h-3 w-3" />
+              <Check className="h-4 w-4" />
               {i18n.t("mandate.sendAdjustment")}
             </button>
           </div>
@@ -179,7 +176,7 @@ function ProfileTile({
           disabled={disabled}
           className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
         >
-          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
           {busy ? i18n.t("mandate.committing") : i18n.t("mandate.commit", { label: profile.label })}
         </button>
       )}
@@ -191,7 +188,7 @@ function ProfileTile({
  * Renders a connector-runtime mandate proposal (SPEC Consent §1/§2).
  *
  * Each profile tile shows concrete numbers (universe, max order, daily cap, leverage,
- * instruments). Committing calls `api.commitMandate` — a privileged surface action,
+ * instruments). Committing calls `api.commitMandate` - a privileged surface action,
  * never `api.sendMessage`. "Adjust" sends a natural-language message back to the agent
  * to re-render a fresh proposal. Once committed, the card collapses to a compact badge.
  */
@@ -269,25 +266,25 @@ export const MandateProposalCard = memo(function MandateProposalCard({ proposal,
       <div className="flex gap-3">
         <AgentAvatar />
         <div className="flex-1 min-w-0">
-          <span className="inline-flex max-w-full flex-wrap items-center gap-1.5 rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-            <ShieldCheck className="h-3 w-3 shrink-0" />
+          <span className="inline-flex max-w-full flex-wrap items-center gap-1.5 rounded-lg bg-success/10 px-2.5 py-1 text-xs font-medium text-success">
+            <ShieldCheck className="h-4 w-4 shrink-0" />
             <span className="shrink-0">
               {i18n.t("mandate.mandateActive", {
                 id: committed.selected_ordinal != null ? `#${committed.selected_ordinal}` : "",
               })}
             </span>
             {maxOrder != null && (
-              <span className="shrink-0 font-mono text-[11px]">
+              <span className="shrink-0 font-mono text-xs">
                 · {translateManifestKey("mandate.maxPerOrder", { amount: formatUsd(maxOrder) })}
               </span>
             )}
             {dailyCap != null && (
-              <span className="shrink-0 font-mono text-[11px]">
+              <span className="shrink-0 font-mono text-xs">
                 · {i18n.t("mandate.tradesPerDay", { count: dailyCap })}
               </span>
             )}
             {expires && (
-              <span className="shrink-0 text-[10px] text-muted-foreground">
+              <span className="shrink-0 text-xs text-muted-foreground">
                 · {translateManifestKey("mandate.expiresOn", {
                   date: expires.toLocaleDateString(i18n.resolvedLanguage || i18n.language),
                 })}
@@ -304,10 +301,10 @@ export const MandateProposalCard = memo(function MandateProposalCard({ proposal,
   return (
     <div className="flex gap-3">
       <AgentAvatar />
-      <div className="flex-1 min-w-0 space-y-3 rounded-2xl border border-primary/20 bg-background/95 p-4 shadow-sm">
+      <div className="flex-1 min-w-0 space-y-3 rounded-lg border border-border bg-card p-4">
         <div className="flex items-start gap-2">
           {isReauth ? (
-            <ShieldAlert className="h-4 w-4 shrink-0 text-amber-500" />
+            <ShieldAlert className="h-4 w-4 shrink-0 text-warning" />
           ) : (
             <ShieldCheck className="h-4 w-4 shrink-0 text-primary" />
           )}
@@ -319,7 +316,7 @@ export const MandateProposalCard = memo(function MandateProposalCard({ proposal,
               <p className="text-xs text-muted-foreground">{proposal.intent_normalized}</p>
             )}
             {proposal.account && (
-              <p className="mt-0.5 text-[11px] text-muted-foreground">
+              <p className="mt-0.5 text-xs text-muted-foreground">
                 {translateManifestKey("mandate.accountSummary", {
                   broker: proposal.account.broker,
                   type: proposal.account.type,
@@ -356,16 +353,16 @@ export const MandateProposalCard = memo(function MandateProposalCard({ proposal,
           ))}
         </div>
 
-        <div className="grid gap-1.5 border-t border-border/60 pt-2 text-[11px] text-muted-foreground">
+        <div className="grid gap-1.5 border-t border-border/60 pt-2 text-xs text-muted-foreground">
           {proposal.funding_note && (
             <p className="flex items-start gap-1.5">
-              <Wallet className="mt-0.5 h-3 w-3 shrink-0" />
+              <Wallet className="mt-0.5 h-4 w-4 shrink-0" />
               <span>{proposal.funding_note}</span>
             </p>
           )}
           {proposal.halt_note && (
             <p className="flex items-start gap-1.5">
-              <OctagonX className="mt-0.5 h-3 w-3 shrink-0 text-destructive" />
+              <OctagonX className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
               <span>{proposal.halt_note}</span>
             </p>
           )}
@@ -393,18 +390,18 @@ export const MandateProposalCard = memo(function MandateProposalCard({ proposal,
         }}
       >
         {accountOptions.status === "loading" && (
-          <p className="mb-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-            <Loader2 className="h-3 w-3 animate-spin" />
+          <p className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
             {i18n.t("mandate.accountLoading")}
           </p>
         )}
         {accountOptions.status === "error" && (
-          <p role="alert" className="mb-2 break-words text-[11px] text-destructive">
+          <p role="alert" className="mb-2 break-words text-xs text-destructive">
             {i18n.t("mandate.accountLoadFailed", { error: accountOptions.error })}
           </p>
         )}
         {accountOptions.status === "ready" && accountOptions.required && (
-          <label className="mb-2 block text-[11px] text-muted-foreground">
+          <label className="mb-2 block text-xs text-muted-foreground">
             {i18n.t("mandate.accountLabel")}
             <select
               value={accountRef}
@@ -431,7 +428,7 @@ export const MandateProposalCard = memo(function MandateProposalCard({ proposal,
           </label>
         )}
         {pendingProfile && (
-          <dl className="grid grid-cols-2 gap-x-3 gap-y-1.5 rounded-lg border bg-muted/20 p-2.5 text-[11px]">
+          <dl className="grid grid-cols-2 gap-x-3 gap-y-1.5 rounded-lg border bg-muted/50 p-2.5 text-xs">
             <div className="col-span-2">
               <dt className="text-muted-foreground">{i18n.t("mandate.universe")}</dt>
               <dd className="font-medium text-foreground">{formatUniverse(pendingProfile.universe)}</dd>

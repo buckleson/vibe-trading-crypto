@@ -1,4 +1,4 @@
-"""CLI handlers for ``vibe-trading research-artifact``."""
+"""CLI handlers for ``vibe-crypto research-artifact``."""
 
 from __future__ import annotations
 

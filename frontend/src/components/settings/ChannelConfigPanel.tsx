@@ -112,7 +112,7 @@ const GUIDE_DEFS: Record<
     }),
   },
   email: {
-    docsUrl: "https://vibetrading.wiki/docs/",
+    docsUrl: "https://github.com/buckleson/vibe-trading-crypto#readme",
     build: (t) => ({
       title: t("settings.channels.guides.email.title"),
       intro: t("settings.channels.guides.email.intro"),
@@ -127,7 +127,7 @@ const GUIDE_DEFS: Record<
     }),
   },
   websocket: {
-    docsUrl: "https://vibetrading.wiki/docs/",
+    docsUrl: "https://github.com/buckleson/vibe-trading-crypto#readme",
     build: (t) => ({
       title: t("settings.channels.guides.websocket.title"),
       intro: t("settings.channels.guides.websocket.intro"),

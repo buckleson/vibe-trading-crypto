@@ -81,7 +81,7 @@
     "collapse": "收起",
     "expand": "展开",
     "skipToMain": "跳转到主要内容",
-    "sidebar": "Vibe-Trading 侧边栏",
+    "sidebar": "Vibe Crypto 侧边栏",
     "mainNavigation": "主导航",
     "about": "关于",
     "sessionsLoadFailed": "无法加载会话。",
@@ -565,7 +565,7 @@
     "clearApiKey": "清除已保存的 API 密钥",
     "channels": {
       "title": "IM 通道",
-      "description": "将聊天适配器接入 Web UI 和 CLI 使用的同一套 Vibe-Trading 会话运行时。",
+      "description": "将聊天适配器接入 Web UI 和 CLI 使用的同一套 Vibe Crypto 会话运行时。",
       "runtime": "运行时",
       "running": "运行中",
       "stopped": "已停止",
@@ -1078,7 +1078,7 @@
           "step3": "填写上方的 IMAP 与 SMTP 凭据，设置发件地址，并把你自己的邮箱加入“允许的发件人”。",
           "step4": "点击“测试连接”，它会依次探测 IMAP 登录、邮箱文件夹和 SMTP 登录。",
           "step5": "勾选“已授予同意”并启用渠道，自动回复即可送达通过 DKIM/SPF 校验的发件人。",
-          "docsLabel": "打开 Vibe-Trading 文档"
+          "docsLabel": "打开 Vibe Crypto 文档"
         },
         "websocket": {
           "title": "WebSocket 配置指南",
@@ -1088,12 +1088,12 @@
           "step3": "客户端使用 ws://host:port/path?client_id=...&token=... 连接。",
           "step4": "渠道运行中保存会热切换服务：已连接的客户端（包括本 Web UI 聊天）会短暂断开并自动重连。",
           "step5": "点击“测试连接”，它会在本地校验 SSL 证书/私钥与地址可用性。",
-          "docsLabel": "打开 Vibe-Trading 文档"
+          "docsLabel": "打开 Vibe Crypto 文档"
         },
         "feishu": {
           "title": "飞书 / Lark 机器人配置指南",
           "intro": "飞书机器人通过 WebSocket 长连接接入，无需公网 IP 或回调地址。",
-          "step1": "在飞书开放平台（open.feishu.cn）创建企业自建应用；也可在终端运行 vibe-trading channels login feishu 扫码创建，App ID 与 App Secret 会自动保存。",
+          "step1": "在飞书开放平台（open.feishu.cn）创建企业自建应用；也可在终端运行 vibe-crypto channels login feishu 扫码创建，App ID 与 App Secret 会自动保存。",
           "step2": "为应用添加机器人能力。",
           "step3": "在事件订阅中订阅“接收消息 im.message.receive_v1”，并选择长连接模式。",
           "step4": "在“凭证与基础信息”页面复制 App ID 与 App Secret，填入上方字段。",
@@ -1933,7 +1933,7 @@
     "unknown": "未知",
     "justNow": "刚刚",
     "loadingInstructions": "正在加载连接器授权说明...",
-    "fallbackInstruction": "运行 `vibe-trading connector list` 选择券商档案，然后在持有券商连接的桌面会话中运行 `vibe-trading connector authorize <档案>`。",
+    "fallbackInstruction": "运行 `vibe-crypto connector list` 选择券商档案，然后在持有券商连接的桌面会话中运行 `vibe-crypto connector authorize <档案>`。",
     "secondsAgo": "{{n}} 秒前",
     "minutesAgo": "{{n}} 分钟前",
     "hoursAgo": "{{n}} 小时前",

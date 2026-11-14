@@ -32,8 +32,6 @@ def _query_body() -> dict:
 @pytest.fixture(autouse=True)
 def clear_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
     """Start every bridge test from dev-mode (keyless loopback) auth."""
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
-    monkeypatch.setattr(api_server, "_API_KEY", "")
 
 
 @pytest.fixture
@@ -81,6 +79,32 @@ def test_manifest_only_advertises_implemented_features(client: TestClient):
 
 def test_query_streams_from_adapter(client: TestClient, fake_adapter: None):
     response = client.post("/v1/query", json=_query_body())
+
+    assert response.status_code == 200
+    assert "hello from vibe" in response.text
+
+
+def test_query_reports_when_runtime_unavailable(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+):
+    monkeypatch.setattr(bridge_routes, "_get_adapter", lambda: None)
+
+    response = client.post("/v1/query", json=_query_body())
+
+    assert response.status_code == 200
+    assert "not enabled" in response.text
+
+
+def test_remote_query_is_rejected(fake_adapter: None):
+    """The agent registry is never exposed to non-local peers."""
+    response = _remote_client().post("/v1/query", json=_query_body())
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Vibe Crypto only accepts requests from this computer"
+
+
+def test_local_query_needs_no_credentials(fake_adapter: None):
+    response = _local_client().post("/v1/query", json=_query_body())
 
     assert response.status_code == 200
     assert "hello from vibe" in response.text

@@ -2,16 +2,16 @@
 
 ## 🖥 CLI Reference
 
-The interactive TUI (`vibe-trading`) now uses a terminal-native transcript: a startup banner, prompt rule, previous-turn recap, live activity rail, Markdown/table rendering, and run timing all stay in the CLI. Non-interactive invocations such as `vibe-trading run`, pipes, and `--json` remain script-friendly.
+The interactive TUI (`vibe-crypto`) now uses a terminal-native transcript: a startup banner, prompt rule, previous-turn recap, live activity rail, Markdown/table rendering, and run timing all stay in the CLI. Non-interactive invocations such as `vibe-crypto run`, pipes, and `--json` remain script-friendly.
 
 ```bash
-vibe-trading               # interactive TUI
-vibe-trading run -p "..."  # single run
-vibe-trading serve         # API server
-vibe-trading alpha list    # browse 478 pre-built alphas; show / bench / compare / export-manifest sub-commands available
-vibe-trading playbook list # five scheduled-research templates; show / create sub-commands available
-vibe-trading channels status --local  # inspect IM channel config and install hints
-vibe-trading provider doctor  # print redacted provider/proxy/package diagnostics
+vibe-crypto               # interactive TUI
+vibe-crypto run -p "..."  # single run
+vibe-crypto serve         # API server
+vibe-crypto alpha list    # browse 478 pre-built alphas; show / bench / compare / export-manifest sub-commands available
+vibe-crypto playbook list # five scheduled-research templates; show / create sub-commands available
+vibe-crypto channels status --local  # inspect IM channel config and install hints
+vibe-crypto provider doctor  # print redacted provider/proxy/package diagnostics
 ```
 
 <details>
@@ -59,30 +59,30 @@ goal token budgets, and is included in usage and iteration counts. If it also
 returns tool-call markup, the existing degraded fallback is returned.
 
 ```bash
-vibe-trading run -p "Backtest BTC-USDT MACD strategy, last 30 days"
-vibe-trading run -p "Analyze AAPL momentum" --json
-vibe-trading run -f strategy.txt
-echo "Backtest 000001.SZ RSI" | vibe-trading run
+vibe-crypto run -p "Backtest BTC-USDT MACD strategy, last 30 days"
+vibe-crypto run -p "Analyze AAPL momentum" --json
+vibe-crypto run -f strategy.txt
+echo "Backtest 000001.SZ RSI" | vibe-crypto run
 ```
 
 ```bash
-vibe-trading -p "your prompt"
-vibe-trading --skills
-vibe-trading --swarm-presets
-vibe-trading --swarm-run investment_committee '{"target":"TSLA","market":"US"}'
-vibe-trading --list
-vibe-trading --show <run_id>
-vibe-trading --code <run_id>
-vibe-trading --pine <run_id>           # Export indicators (TradingView + TDX + MT5)
-vibe-trading --trace <run_id>
-vibe-trading --continue <run_id> "refine the strategy"
-vibe-trading --upload report.pdf
+vibe-crypto -p "your prompt"
+vibe-crypto --skills
+vibe-crypto --swarm-presets
+vibe-crypto --swarm-run investment_committee '{"target":"TSLA","market":"US"}'
+vibe-crypto --list
+vibe-crypto --show <run_id>
+vibe-crypto --code <run_id>
+vibe-crypto --pine <run_id>           # Export indicators (TradingView + TDX + MT5)
+vibe-crypto --trace <run_id>
+vibe-crypto --continue <run_id> "refine the strategy"
+vibe-crypto --upload report.pdf
 ```
 
 ```bash
-vibe-trading alpha list --zoo gtja191 --limit 10
-vibe-trading alpha show gtja191_171
-vibe-trading alpha bench --zoo gtja191 --universe csi300 --period 2018-2025 --top 20
+vibe-crypto alpha list --zoo gtja191 --limit 10
+vibe-crypto alpha show gtja191_171
+vibe-crypto alpha bench --zoo gtja191 --universe csi300 --period 2018-2025 --top 20
 ```
 
 </details>
@@ -96,8 +96,8 @@ IM channel adapters connect outside chat apps to the same session runtime used b
 in both terminals, then upgrade the package and install its Telegram adapter:
 
 ```bash
-python -m pip install -U "vibe-trading-ai[telegram]"
-vibe-trading channels --help
+python -m pip install -U "vibe-crypto[telegram]"
+vibe-crypto channels --help
 ```
 
 Create a bot with `@BotFather`. Merge the following into
@@ -117,11 +117,11 @@ username without `@`; listed senders do not need pairing approval.
 }
 ```
 
-Run `vibe-trading channels status --local` to check configuration and adapter
-availability. Start `vibe-trading serve --port 8000` in terminal 1, then run
-`vibe-trading channels start` in terminal 2 and send your bot a message.
+Run `vibe-crypto channels status --local` to check configuration and adapter
+availability. Start `vibe-crypto serve --port 8000` in terminal 1, then run
+`vibe-crypto channels start` in terminal 2 and send your bot a message.
 For another port, set `VIBE_TRADING_API_URL` to that server's URL in terminal 2.
-If `channels` is missing, check `python -m pip show vibe-trading-ai` in that
+If `channels` is missing, check `python -m pip show vibe-crypto` in that
 same environment and upgrade there; installing into one environment does not
 update another environment's command. Missing SDK hints from `status --local`
 mean the optional adapter still needs installation.
@@ -142,18 +142,18 @@ For long-running channel tasks, tune the central assistant-reply wait budget wit
 This controls how long the shared channel runtime waits for the agent session to produce an assistant message; adapter HTTP/socket timeouts remain adapter-specific.
 
 ```bash
-vibe-trading channels status --local   # inspect config and missing SDK hints without API
-vibe-trading channels status           # query the running API runtime
-vibe-trading channels start            # start enabled adapters through the API
-vibe-trading channels stop             # stop enabled adapters through the API
-vibe-trading channels login weixin     # run an adapter login hook when needed
-vibe-trading channels pairing --channel telegram list
+vibe-crypto channels status --local   # inspect config and missing SDK hints without API
+vibe-crypto channels status           # query the running API runtime
+vibe-crypto channels start            # start enabled adapters through the API
+vibe-crypto channels stop             # stop enabled adapters through the API
+vibe-crypto channels login weixin     # run an adapter login hook when needed
+vibe-crypto channels pairing --channel telegram list
 ```
 
 Telegram long polling permits only one active `getUpdates` poller per bot
-token. `vibe-trading serve` owns the channel runtime; it starts channels at
+token. `vibe-crypto serve` owns the channel runtime; it starts channels at
 startup when `VIBE_TRADING_CHANNELS_AUTO_START=true`, and the Web UI controls
-that same runtime. `vibe-trading channels start` sends a start request to the
+that same runtime. `vibe-crypto channels start` sends a start request to the
 running API server (`VIBE_TRADING_API_URL`, default
 `http://127.0.0.1:8000`), so running it against that same server after
 auto-start does not create another poller. Keep only one API server process
@@ -161,11 +161,11 @@ with a given Telegram bot token enabled. Separate server processes, or a CLI
 configured to target a different server, each own a runtime and can conflict
 when they use the same token.
 
-`vibe-trading channels login feishu` saves the QR-authorized app credentials to
+`vibe-crypto channels login feishu` saves the QR-authorized app credentials to
 `~/.vibe-trading/agent.json` with owner-only file permissions before reporting
 login success.
 
-The built-in adapters cover `websocket`, `telegram`, `slack`, `discord`, `matrix`, `whatsapp`, `signal`, `qq`, `napcat`, `weixin`, `wecom`, `feishu`, `dingtalk`, `msteams`, `email`, and `mochat`. Use narrow extras such as `pip install "vibe-trading-ai[telegram]"`, or install the full channel set with `pip install "vibe-trading-ai[channels]"`.
+The built-in adapters cover `websocket`, `telegram`, `slack`, `discord`, `matrix`, `whatsapp`, `signal`, `qq`, `napcat`, `weixin`, `wecom`, `feishu`, `dingtalk`, `msteams`, `email`, and `mochat`. Use narrow extras such as `pip install "vibe-crypto[telegram]"`, or install the full channel set with `pip install "vibe-crypto[channels]"`.
 
 **In-chat slash commands** (channel-agnostic, work in all 16 adapters):
 
@@ -178,7 +178,7 @@ The built-in adapters cover `websocket`, `telegram`, `slack`, `discord`, `matrix
 
 Commands are case-insensitive and must be sent as the entire message (e.g. `hello /new` is treated as a regular message, not a reset).
 
-> **`/pairing` is operator-gated.** In-chat pairing-control commands are rejected unless the sender is listed as an operator — set `channels.operators` (cross-channel authority) or a channel section's own `operators` list in your channels config. With no operators configured, in-chat `/pairing` is refused (fail-closed) and pairing is managed only through the authenticated CLI (`vibe-trading channels pairing …`) and the auth-gated REST endpoint. This prevents any allow-listed group member from taking over pairing across channels.
+> **`/pairing` is operator-gated.** In-chat pairing-control commands are rejected unless the sender is listed as an operator — set `channels.operators` (cross-channel authority) or a channel section's own `operators` list in your channels config. With no operators configured, in-chat `/pairing` is refused (fail-closed) and pairing is managed only through the authenticated CLI (`vibe-crypto channels pairing …`) and the auth-gated REST endpoint. This prevents any allow-listed group member from taking over pairing across channels.
 
 **Configure from the Web UI**: the **IM Channels** panel on the Settings page configures channels without hand-editing files. Expand a channel to open its config panel: fields render from backend metadata, and secret values are never returned to the browser, only masked (`****` plus the last 4 characters). DingTalk is the first fully-guided channel: create an app at [open-dev.dingtalk.com](https://open-dev.dingtalk.com/), add the bot capability, enable Stream Mode (no public callback URL needed), copy the AppKey into Client ID and the AppSecret into Client Secret, then publish the app. QQ has joined it as a fully-guided channel: register a bot on the QQ Open Platform ([q.qq.com](https://q.qq.com/)), copy the AppID and AppSecret into the form, verify with **Test connection** before saving, then enable; no public callback URL is needed (WebSocket via the official botpy SDK). Email and WebSocket have joined as fully-guided channels: Email's **Test connection** probes the IMAP login, the mailbox folder and the SMTP login against your provider without sending anything, while WebSocket — a local server rather than a remote service — validates the TLS certificate/key material and the address availability on this machine; an address held by the already-running server reads as the expected state, not a failure. Saving a WebSocket config hot-swaps the server, so connected clients (including the Web UI chat) briefly disconnect and reconnect. Feishu has joined them as a fully-guided channel: create a custom app on the Feishu Open Platform ([open.feishu.cn](https://open.feishu.cn/), or [open.larksuite.com](https://open.larksuite.com/) for international Lark), add the bot capability, select the matching domain in the form, copy the App ID and App Secret, verify with **Test connection** before saving, then enable; no public callback URL is needed (WebSocket long connection via the official lark-oapi SDK). **Test connection** probes the values in the form before anything is saved and answers with an honest result code (`ok`, `invalid_credentials`, `network`, or `unsupported`). **Enable** applies immediately: a running channel runtime hot-swaps that one adapter with no process restart, and enabling auto-verifies credentials unless you explicitly choose **Enable anyway** after a failed check. Disabling a channel keeps its stored credentials, so re-enabling needs no re-entry. Only the built-in adapters are listed here; entry-points plugin channels remain file-configured.
 
@@ -189,7 +189,7 @@ Saves write the `channels.<name>` section of `~/.vibe-trading/agent.json` atomic
 ## 🌐 API Server
 
 ```bash
-vibe-trading serve --port 8899
+vibe-crypto serve --port 8899
 ```
 
 | Method | Endpoint | Description |
@@ -238,9 +238,9 @@ loopback development mode. When `API_AUTH_KEY` is configured, `/docs` and
 
 ### Security defaults
 
-For localhost development, `vibe-trading serve` keeps the browser workflow simple. For any non-local client, sensitive API endpoints require `API_AUTH_KEY`; use `Authorization: Bearer <key>` for JSON/upload requests. Browser EventSource streams are handled by the Web UI after you enter the same key once in Settings.
+For localhost development, `vibe-crypto serve` keeps the browser workflow simple. For any non-local client, sensitive API endpoints require `API_AUTH_KEY`; use `Authorization: Bearer <key>` for JSON/upload requests. Browser EventSource streams are handled by the Web UI after you enter the same key once in Settings.
 
-Shell-capable process tools (`bash` / `background_run` / `cancel_background`) are enabled only for the interactive local CLI. Every other surface — the HTTP/SSE API and the MCP server on **all** transports (stdio included) — keeps them off unless you explicitly opt in with `VIBE_TRADING_ENABLE_SHELL_TOOLS=1` (or pass `--enable-shell-tools` to `vibe-trading-mcp`). Transport type never implicitly grants shell access. `cancel_background` stops only the tracked task ID returned by `background_run`; broad Python process-name termination is refused because it could terminate Vibe-Trading itself. A background task and the notice that it finished belong to the session or swarm worker that started them: another conversation cannot list the task, read its output or cancel it, and only the owner is shown the result. Document and journal readers are limited to upload/import roots by default; place files under `~/.vibe-trading/uploads`, `~/.vibe-trading/runs`, `./uploads`, `./data` (or the legacy `agent/uploads` / `agent/runs`), or add a dedicated directory through `VIBE_TRADING_ALLOWED_FILE_ROOTS`. Sessions, runs, swarm runs, uploads, and the `sessions.db` index live under `~/.vibe-trading` (relocatable via the `VIBE_TRADING_HOME` shell environment variable); pre-existing history is moved there automatically on first run.
+Shell-capable process tools (`bash` / `background_run` / `cancel_background`) are enabled only for the interactive local CLI. Every other surface — the HTTP/SSE API and the MCP server on **all** transports (stdio included) — keeps them off unless you explicitly opt in with `VIBE_TRADING_ENABLE_SHELL_TOOLS=1` (or pass `--enable-shell-tools` to `vibe-crypto-mcp`). Transport type never implicitly grants shell access. `cancel_background` stops only the tracked task ID returned by `background_run`; broad Python process-name termination is refused because it could terminate Vibe Crypto itself. A background task and the notice that it finished belong to the session or swarm worker that started them: another conversation cannot list the task, read its output or cancel it, and only the owner is shown the result. Document and journal readers are limited to upload/import roots by default; place files under `~/.vibe-trading/uploads`, `~/.vibe-trading/runs`, `./uploads`, `./data` (or the legacy `agent/uploads` / `agent/runs`), or add a dedicated directory through `VIBE_TRADING_ALLOWED_FILE_ROOTS`. Sessions, runs, swarm runs, uploads, and the `sessions.db` index live under `~/.vibe-trading` (relocatable via the `VIBE_TRADING_HOME` shell environment variable); pre-existing history is moved there automatically on first run.
 
 Generated backtest code runs as a local Python subprocess and can make network requests through the configured market-data loaders. Its environment is intentionally narrow: the runner keeps OS/Python basics, proxy/certificate settings, `VIBE_TRADING_ALLOWED_RUN_ROOTS`, and read-only market-data keys such as `TUSHARE_TOKEN`, `FMP_API_KEY`, `FRED_API_KEY`, and `VIBE_TRADING_IWENCAI_KEY`. It does not pass LLM provider keys, API auth tokens, shell-tool switches, broker trading secrets, or live/advisory toggles to generated strategy code by default.
 
@@ -257,7 +257,7 @@ The same Settings page includes an **IM Channels** panel for local operators. It
 Run a research prompt or backtest on a repeating schedule — from the **Scheduled** page in the web UI or over REST. The background executor is **off by default** — start the server with `VIBE_TRADING_ENABLE_SCHEDULER=1` to enable it:
 
 ```bash
-VIBE_TRADING_ENABLE_SCHEDULER=1 vibe-trading serve --port 8899
+VIBE_TRADING_ENABLE_SCHEDULER=1 vibe-crypto serve --port 8899
 ```
 
 Then create jobs over REST. Send `schedule` as a JSON **string** containing an interval in milliseconds or a cron expression. For a six-hour interval, use `{"prompt":"Summarize market news","schedule":"21600000"}`. For wall-clock scheduling, use a five-field cron expression (`min hour dom mon dow`; each field takes `*`, `*/n`, numbers, comma lists, or low-high ranges like `1-5`). Cron runs on the wall clock of the job's optional `timezone` (an IANA key), so the cadence holds across DST transitions — a spring-forward gap time is skipped, and a fall-back ambiguous time runs once, at its first occurrence. Jobs without a `timezone` keep plain UTC semantics:
@@ -302,7 +302,7 @@ For CLI playbooks, add `--protect-pdf` alongside `--delivery-format pdf` and
 an Email destination, for example:
 
 ```bash
-vibe-trading playbook create premarket-brief --delivery-target-ref research-email \
+vibe-crypto playbook create premarket-brief --delivery-target-ref research-email \
   --delivery-format pdf --protect-pdf
 ```
 
@@ -333,9 +333,9 @@ On the Web UI, scheduled jobs can be edited in place: prompt, cadence/timezone, 
 **Five ready-to-schedule templates** ship with the scheduler — `premarket-brief`, `earnings-season-tracker`, `portfolio-checkup`, `a-share-money-flow`, `institutional-holdings-diff`. Each states the data a run needs in plain language instead of naming tools, so a template keeps working as the tool surface grows, and each is required to name a missing input rather than fill it from memory. Reach them from the CLI, over REST, or with `/playbook` in the TUI:
 
 ```bash
-vibe-trading playbook list                     # the five templates
-vibe-trading playbook show premarket-brief     # body, declared variables, suggested cadence
-vibe-trading playbook create premarket-brief \
+vibe-crypto playbook list                     # the five templates
+vibe-crypto playbook show premarket-brief     # body, declared variables, suggested cadence
+vibe-crypto playbook create premarket-brief \
   --var home_market="US equities" --var watchlist="AAPL, MSFT, NVDA" \
   --timezone America/New_York
 
@@ -353,4 +353,4 @@ Posting `{}` schedules a template on its own suggested cadence with its declared
 [Research Lab](research-lab.md) provides shared Web, CLI, Agent/MCP and REST
 entry points for frozen-input cost scenarios, training-only parameter selection
 and OOS/holdout execution, source/history audits and offline task replays.
-Run `vibe-trading research-lab --help` or open `/research-lab`.
+Run `vibe-crypto research-lab --help` or open `/research-lab`.

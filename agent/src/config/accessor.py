@@ -116,8 +116,7 @@ def _parse_bool(value: str | None) -> bool:
 def get_env_or(primary: str, fallback: str, default: str = "") -> str:
     """Read an env var with a backward-compatible alias fallback.
 
-    Several env vars were renamed during the centralization effort (e.g.
-    ``VIBE_TRADING_API_KEY`` → ``API_AUTH_KEY``).  This helper reads the
+    Several env vars were renamed during the centralization effort.  This helper reads the
     *primary* (new) name first, falls back to the *fallback* (old) name,
     and finally returns *default* when neither is set.
 

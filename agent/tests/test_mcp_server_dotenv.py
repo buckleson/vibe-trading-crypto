@@ -18,7 +18,7 @@ def test_main_loads_dotenv_after_the_shell_tool_decision(tmp_path, monkeypatch):
     monkeypatch.setattr(llm, "_dotenv_loaded", False)
     monkeypatch.delenv("VIBE_TRADING_ENABLE_SHELL_TOOLS", raising=False)
     monkeypatch.delenv("MARKET_DATA_ORDER_HK_EQUITY", raising=False)
-    monkeypatch.setattr(sys, "argv", ["vibe-trading-mcp"])
+    monkeypatch.setattr(sys, "argv", ["vibe-crypto-mcp"])
     monkeypatch.setattr(mcp_server, "_include_shell_tools", False)
     monkeypatch.setattr(mcp_server, "_registry", None)
     monkeypatch.setattr(mcp_server, "_get_registry", lambda: None)

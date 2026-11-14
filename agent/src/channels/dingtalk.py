@@ -47,7 +47,7 @@ except ImportError:
 class VibeTradingDingTalkHandler(CallbackHandler):
     """
     Standard DingTalk Stream SDK Callback Handler.
-    Parses incoming messages and forwards them to the Vibe-Trading channel.
+    Parses incoming messages and forwards them to the Vibe Crypto channel.
     """
 
     def __init__(self, channel: "DingTalkChannel"):
@@ -142,7 +142,7 @@ class VibeTradingDingTalkHandler(CallbackHandler):
 
             self.channel.logger.info("Received message from %s (%s): %s", sender_name, sender_id, content)
 
-            # Forward to Vibe-Trading via _on_message (non-blocking).
+            # Forward to Vibe Crypto via _on_message (non-blocking).
             # Store reference to prevent GC before task completes.
             task = asyncio.create_task(
                 self.channel._on_message(
@@ -614,7 +614,7 @@ class DingTalkChannel(BaseChannel):
             token,
             chat_id,
             "sampleMarkdown",
-            {"text": content, "title": "Vibe-Trading Reply"},
+            {"text": content, "title": "Vibe Crypto Reply"},
         )
 
     async def _send_media_ref(self, token: str, chat_id: str, media_ref: str) -> bool:

@@ -1,6 +1,6 @@
 """Percent-unit evidence fields: a percent figure meets the formula's own unit.
 
-Regression coverage for HKUDS/Vibe-Trading#1820: A-share rows carry fields
+Regression coverage for upstream#1820: A-share rows carry fields
 literally named ``changepercent`` whose values are already percentage points
 (0.52 means 0.52%). A derived figure over such fields needs no trailing
 ``*100``, so the result is in points — but the gate compared percent figures

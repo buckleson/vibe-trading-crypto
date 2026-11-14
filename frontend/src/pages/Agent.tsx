@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router";
 import { ArrowDown } from "lucide-react";
+import { Button } from "@/components/ui";
+import { Skeleton } from "@/components/common/Skeleton";
 import { toast } from "sonner";
 import {
   useAgentStore,
@@ -113,7 +115,7 @@ function toolProgressKey(callId: string | undefined, tool: string): string {
   return callId ? `call:${callId}` : `tool:${tool}`;
 }
 
-// i18n hook for Agent component — used inside the component below
+// i18n hook for Agent component - used inside the component below
 // (declared at module scope for helper usage is fine since t() reads from i18n singleton)
 
 const STREAM_FLUSH_INTERVAL_MS = 80;
@@ -239,7 +241,7 @@ export function Agent() {
   const lastEventRef = useRef(0);
   const sseTimeoutMsRef = useRef(90_000);
 
-  /* tool_progress coalescing — keep latest payload per invocation, flush once per rAF. */
+  /* tool_progress coalescing - keep latest payload per invocation, flush once per rAF. */
   const pendingProgressRef = useRef<Map<string, PendingToolProgress>>(new Map());
   const progressRafRef = useRef(0);
   const pendingTextRef = useRef("");
@@ -293,7 +295,7 @@ export function Agent() {
     ? runtimeIdentity
     : {};
 
-  /* Smart scroll — only auto-scroll when near bottom */
+  /* Smart scroll - only auto-scroll when near bottom */
   const isNearBottom = useCallback(() => {
     const el = listRef.current;
     if (!el) return true;
@@ -778,7 +780,7 @@ export function Agent() {
         touch();
         replayAttemptSeenRef.current = true;
         if (!identifyActivity(d, "thinking")) return;
-        // The backend sends a bounded rolling tail — replace, never append.
+        // The backend sends a bounded rolling tail - replace, never append.
         act().setReasoningTail(String(d.tail ?? ""));
         queueStreamUpdate("", true);
         if (act().status !== "streaming") act().setStatus("streaming");
@@ -790,7 +792,7 @@ export function Agent() {
         if (act().status !== "streaming") act().setStatus("streaming");
         scrollToBottom();
       },
-      thinking_done: () => { touch(); /* don't flush — keep streaming text visible */ },
+      thinking_done: () => { touch(); /* don't flush - keep streaming text visible */ },
 
       tool_call: (d) => {
         touch();
@@ -904,7 +906,7 @@ export function Agent() {
         touch();
         replayAttemptSeenRef.current = true;
         if (!identifyActivity(d, "thinking")) return;
-        // Backend has created a new attempt — ensure streaming state is active
+        // Backend has created a new attempt - ensure streaming state is active
         // even if we connected mid-stream (SSE replay / page reload).
         if (act().status !== "streaming") act().setStatus("streaming");
       },
@@ -1299,7 +1301,7 @@ export function Agent() {
       setRuntimeIdentity({});
       const seed = curMsgs.length > 0 ? curMsgs : getCachedSession(urlSessionId);
       // switchSession() drops the live activity so replay can rebuild its
-      // steps without duplicating them — but the attempt's start time is not
+      // steps without duplicating them - but the attempt's start time is not
       // something replay can restore once the ring buffer has rotated past
       // `attempt.started`. Re-seed the still-running activity with its
       // original startedAt so the elapsed clock does not restart at 0s.
@@ -1535,7 +1537,7 @@ export function Agent() {
       for (const run of activeSwarmRuns) {
         act().updateSwarmStatus(run.runId, stopSwarmRun);
         void api.cancelSwarmRun(run.runId).catch(() => {
-          // Already finished or unknown to this runtime — the local status is
+          // Already finished or unknown to this runtime - the local status is
           // what the card shows either way.
         });
       }
@@ -1775,34 +1777,34 @@ export function Agent() {
         runtimeReasoningEffort={visibleRuntimeIdentity.reasoningEffort}
       />
       {historyError && (
-        <div role="alert" className="flex flex-wrap items-center gap-2 border-b border-warning/30 bg-warning/10 px-4 py-2 text-xs">
+        <div role="alert" className="flex flex-wrap items-center gap-2 border-b border-warning/30 bg-warning/10 px-4 py-2 text-[13px]">
           <span>{t("layout.sessionsLoadFailed")} {historyError}</span>
-          <button type="button" onClick={() => {
+          <Button size="sm" className="ms-auto" onClick={() => {
             if (!sessionId) return;
             act().setSessionLoading(true);
             void refreshSessionMessages(sessionId);
-          }} className="ms-auto rounded-md border px-2 py-1">{t("connection.retry")}</button>
+          }}>{t("connection.retry")}</Button>
         </div>
       )}
       <div
         ref={listRef}
         data-streaming={status === "streaming" ? "true" : undefined}
-        className="chat-scroll-container flex-1 overflow-auto p-6 relative"
+        className="chat-scroll-container flex-1 overflow-auto px-4 py-6 relative"
       >
         <div
           className={[
-            "max-w-3xl mx-auto space-y-8",
+            "max-w-3xl mx-auto px-4 space-y-6",
             !sessionLoading && messages.length === 0 ? "min-h-full flex flex-col" : "",
           ].join(" ")}
         >
           {sessionLoading && (
             <div className="space-y-4 py-4">
               {[1, 2, 3].map(i => (
-                <div key={i} className="flex gap-3 animate-pulse">
-                  <div className="h-8 w-8 rounded-full bg-muted shrink-0" />
+                <div key={i} className="flex gap-3">
+                  <Skeleton className="h-8 w-8 shrink-0" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-muted rounded w-3/4" />
-                    <div className="h-3 bg-muted/60 rounded w-1/2" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
                   </div>
                 </div>
               ))}
@@ -1817,13 +1819,9 @@ export function Agent() {
           )}
 
           {visibleTimelineStart > 0 && (
-            <button
-              type="button"
-              onClick={handleLoadEarlier}
-              className="mx-auto block rounded-full border border-border/60 bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
+            <Button size="sm" onClick={handleLoadEarlier} className="mx-auto flex">
               {t("agent.loadEarlier" as never)}
-            </button>
+            </Button>
           )}
 
           {visibleTimelineRows.map((row, visibleRowIdx) => {
@@ -1920,21 +1918,23 @@ export function Agent() {
 
         {/* Scroll to bottom button */}
         {showScrollBtn && (
-          <button
+          <Button
+            variant="primary"
+            size="sm"
             onClick={() => forceScrollToBottom(true)}
-            className="sticky bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-medium shadow-lg hover:opacity-90 transition-opacity z-10"
+            className="sticky bottom-4 left-1/2 z-10 -translate-x-1/2"
           >
-            <ArrowDown className="h-3 w-3" /> {t('agent.newMessages')}
-          </button>
+            <ArrowDown className="h-4 w-4" /> {t('agent.newMessages')}
+          </Button>
         )}
         <ConversationTimeline messages={messages} containerRef={listRef} />
       </div>
 
       <div
         data-agent-composer
-        className="border-t p-4 bg-background/80 backdrop-blur-sm"
+        className="border-t border-border bg-background px-4 py-3"
       >
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto px-4">
           <LiveRuntimePanel
             ref={liveRuntimeRef}
             sessionId={sessionId}

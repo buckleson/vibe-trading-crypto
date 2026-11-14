@@ -55,7 +55,7 @@ describe("MessageBubble LaTeX rendering", () => {
     );
     expect(container.querySelector(".katex")).toBeNull();
     expect(container.textContent).toContain("Sharpe:");
-    expect(container.querySelector(".animate-pulse")).not.toBeNull();
+    expect(container.querySelector(".bg-primary.w-0\\.5")).not.toBeNull();
   });
 
   it("wraps markdown tables in a horizontal scroll container", () => {

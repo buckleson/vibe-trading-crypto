@@ -252,8 +252,6 @@ def local_client(monkeypatch: pytest.MonkeyPatch):
     import api_server
     from fastapi.testclient import TestClient
 
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
-    monkeypatch.setattr(api_server, "_API_KEY", "")
     return TestClient(api_server.app, client=("127.0.0.1", 50000))
 
 
@@ -285,14 +283,13 @@ def test_regime_route_returns_computation_result(local_client, monkeypatch):
     assert resp.json() == _STUB_RESULT
 
 
-def test_regime_route_requires_auth_for_remote_client(monkeypatch):
+def test_regime_route_rejects_non_local_client(monkeypatch):
     import api_server
     from fastapi.testclient import TestClient
 
-    monkeypatch.setattr(api_server, "_API_KEY", "server-secret")
     remote = TestClient(api_server.app, client=("203.0.113.9", 51000))
     resp = remote.get("/correlation/regime", params={"codes": "AAPL,SPY"})
-    assert resp.status_code == 401
+    assert resp.status_code == 403
 
 
 def test_regime_route_validates_code_count(local_client):

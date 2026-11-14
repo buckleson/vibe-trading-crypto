@@ -5,10 +5,10 @@
 ```bash
 # After CLI installation and provider setup
 # Natural-language research
-vibe-trading run -p "Backtest a BTC-USDT 20/50 moving-average strategy for 2024, summarize return and drawdown, then export the report"
+vibe-crypto run -p "Backtest a BTC-USDT 20/50 moving-average strategy for 2024, summarize return and drawdown, then export the report"
 
 # Bench a pre-built alpha zoo (one line)
-vibe-trading alpha bench --zoo gtja191 --universe csi300 --period 2018-2025 --top 20
+vibe-crypto alpha bench --zoo gtja191 --universe csi300 --period 2018-2025 --top 20
 ```
 
 For a trade journal, [attach the broker export or pass its uploaded path](#upload--analyze-documents).
@@ -16,7 +16,7 @@ For a trade journal, [attach the broker export or pass its uploaded path](#uploa
 ### Pixel Office management
 
 Open **Pixel Office** from the feature menu to plan and assign research tasks.
-The Web page, `vibe-trading office` CLI and `pixel_office` agent tool share one
+The Web page, `vibe-crypto office` CLI and `pixel_office` agent tool share one
 SQLite task board under your runtime directory. Assignment does not start
 execution; organizational ranks grant no trading permissions. Record the actual
 result when completing a task. See [Pixel Office](../pixel-office/README.md) for CLI
@@ -53,14 +53,14 @@ Completed analyses can be saved as immutable revisions with their subject, unive
 Any two revisions in the same series can be compared in either direction. The comparison returns a unified content diff of at most 400 lines, explicit LF/CRLF styles when line endings change, evidence additions, removals and pure reorderings without assuming evidence IDs, and changed provenance fields. The Web history section provides the same operation as `GET /api/research-artifacts/{artifact_id}/compare`, the `compare_research_artifact_revisions` agent tool, and the CLI below. Comparison is read-only: it neither modifies the revisions nor revalidates their research.
 
 ```bash
-vibe-trading research-artifact save --subject "NVDA fundamental review" --content "Conclusion with evidence." --data-as-of 2026-10-27 --evidence '[{"source_uri":"https://example.com/filing"}]'
-vibe-trading research-artifact search --query "NVDA"
-vibe-trading research-artifact compare ra_example ra_example_r1 ra_example_r3
+vibe-crypto research-artifact save --subject "NVDA fundamental review" --content "Conclusion with evidence." --data-as-of 2026-10-27 --evidence '[{"source_uri":"https://example.com/filing"}]'
+vibe-crypto research-artifact search --query "NVDA"
+vibe-crypto research-artifact compare ra_example ra_example_r1 ra_example_r3
 
-vibe-trading research-artifact export ra_example --format json
-vibe-trading research-artifact export ra_example --format markdown
-vibe-trading research-artifact export ra_example --from-revision-id ra_example_r1 --to-revision-id ra_example_r3 --format json
-vibe-trading research-artifact export ra_example --from-revision-id ra_example_r1 --to-revision-id ra_example_r3 --format markdown
+vibe-crypto research-artifact export ra_example --format json
+vibe-crypto research-artifact export ra_example --format markdown
+vibe-crypto research-artifact export ra_example --from-revision-id ra_example_r1 --to-revision-id ra_example_r3 --format json
+vibe-crypto research-artifact export ra_example --from-revision-id ra_example_r1 --to-revision-id ra_example_r3 --format markdown
 ```
 
 A series export includes every immutable revision in chronological order, including evidence, verification state, and optional lineage links. JSON and Markdown are deterministic for the same stored series: no export timestamp is inserted. The API `GET /api/research-artifacts/{artifact_id}/export?format=json|markdown` and the CLI return a filename, media type, exact content, and its SHA-256 digest. The Web library downloads the same server-rendered bytes rather than rebuilding a second representation in the browser. Export does not revalidate historical claims or alter their verification status. In Markdown exports, each original revision is shown verbatim in a fenced Markdown block; its markup is not rendered as part of the export. This keeps arbitrary HTML, unfinished fences, and headings inside the saved research from hiding the generated evidence and revision sections. JSON retains the original content unchanged.
@@ -72,7 +72,7 @@ To export one selected comparison instead of the full series, provide both `from
 ### Strategy & Backtesting
 
 **Daily paper trading** is available in the Web sidebar (`/paper-trading`),
-`vibe-trading paper`, and the authenticated `/api/paper-accounts` API. Start today
+`vibe-crypto paper`, and the authenticated `/api/paper-accounts` API. Start today
 or next session with configurable cash/positions; settle completed daily bars
 and inspect fills, rejections and NAV history. Strategy history stops before the
 execution date, and each day receives the ledger after preceding fills. The
@@ -145,16 +145,16 @@ the legacy timestamp fallback.
 
 ```bash
 # Moving average crossover on US equities
-vibe-trading run -p "Backtest a 20/50-day moving average crossover on AAPL for the past year, show Sharpe ratio and max drawdown"
+vibe-crypto run -p "Backtest a 20/50-day moving average crossover on AAPL for the past year, show Sharpe ratio and max drawdown"
 
 # RSI mean-reversion on crypto
-vibe-trading run -p "Test RSI(14) mean-reversion on BTC-USDT: buy below 30, sell above 70, last 6 months"
+vibe-crypto run -p "Test RSI(14) mean-reversion on BTC-USDT: buy below 30, sell above 70, last 6 months"
 
 # Multi-factor strategy on A-shares
-vibe-trading run -p "Backtest a momentum + value + quality multi-factor strategy on CSI 300 constituents over 2 years"
+vibe-crypto run -p "Backtest a momentum + value + quality multi-factor strategy on CSI 300 constituents over 2 years"
 
 # After backtesting, export to TradingView / TDX / MetaTrader 5
-vibe-trading --pine <run_id>
+vibe-crypto --pine <run_id>
 ```
 
 For calendar-triggered partial rebalancing, keep the strategy signal dense and
@@ -172,7 +172,7 @@ Backtest run cards record the provider and model that wrote `config.json` and
 ISO date to record the model's cutoff; a window ending earlier is marked as
 potentially exposed, and an unset cutoff is treated as unknown and exposed.
 For strict factor benchmarks, pass `--training-cutoff YYYY-MM-DD` to
-`vibe-trading alpha bench --strict` to place the out-of-sample segment strictly
+`vibe-crypto alpha bench --strict` to place the out-of-sample segment strictly
 after the cutoff.
 
 `MS` executes the aligned target on the first observed trading bar of each
@@ -186,7 +186,7 @@ incompatible with `position_adjustment="hold"`.
 
 **Bench a pre-built alpha zoo** (one line):
 ```bash
-vibe-trading alpha bench --zoo gtja191 --universe csi300 --period 2018-2025 --top 20
+vibe-crypto alpha bench --zoo gtja191 --universe csi300 --period 2018-2025 --top 20
 ```
 
 Bench results also carry `meta.data_availability`, a field-level contract for
@@ -205,7 +205,7 @@ can be traced from Alpha Zoo inputs through later research steps. The CLI can
 label a run with `--research-stage`, for example:
 
 ```bash
-vibe-trading alpha bench --zoo gtja191 --universe csi300 --period 2018-2025 \
+vibe-crypto alpha bench --zoo gtja191 --universe csi300 --period 2018-2025 \
   --research-stage factor_screening
 ```
 
@@ -216,8 +216,8 @@ the existing availability contract until a future policy layer enables them.
 
 **Browse the catalogue** and inspect a single alpha:
 ```bash
-vibe-trading alpha list --zoo gtja191 --theme reversal --limit 10
-vibe-trading alpha show gtja191_171
+vibe-crypto alpha list --zoo gtja191 --theme reversal --limit 10
+vibe-crypto alpha show gtja191_171
 ```
 
 **Compose a multi-factor signal** from the zoo (Python):
@@ -253,32 +253,32 @@ This preserves the supplied sequence; it does not reconstruct missing fill order
 
 ```bash
 # Equity deep-dive
-vibe-trading run -p "Research NVDA: earnings trend, analyst consensus, option flow, and key risks for next quarter"
+vibe-crypto run -p "Research NVDA: earnings trend, analyst consensus, option flow, and key risks for next quarter"
 
 # Macro analysis
-vibe-trading run -p "Analyze the current Fed rate path, USD strength, and impact on EM equities and gold"
+vibe-crypto run -p "Analyze the current Fed rate path, USD strength, and impact on EM equities and gold"
 
 # Crypto on-chain
-vibe-trading run -p "Deep dive BTC on-chain: whale flows, exchange balances, miner activity, and funding rates"
+vibe-crypto run -p "Deep dive BTC on-chain: whale flows, exchange balances, miner activity, and funding rates"
 ```
 
 ### Swarm Workflows
 
 ```bash
 # Bull/bear debate on a stock
-vibe-trading --swarm-run investment_committee '{"target":"TSLA","market":"US"}'
+vibe-crypto --swarm-run investment_committee '{"target":"TSLA","market":"US"}'
 
 # Quant strategy from screening to backtest
-vibe-trading --swarm-run quant_strategy_desk '{"universe": "S&P 500", "horizon": "3 months"}'
+vibe-crypto --swarm-run quant_strategy_desk '{"universe": "S&P 500", "horizon": "3 months"}'
 
 # Crypto desk: funding + liquidation + flow → risk manager
-vibe-trading --swarm-run crypto_trading_desk '{"asset": "ETH-USDT", "timeframe": "1w"}'
+vibe-crypto --swarm-run crypto_trading_desk '{"asset": "ETH-USDT", "timeframe": "1w"}'
 
 # Global macro portfolio allocation
-vibe-trading --swarm-run macro_rates_fx_desk '{"focus": "Fed pivot impact on EM bonds"}'
+vibe-crypto --swarm-run macro_rates_fx_desk '{"focus": "Fed pivot impact on EM bonds"}'
 
 # Resume a failed or cancelled run while keeping its completed tasks
-vibe-trading --swarm-retry <run_id> --swarm-resume
+vibe-crypto --swarm-retry <run_id> --swarm-resume
 ```
 
 Each Swarm task keeps its reports, summary and message log under
@@ -291,10 +291,10 @@ workers. Resume also preserves artifacts recorded by older runs.
 
 ```bash
 # Save your preferences once
-vibe-trading run -p "Remember: I prefer RSI-based strategies, max 10% drawdown, hold period 5–20 days"
+vibe-crypto run -p "Remember: I prefer RSI-based strategies, max 10% drawdown, hold period 5–20 days"
 
 # The agent recalls them in future sessions automatically
-vibe-trading run -p "Build a crypto strategy that fits my risk profile"
+vibe-crypto run -p "Build a crypto strategy that fits my risk profile"
 ```
 
 ### Upload & Analyze Documents
@@ -304,13 +304,13 @@ In Web chat, attach a broker export or earnings report and send your question in
 From the CLI, upload the file first. The command prints its saved path with a generated filename.
 
 ```bash
-vibe-trading --upload trades_export.csv
+vibe-crypto --upload trades_export.csv
 ```
 
 For example, if the printed path ends in `uploads/012345abcdef.csv`, use the following prompt. Replace the example filename with the one your upload returned.
 
 ```bash
-vibe-trading run -p "Read uploads/012345abcdef.csv, profile my trading behavior and compare it with my shadow strategy."
+vibe-crypto run -p "Read uploads/012345abcdef.csv, profile my trading behavior and compare it with my shadow strategy."
 ```
 
 For an earnings report, upload the PDF and use its returned path in the same way. Quoted figures are checked against the source document.

@@ -47,12 +47,6 @@ AGENT_DIR = Path(__file__).resolve().parents[1]
 
 READMES = (
     "README.md",
-    "README_zh.md",
-    "README_ja.md",
-    "README_ko.md",
-    "README_ar.md",
-    "README_es.md",
-    "README_id.md",
 )
 
 # Feature badges in the order they appear in every README. Each entry is the

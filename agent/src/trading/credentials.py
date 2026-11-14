@@ -5,10 +5,10 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from typing import Protocol
 
-SERVICE_NAME = "Vibe-Trading"
+SERVICE_NAME = "Vibe Crypto"
 _INSTALL_HINT = (
     "OS credential vault support is not installed. Install the optional extra: "
-    'pip install "vibe-trading-ai[keyring]" (or pip install keyring).'
+    'pip install "vibe-crypto[keyring]" (or pip install keyring).'
 )
 
 

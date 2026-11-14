@@ -39,7 +39,6 @@ def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.setattr(api_server, "ENV_EXAMPLE_PATH", env_example)
     monkeypatch.setattr(api_server, "_baostock_supported", lambda: False)
     monkeypatch.setattr(api_server, "_baostock_installed", lambda: False)
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
     return TestClient(api_server.app, client=("127.0.0.1", 50000))
 
 
@@ -460,7 +459,6 @@ def test_settings_reads_reject_remote_dev_mode_clients(
     env_example.write_text("LANGCHAIN_PROVIDER=openai\n", encoding="utf-8")
     monkeypatch.setattr(api_server, "ENV_PATH", env_path)
     monkeypatch.setattr(api_server, "ENV_EXAMPLE_PATH", env_example)
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
     remote_client = TestClient(api_server.app, client=("203.0.113.10", 50000))
 
     llm_response = remote_client.get("/settings/llm")
@@ -472,7 +470,7 @@ def test_settings_reads_reject_remote_dev_mode_clients(
     assert "ts-s...oken" not in data_source_response.text
 
 
-def test_settings_reads_require_bearer_on_loopback_when_api_auth_key_configured(
+def test_settings_read_masks_stored_key_for_loopback_client(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     env_path = tmp_path / ".env"
@@ -490,18 +488,10 @@ def test_settings_reads_require_bearer_on_loopback_when_api_auth_key_configured(
     env_example.write_text("LANGCHAIN_PROVIDER=openai\n", encoding="utf-8")
     monkeypatch.setattr(api_server, "ENV_PATH", env_path)
     monkeypatch.setattr(api_server, "ENV_EXAMPLE_PATH", env_example)
-    monkeypatch.setenv("API_AUTH_KEY", "settings-secret")
     local_client = TestClient(api_server.app, client=("127.0.0.1", 50000))
 
-    unauthenticated_response = local_client.get("/settings/llm")
-    authenticated_response = local_client.get(
-        "/settings/llm",
-        headers={"Authorization": "Bearer settings-secret"},
-    )
+    authenticated_response = local_client.get("/settings/llm")
 
-    # GHSA-7wgj: a configured key gates settings reads even on loopback (the
-    # bundled frontend sends the bearer once the key is stored in Settings).
-    assert unauthenticated_response.status_code == 401
     assert authenticated_response.status_code == 200
     assert authenticated_response.json()["api_key_configured"] is True
     assert authenticated_response.json()["api_key_hint"] is None
@@ -578,7 +568,6 @@ def test_settings_writes_reject_remote_dev_mode_clients(
     env_example.write_text("LANGCHAIN_PROVIDER=openai\n", encoding="utf-8")
     monkeypatch.setattr(api_server, "ENV_PATH", env_path)
     monkeypatch.setattr(api_server, "ENV_EXAMPLE_PATH", env_example)
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
     remote_client = TestClient(api_server.app, client=("203.0.113.10", 50000))
 
     response = remote_client.put(

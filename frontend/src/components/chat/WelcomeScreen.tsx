@@ -261,22 +261,22 @@ export function WelcomeScreen({ onExample }: Props) {
   const examplesTriggerRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <div className="w-full px-4 pb-14 pt-6 text-start">
-      <BrandMark className="mb-8 h-6 w-6" />
+    <div className="w-full px-4 pb-10 pt-6 text-start">
+      <BrandMark className="mb-4 h-6 w-6" />
 
-      <h1 className="font-serif text-[38px] font-normal leading-[1.08] tracking-[-0.025em] sm:text-[52px]">
+      <h1 className="text-xl font-semibold">
         {t(greetingKey as any)}
       </h1>
-      <p className="mt-4 text-base leading-7 text-muted-foreground sm:text-lg">
+      <p className="mt-1 text-[13px] text-muted-foreground">
         {t("welcome.taskSubtitle" as any)}
       </p>
 
-      <div className="mt-10 border-y border-border/70 py-5">
-        <span className="mb-3 block text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+      <div className="mt-6 border-t border-border pt-5">
+        <span className="mb-2 block text-[13px] font-medium text-muted-foreground">
           {t("welcome.quickActions" as any)}
         </span>
         <div
-          className="grid grid-cols-[repeat(auto-fit,minmax(11rem,1fr))] gap-2"
+          className="grid grid-cols-1 gap-2 sm:grid-cols-2"
           role="group"
           aria-label={t("welcome.quickActions" as any)}
         >
@@ -293,8 +293,8 @@ export function WelcomeScreen({ onExample }: Props) {
                 }}
                 className={
                   isActive
-                    ? "group flex min-h-24 items-center justify-between rounded-xl border border-primary/35 bg-primary/[0.08] px-4 py-3 text-start text-primary shadow-sm transition-all hover:border-primary/50 hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                    : "group flex min-h-24 items-center justify-between rounded-xl border border-border/70 bg-card/70 px-4 py-3 text-start transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-card hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    ? "group flex min-h-16 items-center justify-between rounded-lg border border-primary/35 bg-primary/10 px-4 py-3 text-start text-primary transition-colors duration-150 hover:border-primary/50 hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    : "group flex min-h-16 items-center justify-between rounded-lg border border-border/70 bg-card/70 px-4 py-3 text-start transition-colors duration-150 hover:border-primary/40 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 }
               >
                 <span className="flex items-center gap-2 text-sm font-medium">
@@ -303,7 +303,7 @@ export function WelcomeScreen({ onExample }: Props) {
                   </span>
                   {t(action.titleKey as any)}
                 </span>
-                <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 rtl:-scale-x-100 rtl:group-hover:-translate-x-0.5" aria-hidden="true" />
+                <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground/60 rtl:-scale-x-100" aria-hidden="true" />
               </button>
             );
           })}
@@ -316,19 +316,19 @@ export function WelcomeScreen({ onExample }: Props) {
       <section aria-labelledby="welcome-featured-heading" className="mt-8">
         <h2
           id="welcome-featured-heading"
-          className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground"
+          className="mb-2 text-[13px] font-medium text-muted-foreground"
         >
           {t("welcome.featured" as any)}
         </h2>
-        <ul className="grid grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-2">
+        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {FEATURED_EXAMPLES.map(({ category, example }) => (
             <li key={example.titleKey} className="flex">
               <button
                 type="button"
                 onClick={() => onExample(t(example.promptKey as any))}
-                className="group flex w-full flex-col rounded-xl border border-border/70 bg-card/50 p-4 text-start transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-card hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                className="group flex w-full flex-col rounded-lg border border-border/70 bg-card/50 p-4 text-start transition-colors duration-150 hover:border-primary/40 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
-                <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground/70">{t(category.labelKey as any)}</span>
+                <span className="text-xs text-muted-foreground/70">{t(category.labelKey as any)}</span>
                 <span className="mt-1.5 text-sm font-medium leading-6 transition-colors group-hover:text-primary">{t(example.titleKey as any)}</span>
                 <span className="mt-1 text-xs leading-5 text-muted-foreground">{t(example.descKey as any)}</span>
               </button>
@@ -337,7 +337,7 @@ export function WelcomeScreen({ onExample }: Props) {
         </ul>
       </section>
 
-      <div className="mt-8">
+      <div className="mt-6">
         <button
           ref={examplesTriggerRef}
           type="button"
@@ -348,7 +348,7 @@ export function WelcomeScreen({ onExample }: Props) {
         >
           <span>{t("welcome.browseAllExamples" as any)}</span>
           <ChevronDown
-            className={`h-4 w-4 transition-transform duration-300 ${isExamplesOpen ? "rotate-180" : ""}`}
+            className={`h-4 w-4 transition-transform duration-200 ${isExamplesOpen ? "rotate-180" : ""}`}
             aria-hidden="true"
           />
         </button>
@@ -363,7 +363,7 @@ export function WelcomeScreen({ onExample }: Props) {
             setIsExamplesOpen(false);
             examplesTriggerRef.current?.focus();
           }}
-          className={`grid text-start transition-[grid-template-rows,opacity] duration-300 ease-out ${
+          className={`grid text-start transition-[grid-template-rows,opacity] duration-200 ease-out ${
             isExamplesOpen
               ? "mt-5 grid-rows-[1fr] opacity-100"
               : "grid-rows-[0fr] opacity-0"
@@ -386,8 +386,8 @@ export function WelcomeScreen({ onExample }: Props) {
                     onClick={() => setActiveCategory(index)}
                     className={
                       index === activeCategory
-                        ? "inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary"
-                        : "inline-flex items-center gap-1.5 rounded-full border border-transparent px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-border/60 hover:text-foreground"
+                        ? "inline-flex items-center gap-1.5 rounded-md border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary"
+                        : "inline-flex items-center gap-1.5 rounded-md border border-transparent px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-border/60 hover:text-foreground"
                     }
                   >
                     {cat.icon}
@@ -402,7 +402,7 @@ export function WelcomeScreen({ onExample }: Props) {
                     type="button"
                     tabIndex={isExamplesOpen ? 0 : -1}
                     onClick={() => onExample(t(ex.promptKey as any))}
-                    className="block w-full rounded-xl border border-border/60 px-3 py-2.5 text-start transition-colors hover:border-primary/40 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    className="block w-full rounded-lg border border-border/60 px-3 py-2.5 text-start transition-colors hover:border-primary/40 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                   >
                     <span className="text-sm font-medium leading-snug text-foreground">{t(ex.titleKey as any)}</span>
                     <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">{t(ex.descKey as any)}</span>

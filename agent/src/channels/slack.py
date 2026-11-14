@@ -520,7 +520,7 @@ class SlackChannel(BaseChannel):
     @staticmethod
     def _download_failure_marker(marker_type: str, name: str, reason: str) -> str:
         return (
-            f"[{marker_type}: {name}: {reason}; not available to vibe-trading. "
+            f"[{marker_type}: {name}: {reason}; not available to Vibe Crypto. "
             "Check Slack files:read scope, reinstall the Slack app, and ensure the bot can access the file.]"
         )
 

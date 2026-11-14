@@ -24,7 +24,7 @@ Decision tree for routing user requests:
 - User asks to **populate or refresh the evidence cache** ("turn my backtest runs into evidence", "the evidence is stale, refresh it") → `refresh_strategy_evidence(manifest_path=...)` — this rebuilds the disposable cache from run artifacts; it is NOT strategy creation or registration
 - User asks to **create, backtest, or register** a strategy → this is NOT this skill; route to `strategy-generate` / `strategy-dev-manager` / `alpha-zoo`
 
-The access path is the three read tools (`list_strategies`, `query_strategies`, `get_strategy_evidence`) plus one cache-refresh tool (`refresh_strategy_evidence`), available through the agent registry and the MCP server under the same names. CLI: `vibe-trading strategy-evidence refresh --manifest <path> [--scope strategies]` runs the same refresh as the tool. `vibe-trading strategy-evidence adapt --strategy-id sdm:<id> --name <child> --universe <description> --config <json-path>` prepares an adaptation; queries stay with the agent tools. Do not invent flags or subcommands beyond that.
+The access path is the three read tools (`list_strategies`, `query_strategies`, `get_strategy_evidence`) plus one cache-refresh tool (`refresh_strategy_evidence`), available through the agent registry and the MCP server under the same names. CLI: `vibe-crypto strategy-evidence refresh --manifest <path> [--scope strategies]` runs the same refresh as the tool. `vibe-crypto strategy-evidence adapt --strategy-id sdm:<id> --name <child> --universe <description> --config <json-path>` prepares an adaptation; queries stay with the agent tools. Do not invent flags or subcommands beyond that.
 
 ## Tools
 
@@ -161,7 +161,7 @@ SDM lifecycle mirroring: for rows whose `strategy_id` starts with `sdm:`, the fa
 
 ## Populating & Refreshing Evidence
 
-The evidence cache is populated and refreshed through `refresh_strategy_evidence` (agent tool / MCP tool) or the equivalent CLI, `vibe-trading strategy-evidence refresh --manifest <path>`. There is no auto-discovery of runs — population is manifest-first, because runs carry no stable strategy identity of their own (directory names are timestamp+uuid, and an auto-derived id would orphan its rows on every rerun).
+The evidence cache is populated and refreshed through `refresh_strategy_evidence` (agent tool / MCP tool) or the equivalent CLI, `vibe-crypto strategy-evidence refresh --manifest <path>`. There is no auto-discovery of runs — population is manifest-first, because runs carry no stable strategy identity of their own (directory names are timestamp+uuid, and an auto-derived id would orphan its rows on every rerun).
 
 Manifest format — a JSON object with a `runs` array, or a bare JSON array of the same specs:
 
@@ -202,7 +202,7 @@ Refreshing over unchanged artifacts is legal but limited: it re-verifies and bum
 
 The facade refuses regime assessments without computed evidence. If a strategy has no backtest evidence for a regime, `get_strategy_evidence` returns an honest empty for that regime instead of a guess; `query_strategies` likewise never fabricates rows to satisfy a filter.
 
-An empty result is an answer, not an error: it means "no computed evidence exists for this request." The population path is `refresh_strategy_evidence` (agent tool / MCP tool) or `vibe-trading strategy-evidence refresh --manifest <path>` — point a manifest of healthy backtest runs at the cache and the rows appear (see Populating & Refreshing Evidence). Until a refresh has run, an empty store is the expected state after a fresh install or an upgrade. Never relax a threshold or narrate from a scenario tag instead.
+An empty result is an answer, not an error: it means "no computed evidence exists for this request." The population path is `refresh_strategy_evidence` (agent tool / MCP tool) or `vibe-crypto strategy-evidence refresh --manifest <path>` — point a manifest of healthy backtest runs at the cache and the rows appear (see Populating & Refreshing Evidence). Until a refresh has run, an empty store is the expected state after a fresh install or an upgrade. Never relax a threshold or narrate from a scenario tag instead.
 
 ## Composition Guarantee
 

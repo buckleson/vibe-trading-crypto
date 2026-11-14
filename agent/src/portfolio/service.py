@@ -1184,7 +1184,7 @@ class PortfolioService:
     def _fetch_fx() -> FxQuote:
         """Read Frankfurter v1's dated reference rates; no intraday FX claim."""
         url = "https://api.frankfurter.app/latest?from=USD&to=CNY,HKD,EUR"
-        request = urllib.request.Request(url, headers={"User-Agent": "Vibe-Trading/portfolio"})
+        request = urllib.request.Request(url, headers={"User-Agent": "VibeCrypto/portfolio"})
         with urllib.request.urlopen(request, timeout=8) as response:  # noqa: S310 - fixed HTTPS host
             payload = json.load(response)
         if payload.get("base") != "USD" or payload.get("amount") != 1:

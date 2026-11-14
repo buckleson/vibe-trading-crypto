@@ -2,7 +2,7 @@
 
 ## 🏛 Ecosystem
 
-Vibe-Trading is part of the **[HKUDS](https://github.com/HKUDS)** agent ecosystem:
+Related projects from the upstream authors at **[HKUDS](https://github.com/HKUDS)**:
 
 <table>
   <tr>
@@ -33,7 +33,7 @@ Vibe-Trading is part of the **[HKUDS](https://github.com/HKUDS)** agent ecosyste
 
 ## 🗺 Roadmap
 
-> We ship in phases. Items move to [Issues](https://github.com/HKUDS/Vibe-Trading/issues) when work begins.
+> We ship in phases. Items move to [Issues](https://github.com/buckleson/vibe-trading-crypto/issues) when work begins.
 
 | Phase | Feature | Status |
 |-------|---------|--------|
@@ -57,13 +57,13 @@ Vibe-Trading is part of the **[HKUDS](https://github.com/HKUDS)** agent ecosyste
 
 We welcome contributions! See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
 
-**Good first issues** are tagged with [`good first issue`](https://github.com/HKUDS/Vibe-Trading/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) — pick one and get started.
+**Good first issues** are tagged with [`good first issue`](https://github.com/buckleson/vibe-trading-crypto/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) — pick one and get started.
 
 Want to contribute something bigger? Check the [Roadmap](#-roadmap) above and open an issue to discuss before starting.
 
 ## Contributors
 
-Thanks to everyone who has contributed to Vibe-Trading!
+Thanks to everyone who has contributed to Vibe Crypto!
 
 Recent v0.1.19 cycle contributors and credits:
 
@@ -150,7 +150,7 @@ Recent v0.1.19 cycle contributors and credits:
 - @tingkk — broker-neutral SDK diagnostics across all locales (#1436)
 - @tonydo — OpenCode as a built-in provider, sending the `x-opencode-session` header OpenCode Go requires (#1416)
 - @woshi77777stars — the `Trigger.market` default restored on non-market triggers (#1599)
-- @Yoruxyv — the Bahasa Indonesia UI locale and `README_id.md` (#1482)
+- @Yoruxyv — the Bahasa Indonesia UI locale (#1482)
 
 </details>
 
@@ -187,7 +187,7 @@ Recent v0.1.19 cycle contributors and credits:
 - @nandofmike — the Brazilian Portuguese (pt-BR) locale (#1327)
 - @P1Piyush — metals treated as metals in the forex backtest: pip size, lot size and spreads (#1226)
 - @sambazhu — per-market data-source priority in Settings and `MARKET_DATA_ORDER_*` (#1231)
-- @SiMinus — `vibe-trading swarm retry` with a resume option (#1194)
+- @SiMinus — `vibe-crypto swarm retry` with a resume option (#1194)
 - @sykuang — the IBKR public MCP OAuth flow (#1186)
 - @thisisjun786 — calendar-triggered partial rebalancing (#1277)
 - @wiliao — a run-stall watchdog, a bash tree-kill timeout and a compaction verification ledger (#1169)
@@ -201,7 +201,7 @@ Recent v0.1.19 cycle contributors and credits:
 - @Shizoqua — a 13-PR correctness sweep across nearly every subsystem: grounding auto-recovers identity and price evidence within a bounded budget (#1092), swarm isolates worker artifacts between retries (#1053), rejects raw `ok`/`success` tool-result envelopes (#1052) and truncates oversized results with the shared notice (#1110), MCP gains offset paging for SEC filings and statements (#1138), routes `load_skill` through the registry so oversized skills page (#1137) and carries market-data provenance on `get_market_data` (#1131), plus `excess_return` consistency (#1058), Wilder-EWM RSI (#1056), the FTS5 tokenizer floor (#1071), non-finite prediction-market fields (#1136), in-flight delivery protection (#1140) and preserved backtest validation evidence (#1139)
 - @shadowinlife — the run-analysis surface, four pages in one cycle: Options Lab (#1096), the Factor Research panel with its new IC correlation matrix (#1099), positions structure visualization (#1097) and the tearsheet tab (#1091); plus evidence-gated Strategy Discovery Phase 1 (#978) and Phase 2 decay monitoring (#1007), per-market volume units in market-data provenance (#1065) and baostock volume normalized to board lots (#1067)
 - @pengpengyi92 — five quantlib numerics fixes: `xirr` and money-weighted return survive long-horizon discount underflow (#1119), zero-volatility options discount their forward value (#1066), the fixed-income curve keeps decay inside the requested bounds (#1076), event studies anchor to the prior session (#1078) and cross-validation aligns label ends to the prior observation (#1079)
-- @cgycorey — reasoning effort honoured in chat completions (#1025), the per-task swarm `ChatLLM` closed to stop a pooled-connection leak (#1145) and the same for one-shot clients (#1153), `gross_profit` derived from revenue minus COGS when the SEC tag is absent (#1111), and `vibe-trading show <run_id>` dispatching its run id instead of the flag (#1147)
+- @cgycorey — reasoning effort honoured in chat completions (#1025), the per-task swarm `ChatLLM` closed to stop a pooled-connection leak (#1145) and the same for one-shot clients (#1153), `gross_profit` derived from revenue minus COGS when the SEC tag is absent (#1111), and `vibe-crypto show <run_id>` dispatching its run id instead of the flag (#1147)
 - @lorenzozanee — the test suite stopped escaping into the real config root and its live audit ledger (#1118, closes #1116), recovery steering delivered as user messages with inline system tags (#1112), and unsupported ticker-plus-name symbol queries marked skipped rather than failed (#1114)
 - @AndyLongest — the interactive backtest research dashboard (#1084), the engine reporting actual post-fill positions (#1082), and grounding ignoring identity constants in rate formulas (#1083)
 - @ofeksh-tr — eToro runtime UI parity for SDK connector status (#1051) and its crypto browse and flat market-data quotes (#1070), plus an empty `Response` for the `scheduled-runs` DELETE 204 (#1068)
@@ -218,7 +218,7 @@ Recent v0.1.19 cycle contributors and credits:
 - @miguelangelo78 — the hosted TickerAll MetaTrader 5 data source, so forex and metals backtests need no local MT5 terminal (#968)
 - @ngoanpv — Vietnam equity (HOSE) support: `.VN` no longer executes under China A-share rules (#1033)
 - @jax-novita — Novita AI registered as a built-in OpenAI-compatible provider (#1059)
-- @daviddaco1 — the Spanish locale and `README_es.md`, the sixth README (#1087)
+- @daviddaco1 — the Spanish locale (#1087)
 - @1psconstructor — German (Deutsch) UI support (#1117)
 - @x-lambda — the tencent loader building its SSL context from the certifi CA bundle, unblocking HK quotes (#1113)
 - @er-s-an — `build_registry()` reporting partial construction instead of silently returning a short tool list (#1129)
@@ -360,6 +360,6 @@ Recent v0.1.19 cycle contributors and credits:
 
 </details>
 
-<a href="https://github.com/HKUDS/Vibe-Trading/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=HKUDS/Vibe-Trading" />
+<a href="https://github.com/buckleson/vibe-trading-crypto/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=buckleson/vibe-trading-crypto" />
 </a>

@@ -295,7 +295,7 @@ class EmailChannel(BaseChannel):
             self.logger.info("Skip automatic reply to %s: auto_reply_enabled is false", to_addr)
             return
 
-        base_subject = self._last_subject_by_chat.get(to_addr, "vibe-trading reply")
+        base_subject = self._last_subject_by_chat.get(to_addr, "Vibe Crypto reply")
         subject = self._reply_subject(base_subject)
         if msg.metadata and isinstance(msg.metadata.get("subject"), str):
             override = msg.metadata["subject"].strip()
@@ -392,7 +392,7 @@ class EmailChannel(BaseChannel):
                 generated_pdf,
                 maintype="application",
                 subtype="pdf",
-                filename="vibe-trading-report.pdf",
+                filename="vibe-crypto-report.pdf",
             )
 
         in_reply_to = self._last_message_id_by_chat.get(to_addr)
@@ -1215,7 +1215,7 @@ class EmailChannel(BaseChannel):
         return html.unescape(text)
 
     def _reply_subject(self, base_subject: str) -> str:
-        subject = (base_subject or "").strip() or "vibe-trading reply"
+        subject = (base_subject or "").strip() or "Vibe Crypto reply"
         prefix = self.config.subject_prefix or "Re: "
         if subject.lower().startswith("re:"):
             return subject

@@ -33,8 +33,8 @@ export interface PnlColors {
 export function getPnlColors(): PnlColors {
   const isDark = document.documentElement.classList.contains("dark");
   return {
-    profit: hslToHex(cssVar("--success")) || "#22c55e",
-    loss: hslToHex(cssVar("--danger")) || "#ef4444",
-    neutral: isDark ? "#3a4252" : "#eef0f2",
+    profit: hslToHex(cssVar("--success")) || (isDark ? "#39C684" : "#1D7C50"),
+    loss: hslToHex(cssVar("--danger")) || (isDark ? "#EE6363" : "#C52020"),
+    neutral: isDark ? "#22262F" : "#EDEFF2",
   };
 }

@@ -176,8 +176,6 @@ def test_http_retry_route_resume_rejects_completed_run(tmp_path, monkeypatch):
 
     from src.api import swarm_routes
 
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
-    monkeypatch.setattr(api_server, "_API_KEY", "")
     client = TestClient(api_server.app, client=("127.0.0.1", 50000))
 
     store = SwarmStore(base_dir=tmp_path)
@@ -202,8 +200,6 @@ def test_http_retry_route_resume_query_plumbs_resume_from(tmp_path, monkeypatch)
 
     from src.api import swarm_routes
 
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
-    monkeypatch.setattr(api_server, "_API_KEY", "")
     client = TestClient(api_server.app, client=("127.0.0.1", 50000))
 
     store = SwarmStore(base_dir=tmp_path)

@@ -38,7 +38,7 @@ def test_mcp_server_main_runs_migration(
     import mcp_server
 
     monkeypatch.setattr(
-        "sys.argv", ["vibe-trading-mcp", "--transport", "stdio"]
+        "sys.argv", ["vibe-crypto-mcp", "--transport", "stdio"]
     )
     monkeypatch.setattr(mcp_server.mcp, "run", lambda **kwargs: None)
 

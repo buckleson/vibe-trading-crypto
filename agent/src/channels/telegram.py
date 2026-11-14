@@ -515,7 +515,7 @@ class TelegramChannel(BaseChannel):
 
     @staticmethod
     def _normalize_telegram_command(content: str) -> str:
-        """Map Telegram-safe command aliases back to canonical vibe-trading commands."""
+        """Map Telegram-safe command aliases back to canonical Vibe Crypto commands."""
         if not content.startswith("/"):
             return content
         if content == "/dream_log" or content.startswith("/dream_log "):
@@ -1142,7 +1142,7 @@ class TelegramChannel(BaseChannel):
             await self._send_pairing_code_if_private(sender_id, update.message, user)
             return
         await update.message.reply_text(
-            f"👋 Hi {user.first_name}! I'm vibe-trading.\n\n"
+            f"👋 Hi {user.first_name}! I'm Vibe Crypto.\n\n"
             "Send me a message and I'll respond!\n"
             "Type /help to see available commands."
         )
@@ -1156,7 +1156,7 @@ class TelegramChannel(BaseChannel):
         if not self.is_allowed(sender_id):
             await self._send_pairing_code_if_private(sender_id, update.message, user)
             return
-        await update.message.reply_text("Use /help for available commands. Docs: https://github.com/HKUDS/Vibe-Trading")
+        await update.message.reply_text("Use /help for available commands. Docs: https://github.com/buckleson/vibe-trading-crypto")
 
     @staticmethod
     def _sender_id(user) -> str:
@@ -1348,7 +1348,7 @@ class TelegramChannel(BaseChannel):
 
     @staticmethod
     def _queue_key_for_message(message) -> str:
-        """Return the final vibe-trading session key used for ordered Telegram ingress."""
+        """Return the final Vibe Crypto session key used for ordered Telegram ingress."""
         return TelegramChannel._derive_topic_session_key(message) or f"telegram:{message.chat_id}"
 
     @staticmethod

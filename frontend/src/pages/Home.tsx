@@ -1,68 +1,65 @@
 import { Link } from "react-router";
-import { ArrowRight, Bot, BarChart3, Zap, UserCircle2, MessageSquarePlus, SearchCode, LineChart, ShieldCheck } from "lucide-react";
+import { ArrowRight, Bot, BarChart3, LineChart, MessagesSquare, ShieldCheck, SearchCode, MessageSquarePlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Button, Card, CardBody, Page, PageHeader } from "@/components/ui";
 
 export function Home() {
   const { t } = useTranslation();
 
-  const FEATURES = [
-    { icon: Bot, title: t("home.featureAgent"), desc: t("home.featureAgentDesc") },
-    { icon: BarChart3, title: t("home.featureBacktest"), desc: t("home.featureBacktestDesc") },
-    { icon: Zap, title: t("home.featureStreaming"), desc: t("home.featureStreamingDesc") },
-    { icon: UserCircle2, title: t("home.featureReplay"), desc: t("home.featureReplayDesc") },
+  const features = [
+    { icon: Bot, title: t("about.featureResearch", { defaultValue: "Research agent" }), desc: t("about.featureResearchDesc", { defaultValue: "Describe a strategy in plain language and let the agent write and refine it." }) },
+    { icon: BarChart3, title: t("about.featureBacktest", { defaultValue: "Backtesting" }), desc: t("about.featureBacktestDesc", { defaultValue: "Test ideas on crypto, stocks, futures and more with built-in data sources." }) },
+    { icon: LineChart, title: t("about.featurePaper", { defaultValue: "Paper trading" }), desc: t("about.featurePaperDesc", { defaultValue: "Run a strategy forward with simulated funds and track profit and loss." }) },
+    { icon: MessagesSquare, title: t("about.featureClaude", { defaultValue: "Claude assistant" }), desc: t("about.featureClaudeDesc", { defaultValue: "Chat with Claude in the side panel, or connect it from your terminal." }) },
   ];
 
-  const STEPS = [
-    { icon: MessageSquarePlus, title: t("home.step1Title"), desc: t("home.step1Desc") },
-    { icon: SearchCode, title: t("home.step2Title"), desc: t("home.step2Desc") },
-    { icon: LineChart, title: t("home.step3Title"), desc: t("home.step3Desc") },
-    { icon: ShieldCheck, title: t("home.step4Title"), desc: t("home.step4Desc") },
+  const steps = [
+    { icon: MessageSquarePlus, text: t("about.stepDescribe", { defaultValue: "Describe the strategy you want to test." }) },
+    { icon: SearchCode, text: t("about.stepResearch", { defaultValue: "The agent researches, writes code and runs a backtest." }) },
+    { icon: LineChart, text: t("about.stepPaper", { defaultValue: "Review the results, then run the strategy forward on paper." }) },
+    { icon: ShieldCheck, text: t("about.stepLive", { defaultValue: "Connect a broker or exchange when you are ready to go live." }) },
   ];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8">
-      <div className="max-w-2xl text-center space-y-6">
-        <h1 className="text-4xl font-bold tracking-tight">{t("home.title")}</h1>
-        <p className="text-lg text-muted-foreground">{t("home.subtitle")}</p>
-        <Link
-          to="/agent"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition"
-        >
-          {t("home.startResearch")} <ArrowRight className="h-4 w-4" />
-        </Link>
-      </div>
+    <Page width="narrow">
+      <PageHeader
+        title={t("about.title", { defaultValue: "Vibe Crypto" })}
+        description={t("about.summary", { defaultValue: "A local workspace to research, backtest and paper trade crypto, stocks and other markets, with Claude built in." })}
+        actions={
+          <Link to="/">
+            <Button variant="primary" tabIndex={-1}>
+              {t("about.start", { defaultValue: "Start researching" })}
+              <ArrowRight className="h-4 w-4 rtl:rotate-180" aria-hidden="true" />
+            </Button>
+          </Link>
+        }
+      />
 
-      <div className="mt-16 max-w-5xl w-full">
-        <h2 className="text-center text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          {t("home.howItWorksTitle")}
-        </h2>
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
-          {STEPS.map(({ icon: Icon, title, desc }, index) => (
-            <div key={title} className="relative rounded-lg border bg-card p-4 space-y-2">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <Icon className="h-3.5 w-3.5" />
-                </span>
-                <h3 className="min-w-0 text-sm font-semibold">{title}</h3>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {features.map(({ icon: Icon, title, desc }) => (
+          <Card key={title}>
+            <CardBody className="space-y-1 p-5">
+              <div className="flex items-center gap-2">
+                <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
+                <h2 className="text-sm font-semibold">{title}</h2>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
-              {index < STEPS.length - 1 && (
-                <ArrowRight className="hidden md:block absolute top-1/2 -right-6 h-4 w-4 -translate-y-1/2 text-muted-foreground/40" />
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12 max-w-5xl w-full">
-        {FEATURES.map(({ icon: Icon, title, desc }) => (
-          <div key={title} className="border rounded-lg p-6 space-y-3">
-            <Icon className="h-8 w-8 text-primary" />
-            <h3 className="font-semibold">{title}</h3>
-            <p className="text-sm text-muted-foreground">{desc}</p>
-          </div>
+              <p className="text-[13px] text-muted-foreground">{desc}</p>
+            </CardBody>
+          </Card>
         ))}
       </div>
-    </div>
+
+      <section aria-labelledby="about-how" className="space-y-3">
+        <h2 id="about-how" className="text-base font-semibold">{t("about.how", { defaultValue: "How it works" })}</h2>
+        <ul className="space-y-2">
+          {steps.map(({ icon: Icon, text }) => (
+            <li key={text} className="flex items-start gap-2.5 text-sm">
+              <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+              <span>{text}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </Page>
   );
 }

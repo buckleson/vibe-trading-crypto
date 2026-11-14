@@ -52,14 +52,14 @@ BaoStock is an optional, token-free TCP source for daily A-share bars; install
 the `ashare` extra to make it available:
 
 ```bash
-pip install --upgrade "vibe-trading-ai[ashare]"
+pip install --upgrade "vibe-crypto[ashare]"
 # For a uv tool installation that previously used only the base package:
-uv tool install --force --python 3.12 "vibe-trading-ai[ashare]"
+uv tool install --force --python 3.12 "vibe-crypto[ashare]"
 ```
 
 For uv tool users, `--force` rebuilds the existing tool environment. Keep any
 extras you already use when adding `ashare` (for example,
-`"vibe-trading-ai[ashare,deepseek]"`) and repeat any existing `--with` arguments
+`"vibe-crypto[ashare,deepseek]"`) and repeat any existing `--with` arguments
 in that command.
 
 `mootdx` is not included in the base install or the `ashare` extra. Its legacy
@@ -78,7 +78,7 @@ its remote data service is reachable.
 Longbridge is an optional US/HK historical OHLCV loader. Install its SDK with:
 
 ```bash
-pip install "vibe-trading-ai[longbridge]"
+pip install "vibe-crypto[longbridge]"
 ```
 
 Configure the three credentials in `.env`:
@@ -243,7 +243,7 @@ Paper-vs-live is a **structural per-broker runtime guard** (account-id format, h
 | `risk_committee` | Drawdown + tail risk + regime review → sign-off |
 | `global_allocation_committee` | A-shares + crypto + HK/US → cross-market allocation |
 
-<sub>Plus 20+ additional specialist presets — run vibe-trading --swarm-presets to explore all.
+<sub>Plus 20+ additional specialist presets — run vibe-crypto --swarm-presets to explore all.
 Bring your own: drop preset YAMLs into <code>~/.vibe-trading/swarm/presets/</code> — they are listed
 alongside the bundled roster (same-name files override it, like user skills) and survive upgrades.
 
@@ -268,7 +268,7 @@ alongside the bundled roster (same-name files override it, like user skills) and
 | **academic** | 12 | Fama-French 5 + Carhart momentum + Jegadeesh reversal + George-Hwang 52-week-high + Amihud illiquidity + Harvey-Siddique skew + Frazzini-Pedersen betting-against-beta + correlation-rewiring stability (price-based proxies) | Public academic literature |
 | **fundamental** | 20 | PIT-safe SEC company facts (14, filed-date anchored: earnings yield, book-to-market, ROE, ROA, gross profitability, growth, accruals, leverage, cash-flow yields …) + A-share P/B, P/S TTM and dividend yield (3) + their Shenwan industry-neutral variants (3) | Public financial data |
 
-Run `vibe-trading alpha list` to browse, `vibe-trading alpha show <id>` for formulas + source, `vibe-trading alpha bench --zoo X --universe Y --period Z` to score a whole zoo, and `vibe-trading alpha compare --all` to rank zoos side by side.
+Run `vibe-crypto alpha list` to browse, `vibe-crypto alpha show <id>` for formulas + source, `vibe-crypto alpha bench --zoo X --universe Y --period Z` to score a whole zoo, and `vibe-crypto alpha compare --all` to rank zoos side by side.
 
 </details>
 
@@ -351,7 +351,7 @@ finance math works on the CLI, the Web UI, the REST API and MCP — including
 deployments where `bash` is gated off. It is
 structurally not a shell — module allowlist, `__all__`-only dispatch, `export_*`
 refused. Econometrics needs the `stats` extra
-(`pip install "vibe-trading-ai[stats]"`); those functions lazy-import and tell
+(`pip install "vibe-crypto[stats]"`); those functions lazy-import and tell
 you which one is missing.
 
 </details>
@@ -414,7 +414,7 @@ in either.
 <summary><b>Click to expand</b></summary>
 
 ```
-Vibe-Trading/
+VibeCrypto/
 ├── agent/                          # Backend (Python)
 │   ├── cli/                        # CLI package — interactive TUI + subcommands
 │   ├── api_server.py               # FastAPI server — runs, sessions, upload, swarm, SSE

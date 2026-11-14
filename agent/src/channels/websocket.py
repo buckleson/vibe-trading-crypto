@@ -1,4 +1,4 @@
-"""WebSocket server channel: vibe-trading acts as a WebSocket server and serves connected clients."""
+"""WebSocket server channel: Vibe Crypto acts as a WebSocket server and serves connected clients."""
 
 from __future__ import annotations
 
@@ -61,7 +61,7 @@ class WebSocketConfig(BaseModel):
     - ``token_issue_path``: If non-empty, **GET** (HTTP/1.1) to this path returns JSON
       ``{"token": "...", "expires_in": <seconds>}``; use ``?token=...`` when opening the WebSocket.
       Must differ from ``path`` (the WS upgrade path). If the client runs in the **same process** as
-      vibe-trading and shares the asyncio loop, use a thread or async HTTP client for GET—do not call
+      Vibe Crypto and shares the asyncio loop, use a thread or async HTTP client for GET—do not call
       blocking ``urllib`` or synchronous ``httpx`` from inside a coroutine.
     - ``token_issue_secret``: If non-empty, token requests must send ``Authorization: Bearer <secret>`` or
       ``X-Vibe-Trading-Auth: <secret>``.

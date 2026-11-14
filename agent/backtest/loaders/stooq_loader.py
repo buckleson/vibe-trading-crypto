@@ -9,7 +9,7 @@ reuse) under the ``"stooq"`` host bucket.
 API format:
   https://stooq.com/q/d/l/?s=aapl.us&d1=20240101&d2=20240131&i=d
 
-Symbol convention (Vibe-Trading -> Stooq):
+Symbol convention (Vibe Crypto -> Stooq):
   * ``AAPL.US`` -> ``aapl.us`` (Stooq tickers are lowercase; the ``.US`` market
     suffix is kept, just lower-cased).
 
@@ -53,7 +53,7 @@ _DEFAULT_MIN_INTERVAL_S = 0.6
 # warning: while it lies in the future no further symbol is probed, because a
 # second request can only be answered the same way. It expires rather than
 # latching for the process lifetime, so one transient block does not downgrade
-# stooq for as long as ``vibe-trading serve`` happens to run.
+# stooq for as long as ``vibe-crypto serve`` happens to run.
 _challenge_until = 0.0
 # How long a latched process waits before it probes Stooq again.
 _LATCH_COOLDOWN_S = 300.0
@@ -131,7 +131,7 @@ def _min_interval() -> float:
 
 
 def map_symbol(symbol: str) -> str:
-    """Translate a Vibe-Trading symbol into Stooq's ticker convention.
+    """Translate a Vibe Crypto symbol into Stooq's ticker convention.
 
     Args:
         symbol: Project-side symbol, e.g. ``AAPL.US`` or ``BRK.B.US``.
@@ -163,7 +163,7 @@ class DataLoader:
     name = "stooq"
     markets = {"us_equity"}
     # Stooq US EOD volume is single shares (universal US convention,
-    # HKUDS/Vibe-Trading#1062).
+    # upstream#1062).
     volume_units = {"us_equity": "shares"}
     requires_auth = False
 

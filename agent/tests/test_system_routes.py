@@ -31,8 +31,6 @@ from src.api import system_routes
 @pytest.fixture
 def local_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     """Loopback client with no API key configured (dev-mode: auth passes)."""
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
-    monkeypatch.setattr(api_server, "_API_KEY", "")
     return TestClient(api_server.app, client=("127.0.0.1", 50000))
 
 
@@ -52,7 +50,7 @@ def test_live_returns_healthy(local_client: TestClient):
     assert resp.status_code == 200
     body = resp.json()
     assert body["status"] == "healthy"
-    assert body["service"] == "Vibe-Trading API"
+    assert body["service"] == "Vibe Crypto API"
 
 
 def test_health_is_backward_compatible_alias(local_client: TestClient):
@@ -69,7 +67,7 @@ def test_ready_returns_200_when_provider_ready(
     assert resp.status_code == 200
     body = resp.json()
     assert body["status"] == "ready"
-    assert body["service"] == "Vibe-Trading API"
+    assert body["service"] == "Vibe Crypto API"
 
 
 def test_ready_returns_503_when_provider_not_ready(
@@ -134,12 +132,11 @@ def test_readiness_helper_missing_provider(monkeypatch: pytest.MonkeyPatch):
 # ---------------------------------------------------------------------------
 
 
-def test_correlation_requires_auth_for_remote_client(monkeypatch: pytest.MonkeyPatch):
-    """A non-loopback caller with a configured key but no token is rejected."""
-    monkeypatch.setattr(api_server, "_API_KEY", "server-secret")
+def test_correlation_rejects_non_local_client():
+    """A non-loopback caller is rejected by the local request guard."""
     remote = TestClient(api_server.app, client=("203.0.113.9", 51000))
     resp = remote.get("/correlation", params={"codes": "AAPL,SPY"})
-    assert resp.status_code == 401
+    assert resp.status_code == 403
 
 
 def test_correlation_allows_local_and_masks_generic_error(
@@ -235,8 +232,6 @@ def test_slow_analysis_does_not_block_other_api_requests(
         return {"labels": kwargs["codes"], "matrix": [[1.0, 0.5], [0.5, 1.0]]}
 
     monkeypatch.setattr(importlib.import_module(module_name), function_name, compute)
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
-    monkeypatch.setattr(api_server, "_API_KEY", "")
     transport = httpx.ASGITransport(app=api_server.app, client=("127.0.0.1", 50000))
     async def probe():
         async with httpx.AsyncClient(transport=transport, base_url="http://localhost") as client:

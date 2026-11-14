@@ -56,7 +56,7 @@ def test_channels_status_can_render_local_json(monkeypatch) -> None:
     assert _legacy.main(["channels", "status", "--local", "--json"]) == _legacy.EXIT_SUCCESS
 
 
-def test_channels_api_call_sends_configured_bearer_token(monkeypatch) -> None:
+def test_channels_api_call_sends_no_auth_headers(monkeypatch) -> None:
     captured = {}
 
     class FakeResponse:
@@ -66,19 +66,16 @@ def test_channels_api_call_sends_configured_bearer_token(monkeypatch) -> None:
         def json(self) -> dict[str, str]:
             return {"status": "ok"}
 
-    def fake_get(url, *, headers, timeout):
+    def fake_get(url, *, timeout):
         captured["url"] = url
-        captured["headers"] = headers
         captured["timeout"] = timeout
         return FakeResponse()
 
     import httpx
 
-    monkeypatch.setenv("API_AUTH_KEY", "secret-token")
     monkeypatch.setattr(httpx, "get", fake_get)
 
     assert _legacy._channels_api_call("GET", "/channels/status") == {"status": "ok"}
-    assert captured["headers"] == {"Authorization": "Bearer secret-token"}
 
 
 @pytest.mark.parametrize(

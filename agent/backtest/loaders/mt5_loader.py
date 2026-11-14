@@ -3,7 +3,7 @@
 Feeds backtests and ``get_market_data`` from the user's own broker feed
 (e.g. Exness), with the broker's exact symbols and session times. Requires
 Windows, the optional ``MetaTrader5`` package (``pip install
-"vibe-trading-ai[mt5]"``), and a running, logged-in MT5 terminal — when any of
+"vibe-crypto[mt5]"``), and a running, logged-in MT5 terminal — when any of
 those are missing :meth:`DataLoader.is_available` is ``False`` and the forex
 fallback chain degrades to akshare/yfinance/local.
 

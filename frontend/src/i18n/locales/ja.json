@@ -81,7 +81,7 @@
     "collapse": "折りたたむ",
     "expand": "展開",
     "skipToMain": "メインコンテンツへスキップ",
-    "sidebar": "Vibe-Trading サイドバー",
+    "sidebar": "Vibe Crypto サイドバー",
     "mainNavigation": "メインナビゲーション",
     "about": "概要",
     "sessionsLoadFailed": "会話を読み込めません。",
@@ -565,7 +565,7 @@
     "clearApiKey": "保存済み API キーをクリア",
     "channels": {
       "title": "IM チャンネル",
-      "description": "チャットアダプターを Web UI と CLI が使う同じ Vibe-Trading セッションランタイムへ接続します。",
+      "description": "チャットアダプターを Web UI と CLI が使う同じ Vibe Crypto セッションランタイムへ接続します。",
       "runtime": "ランタイム",
       "running": "実行中",
       "stopped": "停止中",
@@ -1078,7 +1078,7 @@
           "step3": "上の IMAP / SMTP 認証情報を入力し、送信元アドレスを設定して、自分のアドレスを「許可する送信者」に追加します。",
           "step4": "「接続テスト」をクリックします。IMAP ログイン、メールボックスフォルダー、SMTP ログインの順に確認されます。",
           "step5": "「同意済み」にチェックを入れてチャンネルを有効にすると、DKIM/SPF 検証を通過した送信者に自動返信が届きます。",
-          "docsLabel": "Vibe-Trading のドキュメントを開く"
+          "docsLabel": "Vibe Crypto のドキュメントを開く"
         },
         "websocket": {
           "title": "WebSocket 設定ガイド",
@@ -1088,12 +1088,12 @@
           "step3": "クライアントは ws://host:port/path?client_id=...&token=... で接続します。",
           "step4": "チャンネル実行中に保存するとサーバーがホットスワップされます。接続中のクライアント（この Web UI チャットを含む）は一時的に切断され、自動的に再接続します。",
           "step5": "「接続テスト」をクリックすると、SSL 証明書/鍵の素材とアドレスの可用性をローカルで検証します。",
-          "docsLabel": "Vibe-Trading のドキュメントを開く"
+          "docsLabel": "Vibe Crypto のドキュメントを開く"
         },
         "feishu": {
           "title": "Feishu / Lark ボット設定ガイド",
           "intro": "Feishu ボットは WebSocket ロングコネクションで接続するため、公開 IP も Webhook も不要です。",
-          "step1": "Feishu Open Platform（open.feishu.cn）でカスタムアプリを作成します。ターミナルで vibe-trading channels login feishu を実行すると、QR スキャンで作成でき、App ID と App Secret は自動的に保存されます。",
+          "step1": "Feishu Open Platform（open.feishu.cn）でカスタムアプリを作成します。ターミナルで vibe-crypto channels login feishu を実行すると、QR スキャンで作成でき、App ID と App Secret は自動的に保存されます。",
           "step2": "アプリにボット機能を追加します。",
           "step3": "イベント購読で「メッセージ受信 im.message.receive_v1」を購読し、ロングコネクションモードを選択します。",
           "step4": "「認証情報と基本情報」から App ID と App Secret をコピーして、上の欄に貼り付けます。",
@@ -1933,7 +1933,7 @@
     "unknown": "不明",
     "justNow": "たった今",
     "loadingInstructions": "コネクタ認可手順を読み込み中...",
-    "fallbackInstruction": "`vibe-trading connector list` を実行してブローカープロファイルを選び、ブローカー接続を保持するデスクトップセッションで `vibe-trading connector authorize <プロファイル>` を実行してください。",
+    "fallbackInstruction": "`vibe-crypto connector list` を実行してブローカープロファイルを選び、ブローカー接続を保持するデスクトップセッションで `vibe-crypto connector authorize <プロファイル>` を実行してください。",
     "secondsAgo": "{{n}} 秒前",
     "minutesAgo": "{{n}} 分前",
     "hoursAgo": "{{n}} 時間前",

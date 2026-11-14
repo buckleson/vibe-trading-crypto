@@ -19,7 +19,7 @@ from src.config.paths import get_runs_dir, get_sessions_dir, get_uploads_dir
 # Path constants
 # ============================================================================
 
-# helpers.py lives at agent/src/api/helpers.py — 4 levels up to Vibe-Trading/.
+# helpers.py lives at agent/src/api/helpers.py — 4 levels up to VibeCrypto/.
 # AGENT_DIR stays a code location; state dirs resolve under the user-level
 # runtime root (#904).
 _AGENT_DIR = Path(__file__).resolve().parent.parent.parent  # agent/
@@ -129,7 +129,7 @@ def _ensure_agent_env_file(path: Path | None = None) -> Path:
     env_path = path or _host_attr("ENV_PATH", ENV_PATH)
     env_path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     if not env_path.exists():
-        _atomic_write_secret(env_path, "# Created by Vibe-Trading Web UI settings.\n")
+        _atomic_write_secret(env_path, "# Created by Vibe Crypto Web UI settings.\n")
     return env_path
 
 

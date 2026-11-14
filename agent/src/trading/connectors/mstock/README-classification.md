@@ -17,10 +17,10 @@ can be a company name and its exchange can be null; these are not invented ticke
 symbols. Available funds, collateral and utilized margin do not establish cash
 or net liquidation. The profile therefore withholds `account.read` and is not
 eligible for portfolio aggregation. Raw fund limits remain inspectable through
-`trading_account` / `vibe-trading connector account mstock-live-rest-readonly --connection-id <id>`.
+`trading_account` / `vibe-crypto connector account mstock-live-rest-readonly --connection-id <id>`.
 
 Set up `mstock-live-rest-readonly` in the connection center, or use
-`vibe-trading connector setup --help` for the shared CLI flow. Supply the API key
+`vibe-crypto connector setup --help` for the shared CLI flow. Supply the API key
 and current Type B session access token; the broker documents midnight token
 expiry. The connection test reads both position books without placing orders.
 

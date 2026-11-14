@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 import { api, type RunListItem } from "@/lib/api";
 import { formatMetricVal } from "@/lib/formatters";
-import { cn } from "@/lib/utils";
+import { Badge, Button, Card, CardBody, EmptyState, Input, Page, PageHeader, Select, Table, THead, TBody, TR, TH, TD } from "@/components/ui";
+import { Skeleton } from "@/components/common/Skeleton";
 
 const REPORT_SCAN_LIMIT = 100;
 
@@ -82,178 +83,168 @@ export function Reports() {
   }, [runs, query, statusFilter, startDate, endDate, sortMode]);
 
   return (
-    <div className="min-h-screen p-6 lg:p-8">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-        <section className="flex flex-col gap-4 border-b pb-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-md border px-2.5 py-1 text-xs font-medium text-muted-foreground">
-              <FileText className="h-3.5 w-3.5" />
-              {t("reports.badge")}
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight">{t("reports.title")}</h1>
-              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{t("reports.subtitle")}</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => void loadReports("refresh")}
-            disabled={refreshing}
-            className="inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition hover:bg-muted disabled:opacity-50"
-          >
+    <Page width="narrow">
+      <PageHeader
+        title={t("reports.title")}
+        description={t("reports.subtitle")}
+        actions={
+          <Button onClick={() => void loadReports("refresh")} disabled={refreshing}>
             {refreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
             {t("reports.refresh")}
-          </button>
-        </section>
+          </Button>
+        }
+      />
 
-        <section className="grid gap-3 lg:grid-cols-[minmax(220px,1fr)_160px_150px_150px_170px]">
-          <label className="relative block">
-            <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder={t("reports.searchPlaceholder")}
-              aria-label={t("alphaZoo.search")}
-              className="w-full rounded-md border bg-background py-2 ps-9 pe-3 text-sm outline-none transition focus:border-primary"
-            />
-          </label>
-          <select
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
-            className="rounded-md border bg-background px-3 py-2 text-sm"
-            aria-label={t("settings.status")}
-          >
-            {statusOptions.map((status) => (
-              <option key={status} value={status}>
-                {status === "all" ? t("reports.allStatuses") : status}
-              </option>
-            ))}
-          </select>
-          <input
-            type="date"
-            value={startDate}
-            onChange={(event) => setStartDate(event.target.value)}
-            className="rounded-md border bg-background px-3 py-2 text-sm"
-            aria-label={t("reports.startDate")}
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(220px,1fr)_160px_150px_150px_170px]">
+        <div className="relative sm:col-span-2 lg:col-span-1">
+          <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={t("reports.searchPlaceholder")}
+            aria-label={t("alphaZoo.search")}
+            className="ps-9"
           />
-          <input
-            type="date"
-            value={endDate}
-            onChange={(event) => setEndDate(event.target.value)}
-            className="rounded-md border bg-background px-3 py-2 text-sm"
-            aria-label={t("reports.endDate")}
-          />
-          <select
-            value={sortMode}
-            onChange={(event) => setSortMode(event.target.value as SortMode)}
-            className="rounded-md border bg-background px-3 py-2 text-sm"
-            aria-label={t("reports.sort")}
-          >
-            <option value="created_desc">{t("reports.sortNewest")}</option>
-            <option value="created_asc">{t("reports.sortOldest")}</option>
-            <option value="return_desc">{t("reports.sortReturn")}</option>
-            <option value="sharpe_desc">{t("reports.sortSharpe")}</option>
-          </select>
-        </section>
-
-        <div className="text-sm text-muted-foreground">
-          {t("reports.count", { shown: filtered.length, total: runs.length })}
         </div>
+        <Select
+          value={statusFilter}
+          onChange={(event) => setStatusFilter(event.target.value)}
+          aria-label={t("settings.status")}
+        >
+          {statusOptions.map((status) => (
+            <option key={status} value={status}>
+              {status === "all" ? t("reports.allStatuses") : status}
+            </option>
+          ))}
+        </Select>
+        <Input
+          type="date"
+          value={startDate}
+          onChange={(event) => setStartDate(event.target.value)}
+          aria-label={t("reports.startDate")}
+        />
+        <Input
+          type="date"
+          value={endDate}
+          onChange={(event) => setEndDate(event.target.value)}
+          aria-label={t("reports.endDate")}
+        />
+        <Select
+          value={sortMode}
+          onChange={(event) => setSortMode(event.target.value as SortMode)}
+          aria-label={t("reports.sort")}
+        >
+          <option value="created_desc">{t("reports.sortNewest")}</option>
+          <option value="created_asc">{t("reports.sortOldest")}</option>
+          <option value="return_desc">{t("reports.sortReturn")}</option>
+          <option value="sharpe_desc">{t("reports.sortSharpe")}</option>
+        </Select>
+      </section>
 
-        {loading ? (
-          <div className="grid gap-3">
-            {[1, 2, 3, 4].map((item) => (
-              <div key={item} className="h-28 animate-pulse rounded-md border bg-muted/40" />
-            ))}
-          </div>
-        ) : null}
+      <div className="text-[13px] text-muted-foreground">
+        {t("reports.count", { shown: filtered.length, total: runs.length })}
+      </div>
 
-        {!loading && error ? (
-          <section className="rounded-md border border-warning/30 bg-warning/5 p-5">
-            <div className="flex items-center gap-2 font-medium text-warning">
-              <AlertTriangle className="h-5 w-5" />
+      {loading ? (
+        <div className="grid gap-3">
+          {[1, 2, 3, 4].map((item) => (
+            <Skeleton key={item} className="h-12" />
+          ))}
+        </div>
+      ) : null}
+
+      {!loading && error ? (
+        <Card className="border-warning/30 bg-warning/10">
+          <CardBody>
+            <div className="flex items-center gap-2 text-sm font-medium text-warning">
+              <AlertTriangle className="h-4 w-4" />
               {t("reports.unavailable")}
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">{error}</p>
-          </section>
-        ) : null}
+            <p className="mt-2 text-[13px] text-muted-foreground">{error}</p>
+          </CardBody>
+        </Card>
+      ) : null}
 
-        {!loading && !error && filtered.length === 0 ? (
-          <section className="rounded-md border border-dashed p-8 text-center">
-            <FileText className="mx-auto h-8 w-8 text-muted-foreground" />
-            <h2 className="mt-3 font-medium">{runs.length === 0 ? t("reports.emptyTitle") : t("reports.noMatchesTitle")}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {runs.length === 0 ? t("reports.emptyBody") : t("reports.noMatchesBody")}
-            </p>
-            {runs.length === 0 && <Link to="/" className="mt-5 inline-flex rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">{t("navigation.startResearch")}</Link>}
-          </section>
-        ) : null}
+      {!loading && !error && filtered.length === 0 ? (
+        <Card>
+          <EmptyState
+            icon={FileText}
+            title={runs.length === 0 ? t("reports.emptyTitle") : t("reports.noMatchesTitle")}
+            description={runs.length === 0 ? t("reports.emptyBody") : t("reports.noMatchesBody")}
+            action={runs.length === 0 ? (
+              <Link to="/" className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">{t("navigation.startResearch")}</Link>
+            ) : undefined}
+          />
+        </Card>
+      ) : null}
 
-        {!loading && !error && filtered.length > 0 ? (
-          <section className="grid gap-3">
+      {!loading && !error && filtered.length > 0 ? (
+        <Table>
+          <THead>
+            <tr>
+              <TH>{t("reports.run", { defaultValue: "Run" })}</TH>
+              <TH numeric>{t("reports.return")}</TH>
+              <TH numeric>{t("reports.sharpe")}</TH>
+              <TH><span className="sr-only">{t("reports.actions", { defaultValue: "Actions" })}</span></TH>
+            </tr>
+          </THead>
+          <TBody>
             {filtered.map((run) => (
               <ReportRow key={run.run_id} run={run} />
             ))}
-          </section>
-        ) : null}
-      </div>
-    </div>
+          </TBody>
+        </Table>
+      ) : null}
+    </Page>
   );
 }
 
 function ReportRow({ run }: { run: RunListItem }) {
   const { t } = useTranslation();
   return (
-    <article className="rounded-md border p-4 transition hover:border-primary/40 hover:bg-muted/30">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0 space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge status={run.status} />
-            <Link to={`/runs/${run.run_id}`} className="truncate font-mono text-sm font-medium hover:text-primary">
-              {run.run_id}
-            </Link>
-            <span className="text-xs text-muted-foreground">
-              {formatRunDate(run.created_at, t("reports.unknown", { defaultValue: "Unknown" }))}
-            </span>
-          </div>
-          <p className="line-clamp-2 text-sm text-muted-foreground">{run.prompt || t("reports.noPrompt")}</p>
-          <div className="flex flex-wrap gap-1.5">
-            {(run.codes || []).slice(0, 6).map((code) => (
-              <span key={code} className="rounded border px-2 py-0.5 font-mono text-xs text-muted-foreground">
-                {code}
-              </span>
-            ))}
-            {run.start_date || run.end_date ? (
-              <span className="rounded border px-2 py-0.5 text-xs text-muted-foreground">
-                {run.start_date || "?"} {t("reports.to")} {run.end_date || "?"}
-              </span>
-            ) : null}
-          </div>
+    <TR>
+      <TD className="min-w-[16rem] max-w-md align-top">
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusBadge status={run.status} />
+          <Link to={`/runs/${run.run_id}`} className="truncate font-mono text-[13px] font-medium hover:text-primary">
+            {run.run_id}
+          </Link>
+          <span className="text-xs text-muted-foreground">
+            {formatRunDate(run.created_at, t("reports.unknown", { defaultValue: "Unknown" }))}
+          </span>
         </div>
-
-        <div className="flex flex-col gap-3 lg:items-end">
-          <div className="grid grid-cols-2 gap-2 text-end sm:flex sm:flex-wrap sm:justify-end">
-            <MetricPill label={t("reports.return")} value={formatOptionalMetric("total_return", run.total_return)} />
-            <MetricPill label={t("reports.sharpe")} value={formatOptionalMetric("sharpe", run.sharpe)} />
-          </div>
-          <div className="flex flex-wrap gap-2 lg:justify-end">
-            <Link
-              to={`/runs/${run.run_id}`}
-              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition hover:opacity-90"
-            >
-              {t("reports.fullReport")} <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-            <Link
-              to="/compare"
-              className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition hover:bg-muted"
-            >
-              <GitCompare className="h-3.5 w-3.5" />
-              {t("reports.compare")}
-            </Link>
-          </div>
+        <p className="mt-1 line-clamp-2 text-[13px] text-muted-foreground">{run.prompt || t("reports.noPrompt")}</p>
+        <div className="mt-1.5 flex flex-wrap gap-1.5">
+          {(run.codes || []).slice(0, 6).map((code) => (
+            <Badge key={code} className="font-mono">{code}</Badge>
+          ))}
+          {run.start_date || run.end_date ? (
+            <Badge>
+              {run.start_date || "?"} {t("reports.to")} {run.end_date || "?"}
+            </Badge>
+          ) : null}
         </div>
-      </div>
-    </article>
+      </TD>
+      <TD numeric className={`align-top ${(run.total_return ?? 0) > 0 ? "text-success" : (run.total_return ?? 0) < 0 ? "text-danger" : ""}`}>{formatOptionalMetric("total_return", run.total_return)}</TD>
+      <TD numeric className="align-top">{formatOptionalMetric("sharpe", run.sharpe)}</TD>
+      <TD className="align-top">
+        <div className="flex flex-wrap justify-end gap-2">
+          <Link
+            to={`/runs/${run.run_id}`}
+            className="inline-flex h-8 items-center justify-center gap-2 rounded-md bg-primary px-3 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          >
+            {t("reports.fullReport")} <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link
+            to="/compare"
+            className="inline-flex h-8 items-center justify-center gap-2 rounded-md border border-border bg-card px-3 text-[13px] font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          >
+            <GitCompare className="h-4 w-4" />
+            {t("reports.compare")}
+          </Link>
+        </div>
+      </TD>
+    </TR>
   );
 }
 
@@ -262,24 +253,10 @@ function StatusBadge({ status }: { status: string }) {
   const normalized = status.toLowerCase();
   const ok = ["success", "done", "completed", "complete"].includes(normalized);
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-medium",
-        ok ? "bg-success/10 text-success" : "bg-muted text-muted-foreground",
-      )}
-    >
-      {ok ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+    <Badge tone={ok ? "success" : "neutral"}>
+      {ok ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
       {status || t("reports.unknown", { defaultValue: "Unknown" })}
-    </span>
-  );
-}
-
-function MetricPill({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md border px-3 py-1.5">
-      <div className="text-[11px] uppercase text-muted-foreground">{label}</div>
-      <div className="font-mono text-sm font-medium">{value}</div>
-    </div>
+    </Badge>
   );
 }
 

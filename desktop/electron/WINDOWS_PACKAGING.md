@@ -59,7 +59,7 @@ Electron Builder's supported compression-level override at level 7 to bound
 build time without changing installed build-tool code.
 Python dependencies are installed from
 `desktop/electron/requirements-windows-lock.txt` with `--require-hashes`; the
-checked-out Vibe-Trading package is then installed with `--no-deps` so
+checked-out Vibe Crypto package is then installed with `--no-deps` so
 packaging cannot silently resolve versions outside that lock.
 
 `prepare:electron` downloads the official Windows x64 Electron archive with
@@ -105,7 +105,7 @@ injected values back to dotenv.
 
 Local and pull-request artifacts are unsigned. Windows SmartScreen may warn
 when they are launched. Code signing and release ownership remain with the
-community publisher unless HKUDS explicitly takes them over later.
+community publisher unless the upstream maintainers explicitly takes them over later.
 
 There is intentionally no generic `installer:win` command. A publishable build
 must use:
@@ -147,10 +147,10 @@ runs the complete packaging path for relevant pull requests and pushes to
 ## Local validation record
 
 Windows host validation on 2026-08-08 against the current upstream
-`vibe-trading-ai` 0.1.13 source:
+`vibe-crypto` 0.1.13 source:
 
 - [x] all 183 installed third-party Python distributions exactly match the
-  committed Windows lock; the checked-out `vibe-trading-ai` package is the only
+  committed Windows lock; the checked-out `vibe-crypto` package is the only
   additional distribution;
 - [x] `pip check` confirms that the locked runtime satisfies the checked-out
   project dependency metadata;

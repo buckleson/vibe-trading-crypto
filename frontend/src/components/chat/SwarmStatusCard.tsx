@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { api } from "@/lib/api";
 import { buildSwarmStatusFromRunDetail, mergeSwarmRunUsage } from "@/lib/swarmStatus";
-import { Clock, Users } from "lucide-react";
+import { Clock, Loader2, Users } from "lucide-react";
 import { SwarmDashboard } from "@/components/chat/SwarmDashboard";
 import { abbreviateNum } from "@/lib/formatters";
 import {
@@ -42,14 +42,11 @@ function LayerStepper({
           className="sr-only"
           aria-label={t("swarm.preparingLayers")}
         />
-        <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-muted">
-          <div className="h-full w-1/3 rounded-full bg-primary animate-[pulse-slide_2s_ease-in-out_infinite]" />
+        <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-sm bg-muted">
+          <div className="h-full w-1/3 rounded-sm bg-primary animate-[pulse-slide_2s_ease-in-out_infinite]" />
         </div>
-        <span className="inline-flex shrink-0 items-center gap-1.5 text-[10px] text-muted-foreground">
-          <span
-            className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"
-            aria-hidden="true"
-          />
+        <span className="inline-flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />
           {t("swarm.preparingLayers")}
         </span>
       </div>
@@ -96,14 +93,11 @@ function LayerStepper({
               isDone
                 ? "bg-primary"
                 : isCurrent
-                  ? "bg-primary/30"
+                  ? "bg-primary/50"
                   : "bg-muted",
             ].join(" ")}
             key={index}
           >
-            {isActive && isCurrent && (
-              <span className="absolute inset-0 rounded-full bg-primary animate-pulse motion-reduce:animate-none" />
-            )}
           </span>
         );
       })}
@@ -120,7 +114,7 @@ function formatTokenCount(value: number | undefined): string | null {
 /**
  * Run-level token totals with provenance labeling: an explicit "estimated"
  * badge for heuristic counts, an "unlabeled" badge when the source is unknown
- * (pre-telemetry runs). Only "provider" — the exact-usage case — renders
+ * (pre-telemetry runs). Only "provider" (the exact-usage case) renders
  * without a badge, so a partly-estimated total can never read as billed data.
  */
 function TokenUsageLine({
@@ -136,25 +130,25 @@ function TokenUsageLine({
   if (!input && !output) return null;
 
   const label = t("swarmStatus.tokens", {
-    input: input ?? "—",
-    output: output ?? "—",
+    input: input ?? "-",
+    output: output ?? "-",
   });
 
   return (
-    <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+    <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
       <span
         className="font-mono"
-        title={`\u2191${String(status.total_input_tokens ?? "—")} \u2193${String(status.total_output_tokens ?? "—")}`}
+        title={`\u2191${String(status.total_input_tokens ?? "-")} \u2193${String(status.total_output_tokens ?? "-")}`}
       >
         {label}
       </span>
       {status.token_source === "estimated" && (
-        <span className="rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+        <span className="rounded-sm bg-warning/10 px-1.5 py-0.5 text-xs font-medium text-warning">
           {t("swarmStatus.estimated")}
         </span>
       )}
       {status.token_source == null && (
-        <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium">
+        <span className="rounded-sm bg-muted px-1.5 py-0.5 text-xs font-medium">
           {t("swarmStatus.tokenSourceUnlabeled")}
         </span>
       )}
@@ -165,7 +159,7 @@ function TokenUsageLine({
 function runTone(status: SwarmRunStatus["status"]): string {
   switch (status) {
     case "completed":
-      return "text-emerald-600 dark:text-emerald-400";
+      return "text-success";
     case "failed":
       return "text-destructive";
     case "cancelled":
@@ -233,10 +227,10 @@ export const SwarmStatusCard = memo(function SwarmStatusCard({ status: originalS
 
   return (
     <div className="flex gap-3">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-primary/10 text-primary">
         <Users className="h-4 w-4" />
       </div>
-      <div className="min-w-0 flex-1 rounded-lg border bg-background p-3 shadow-sm">
+      <div className="min-w-0 flex-1 rounded-lg border bg-background p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2">
             <span className="truncate text-sm font-semibold text-foreground">
@@ -252,16 +246,13 @@ export const SwarmStatusCard = memo(function SwarmStatusCard({ status: originalS
             </span>
           </div>
           {(hasAgentTotal || isActive) && (
-            <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-              <Clock className="h-3 w-3" />
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Clock className="h-4 w-4" />
               {hasAgentTotal ? (
                 <span>{t("swarmStatus.agents", { done, total })}</span>
               ) : (
                 <span className="inline-flex items-center gap-1.5" role="status">
-                  <span
-                    className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"
-                    aria-hidden="true"
-                  />
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />
                   <span>{t("swarm.assemblingTeam")}</span>
                 </span>
               )}

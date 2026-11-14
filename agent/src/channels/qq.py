@@ -3,7 +3,7 @@
 Inbound:
 - Parse QQ botpy messages (C2C / Group)
 - Download attachments to media dir using chunked streaming write (memory-safe)
-- Publish to the Vibe-Trading bus via BaseChannel._handle_message()
+- Publish to the Vibe Crypto bus via BaseChannel._handle_message()
 - Content includes a clear, actionable "Received files:" list with local paths
 
 Outbound:
@@ -110,7 +110,7 @@ def _make_bot_class(channel: QQChannel) -> type[botpy.Client]:
 
     class _Bot(botpy.Client):
         def __init__(self):
-            # Disable botpy's file log — vibe-trading uses loguru; default "botpy.log" fails on read-only fs
+            # Disable botpy's file log — Vibe Crypto uses loguru; default "botpy.log" fails on read-only fs
             super().__init__(intents=intents, ext_handlers=False)
 
         async def on_ready(self):
@@ -138,7 +138,7 @@ class QQConfig(BaseModel):
     msg_format: Literal["plain", "markdown"] = "plain"
     ack_message: str = "⏳ Processing..."
 
-    # Optional: directory to save inbound attachments. If empty, use vibe-trading get_media_dir("qq").
+    # Optional: directory to save inbound attachments. If empty, use Vibe Crypto get_media_dir("qq").
     media_dir: str = ""
 
     # Download tuning

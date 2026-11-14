@@ -90,8 +90,6 @@ def env_flags(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
 @pytest.fixture
 def client(store: ScheduledResearchJobStore, monkeypatch: pytest.MonkeyPatch) -> TestClient:
     """Plain TestClient (no lifespan) with loopback auth, as in the battery."""
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
-    monkeypatch.setattr(api_server, "_API_KEY", "")
     return TestClient(api_server.app, client=("127.0.0.1", 50000))
 
 
@@ -360,8 +358,6 @@ def test_flag_on_lifespan_seeds_system_jobs_before_first_tick(
     env_flags(**{_SCHEDULER_ENV: "1", _MEMORY_JOB_ENV: "1"})
     monkeypatch.setattr("src.preflight.run_preflight", lambda *_a, **_k: None)
     monkeypatch.setattr("src.config.migrate.migrate_legacy_state", lambda *_a, **_k: None)
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
-    monkeypatch.setattr(api_server, "_API_KEY", "")
 
     observations: list[bool] = []
     dispatches: list[str] = []

@@ -1,4 +1,4 @@
-"""CLI handlers for ``vibe-trading alpha {list,show,bench,compare,export-manifest}``.
+"""CLI handlers for ``vibe-crypto alpha {list,show,bench,compare,export-manifest}``.
 
 All logic lives here; ``agent/cli.py`` only wires this in via :func:`add_subparser`
 and :func:`dispatch`. Handlers print to stdout (Rich when available, plain
@@ -186,7 +186,7 @@ def _handle_exception(args: argparse.Namespace, prefix: str, exc: BaseException)
 
 
 def cmd_alpha_list(args: argparse.Namespace) -> int:
-    """``vibe-trading alpha list [--zoo X] [--theme Y] [--universe Z]``.
+    """``vibe-crypto alpha list [--zoo X] [--theme Y] [--universe Z]``.
 
     Supports ``--limit N`` (default 50) and ``--json`` for machine-readable
     output. ``--include-load-errors`` (alias: ``--show-failed``) appends a
@@ -270,8 +270,8 @@ def cmd_alpha_list(args: argparse.Namespace) -> int:
             example_id = ids[0]
             example_zoo = reg.get(example_id).zoo
             _hint(
-                f"Next: vibe-trading alpha show {example_id}  |  "
-                f"Bench a zoo: vibe-trading alpha bench --zoo {example_zoo} "
+                f"Next: vibe-crypto alpha show {example_id}  |  "
+                f"Bench a zoo: vibe-crypto alpha bench --zoo {example_zoo} "
                 f"--universe csi300 --period 2020-2025"
             )
         return 0
@@ -300,7 +300,7 @@ def _print_load_errors(reg: Registry) -> None:
 
 
 def cmd_alpha_show(args: argparse.Namespace) -> int:
-    """``vibe-trading alpha show <alpha_id> [--brief]`` — metadata + source."""
+    """``vibe-crypto alpha show <alpha_id> [--brief]`` — metadata + source."""
     try:
         reg = Registry()
         if args.alpha_id not in reg.list():
@@ -356,7 +356,7 @@ def cmd_alpha_show(args: argparse.Namespace) -> int:
 
         if brief:
             _hint(
-                f"Next: vibe-trading alpha bench --zoo {alpha.zoo} "
+                f"Next: vibe-crypto alpha bench --zoo {alpha.zoo} "
                 f"--universe csi300 --period 2020-2025 --top 20"
             )
             return 0
@@ -401,7 +401,7 @@ def cmd_alpha_show(args: argparse.Namespace) -> int:
                 print(source)
 
         _hint(
-            f"Next: vibe-trading alpha bench --zoo {alpha.zoo} "
+            f"Next: vibe-crypto alpha bench --zoo {alpha.zoo} "
             f"--universe csi300 --period 2020-2025 --top 20"
         )
         return 0
@@ -564,7 +564,7 @@ def _run_all_zoos_with_progress(
 
 
 def cmd_alpha_bench(args: argparse.Namespace) -> int:
-    """``vibe-trading alpha bench --zoo X --universe csi300 --period Y-Z [--top N]``.
+    """``vibe-crypto alpha bench --zoo X --universe csi300 --period Y-Z [--top N]``.
 
     Calls :func:`src.factors.bench_runner.run_bench` for the IC loop so we can
     stream Rich progress, then renders the HTML report via helpers imported
@@ -878,7 +878,7 @@ def _render_compare_table(ranking: list[dict[str, Any]], sort_key: str) -> None:
 
 
 def cmd_alpha_compare(args: argparse.Namespace) -> int:
-    """``vibe-trading alpha compare <id1> <id2> ... | --all | --zoo X``.
+    """``vibe-crypto alpha compare <id1> <id2> ... | --all | --zoo X``.
 
     Bench a hand-picked set of alphas head-to-head and print a ranked
     comparison (IC mean/std, IR, IC>0 ratio, sample count) plus a JSON
@@ -941,7 +941,7 @@ def cmd_alpha_compare(args: argparse.Namespace) -> int:
 
 
 def cmd_alpha_export_manifest(args: argparse.Namespace) -> int:
-    """``vibe-trading alpha export-manifest --out PATH [--force]``."""
+    """``vibe-crypto alpha export-manifest --out PATH [--force]``."""
     try:
         out_path = Path(args.out).resolve()
 
@@ -1199,7 +1199,7 @@ def dispatch(args: argparse.Namespace) -> int:
         if _ALPHA_PARSER is not None:
             _ALPHA_PARSER.print_help()
         else:
-            _err("alpha requires a subcommand. Try: vibe-trading alpha list")
+            _err("alpha requires a subcommand. Try: vibe-crypto alpha list")
         return 1
     handler = _DISPATCH.get(sub)
     if handler is None:

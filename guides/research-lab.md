@@ -16,7 +16,7 @@ still match the strategy and every exported OHLCV snapshot. A changed or
 missing file is refused; rerun that backtest to create a new baseline.
 
 ```bash
-vibe-trading research-lab costs RUN_ID --fee-multipliers 1 2 3 --slippage-bps 0 5 --json
+vibe-crypto research-lab costs RUN_ID --fee-multipliers 1 2 3 --slippage-bps 0 5 --json
 ```
 
 Each scenario actually reruns the ordinary market engine against the same
@@ -32,7 +32,7 @@ scenarios per request.
 ## Train, select, freeze, test
 
 ```bash
-vibe-trading research-lab walk-forward RUN_ID \
+vibe-crypto research-lab walk-forward RUN_ID \
   --parameter fast=10,20 --parameter slow=40,60 \
   --train-bars 252 --test-bars 63 --holdout-bars 63 --max-folds 4 \
   --objective sharpe --training rolling --json
@@ -64,8 +64,8 @@ train-and-test parameter study. CLI revalidation uses the same correction.
 ## Factor source and history contracts
 
 ```bash
-vibe-trading research-lab audit --json
-vibe-trading research-lab audit --alpha-id gtja191_149 --json
+vibe-crypto research-lab audit --json
+vibe-crypto research-lab audit --alpha-id gtja191_149 --json
 ```
 
 The audit checks every registered factor against a reviewed source fingerprint,
@@ -86,9 +86,9 @@ The original report and operator interpretations are linked in the zoo's
 ## Saved task replay
 
 ```bash
-vibe-trading research-lab cases --json
-vibe-trading research-lab replay /path/to/saved-run --case research.window_boundary.v1 --json
-vibe-trading research-lab replay --bindings /path/to/bindings.json --json
+vibe-crypto research-lab cases --json
+vibe-crypto research-lab replay /path/to/saved-run --case research.window_boundary.v1 --json
+vibe-crypto research-lab replay --bindings /path/to/bindings.json --json
 ```
 
 There are 20 financial task cases alongside the existing identity case. Each

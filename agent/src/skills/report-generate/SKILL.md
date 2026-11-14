@@ -48,7 +48,7 @@ missing inputs; do not invent them. No hidden numeric declaration is required.
 # [Report Title]
 
 > **Rating**: Buy | **Target Price**: ¥XX | **Current Price**: ¥XX
-> **Analyst**: Vibe-Trading | **Date**: 2026-03-28
+> **Analyst**: Vibe Crypto | **Date**: 2026-03-28
 
 ## Summary
 

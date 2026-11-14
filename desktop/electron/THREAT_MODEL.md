@@ -3,7 +3,7 @@
 ## Scope
 
 This document covers the Electron main process, its sandboxed renderer, and the
-single Vibe-Trading Python process started by the shell. The Windows packaging
+single Vibe Crypto Python process started by the shell. The Windows packaging
 layer additionally covers local credential encryption, migration, and
 injection into that owned Python process. Auto-update, optional messaging
 adapters, personal WeChat pairing, broker configuration, and release ownership
@@ -16,13 +16,12 @@ or default-enabled updater exists.
 
 ## Assets
 
-- The per-launch API authentication secret.
-- Local Vibe-Trading sessions, reports, configuration, and research data.
+- Local Vibe Crypto sessions, reports, configuration, and research data.
 - Any credentials already present in the environment inherited by the Python
   process.
 - LLM, Tushare, and Gildata credentials managed by the desktop host.
 - The integrity of the executable selected as the backend.
-- The ability to invoke authenticated local API routes.
+- The ability to invoke local API routes.
 - Future update publisher policy, release digest metadata, and the integrity of
   a staged installer.
 - The pending-update journal used to distinguish completed and interrupted
@@ -32,46 +31,40 @@ or default-enabled updater exists.
 
 ```text
 Electron main process
-  |-- owns random API secret
   |-- owns safeStorage encryption/decryption
   |-- selects backend executable and starts watchdog
-  |-- injects Authorization on one loopback origin
   |
   +--> sandboxed renderer
   |      no Node.js, isolated context, deny-by-default permissions
-  |      can use the authenticated local API through normal page requests
+  |      can use the local API through normal page requests
   |      can set or clear allowlisted credentials, but cannot read them
   |
   +--> backend parent-death watchdog
-         |-- inherits the launch secret and decrypted credentials only to pass them to Python
+         |-- inherits decrypted credentials only to pass them to Python
          |-- exits without spawning Python if the parent is already gone
          |-- monitors Electron IPC disconnect and parent PID liveness
          +--> Python backend
                 binds 127.0.0.1:<random-port>
-                receives API_AUTH_KEY through its child environment
+                rejects non-loopback peers, foreign Host headers and cross-site writes
                 receives decrypted credentials through its child environment
 ```
 
 The renderer is trusted to perform the same application actions as the web UI,
-but it is not given the raw authentication secret. A renderer compromise can
-still call authenticated API routes through the Electron session and is
-therefore security-significant.
+and the app has no login or API key (ADR 0002). A renderer compromise can
+still call the local API and is therefore security-significant.
 
 ## Controls
 
-### Loopback and authentication
+### Loopback and local request guard
 
 - The backend is launched with `--host 127.0.0.1`.
 - A free ephemeral port is selected for every backend start.
-- The secret is 32 cryptographically random bytes encoded with Base64URL.
-- The secret exists only in Electron main-process memory and the owned
-  watchdog/Python child environments. It is not written to logs,
-  configuration, or renderer storage.
-- Electron adds `Authorization: Bearer <secret>` only when the request origin
-  exactly matches the active backend origin.
-- Health and shutdown requests are authenticated.
-- A new desktop process receives a new secret, so any stale value is invalid
-  after exit.
+- The backend rejects any request whose peer is not a loopback address (403),
+  any `Host` header outside the loopback allow-list (DNS rebinding), and any
+  state-changing request with a cross-site `Origin` or `Sec-Fetch-Site`.
+- There is no shared secret: Electron does not mint or inject credentials, and
+  `API_AUTH_KEY` is removed from the backend child environment.
+- Health and shutdown requests pass the same local guard.
 
 ### Renderer
 
@@ -96,9 +89,9 @@ therefore security-significant.
   subtrees. It does not walk their ancestors.
 - Source-mode discovery is disabled for packaged applications. During source
   development, an ancestor is accepted only when its `pyproject.toml` contains
-  `[project].name = "vibe-trading-ai"`; only that marked root's
-  `.venv\Scripts\vibe-trading.exe` is eligible.
-- The final fallback checks non-empty `PATH` entries for `vibe-trading.exe`.
+  `[project].name = "vibe-crypto"`; only that marked root's
+  `.venv\Scripts\vibe-crypto.exe` is eligible.
+- The final fallback checks non-empty `PATH` entries for `vibe-crypto.exe`.
 - No generic executable candidate is evaluated while walking ancestors, and
   the filesystem drive root is never treated as a source-project root.
 
@@ -106,7 +99,7 @@ therefore security-significant.
 
 - Only one desktop application instance is allowed.
 - Standard output and standard error are appended to a per-user Electron log.
-- Startup waits for authenticated health success and reports early process exit
+- Startup waits for health success and reports early process exit
   with a bounded log tail.
 - Electron starts a small watchdog before the Python backend. The watchdog
   verifies that the Electron main PID is alive before spawning Python.
@@ -114,7 +107,7 @@ therefore security-significant.
   parent PID. An IPC disconnect or dead parent PID triggers Windows
   `taskkill /T /F` against the Python process tree without relying on an
   Electron JavaScript shutdown callback.
-- Normal shutdown first calls the authenticated backend shutdown route. If the
+- Normal shutdown first calls the backend shutdown route. If the
   backend remains alive, Electron asks the watchdog to terminate it and finally
   retains process-tree termination as a bounded fallback.
 - The automated parent-death smoke test terminates only the Electron main PID,
@@ -180,18 +173,18 @@ therefore security-significant.
 
 ## Residual risks
 
-- Renderer script injection can exercise the authenticated API even though it
-  cannot read the raw secret.
+- Renderer script injection can call the local API, and can overwrite stored
+  credentials even though it cannot read them.
 - A local administrator, debugger, or process with equivalent user privileges
   may inspect the Electron, watchdog, or Python process and its environment.
 - Port discovery closes the probe socket before Python binds it. Another local
   process can win that race, causing startup failure; it does not receive the
-  authentication secret.
+  decrypted credentials.
 - The development override `VIBE_TRADING_EXECUTABLE` trusts the explicitly
   selected executable. Users must not point it at untrusted code.
 - The `PATH` fallback trusts the desktop process environment and normal Windows
   executable-path integrity. A process able to alter that environment can
-  select the backend that receives the launch secret.
+  select the backend that receives the decrypted credentials.
 - A compromised renderer can overwrite or clear an allowlisted credential even
   though it cannot retrieve the current value.
 - `safeStorage` protects data at rest for the current Windows user; it does not

@@ -72,7 +72,7 @@ def _load_neonize() -> _NeonizeAPI:
         from neonize.utils.jid import build_jid
     except ImportError as exc:
         raise RuntimeError(
-            'WhatsApp dependencies not installed. Run: pip install "vibe-trading-ai[whatsapp]"'
+            'WhatsApp dependencies not installed. Run: pip install "vibe-crypto[whatsapp]"'
         ) from exc
 
     _NEONIZE_API = _NeonizeAPI(
@@ -285,7 +285,7 @@ class WhatsAppChannel(BaseChannel):
         if legacy_bridge_fields:
             self.logger.warning(
                 "Ignoring deprecated WhatsApp bridge config fields: %s. "
-                "Run 'vibe-trading channels login whatsapp' to create a neonize session.",
+                "Run 'vibe-crypto channels login whatsapp' to create a neonize session.",
                 ", ".join(legacy_bridge_fields),
             )
         self._client: Any | None = None

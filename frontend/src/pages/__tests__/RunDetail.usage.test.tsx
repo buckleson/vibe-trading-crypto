@@ -120,10 +120,10 @@ describe("RunDetail token-usage tab", () => {
     // an iteration that never reported cache gets the not-reported marker,
     // never a fabricated 0
     expect(within(rows[2]).getAllByRole("cell").map((cell) => cell.textContent)).toEqual([
-      "1", "414", "2278", "2692", "—", "—",
+      "1", "414", "2278", "2692", "-", "-",
     ]);
     expect(within(rows[3]).getAllByRole("cell").map((cell) => cell.textContent)).toEqual([
-      "2", "320", "2500", "2820", "200", "—",
+      "2", "320", "2500", "2820", "200", "-",
     ]);
   });
 

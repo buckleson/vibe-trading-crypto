@@ -63,7 +63,7 @@ def test_capabilities_resolve_opencode_provider() -> None:
     assert caps.api_key_env == "OPENCODE_API_KEY"
     assert caps.base_url_env == "OPENCODE_BASE_URL"
     assert caps.capture_reasoning is True
-    assert caps.default_headers["User-Agent"].startswith("Vibe-Trading/")
+    assert caps.default_headers["User-Agent"].startswith("VibeCrypto/")
 
 
 @pytest.mark.parametrize("name", ["opencode-go", "opencode-zen"])
@@ -172,7 +172,7 @@ def _adapter(
         base_url=base_url,
         temperature=0.0,
         http_client=client,
-        default_headers={"User-Agent": "Vibe-Trading/test"},
+        default_headers={"User-Agent": "VibeCrypto/test"},
         vibe_provider=provider,
         vibe_api_key="sk-test",
     )
@@ -198,7 +198,7 @@ def test_bound_session_id_is_sent_to_opencode() -> None:
     assert len(seen) == 2
     for headers in seen:
         assert headers["x-opencode-session"] == "vibe-session-42"
-        assert headers["user-agent"].startswith("Vibe-Trading/")
+        assert headers["user-agent"].startswith("VibeCrypto/")
 
 
 @pytestmark_wire

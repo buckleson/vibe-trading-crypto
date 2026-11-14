@@ -61,7 +61,7 @@ def main(repo_root: Path | None = None) -> int:
             # Escape control characters so a filename cannot inject CI output.
             print(f"  {ascii(name)}")
         print("Use git rm --cached -- <path> to retain the local file without tracking it.")
-        print("Publish project documentation under wiki/docs/ or the relevant source directory.")
+        print("Publish project documentation in README.md, guides/, or the relevant source directory.")
         return 1
 
     print("OK: no internal documents are tracked in Git.")

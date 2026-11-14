@@ -56,7 +56,7 @@ def _make_server_config(
 
 
 def _make_oauth_config(
-    client_name="Vibe-Trading",
+    client_name="Vibe Crypto",
     scopes=None,
     cache_dir="~/.vibe-trading/oauth",
     callback_port=None,

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { GitCompare, ArrowLeftRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button, Card, CardBody, CardHeader, EmptyState, Field, Page, PageHeader, Select, Table, THead, TBody, TR, TH, TD } from "@/components/ui";
 import { api, type RunListItem, type RunData, type EquityPoint } from "@/lib/api";
 import { echarts, CHART_GROUP, connectCharts } from "@/lib/echarts";
 import { getChartTheme } from "@/lib/chart-theme";
@@ -40,10 +41,10 @@ function diffClass(a: unknown, b: unknown, higherIsBetter: boolean): DiffPresent
   const better = higherIsBetter ? nb > na : nb < na;
   const worse = higherIsBetter ? nb < na : nb > na;
   if (better) {
-    return { className: "text-green-600 dark:text-green-400", verdict: "better", glyph: "\u2191" };
+    return { className: "text-success", verdict: "better", glyph: "\u2191" };
   }
   if (worse) {
-    return { className: "text-red-600 dark:text-red-400", verdict: "worse", glyph: "\u2193" };
+    return { className: "text-danger", verdict: "worse", glyph: "\u2193" };
   }
   return { className: "", verdict: null, glyph: null };
 }
@@ -112,7 +113,7 @@ interface EquityChartOverlayProps {
   rightCurve: EquityPoint[];
   leftLabel: string;
   rightLabel: string;
-  /** Rebase both curves to 100 at their first bar — runs with different
+  /** Rebase both curves to 100 at their first bar - runs with different
    * initial capital are only comparable on an indexed scale. */
   rebase: boolean;
 }
@@ -147,8 +148,8 @@ function EquityChartOverlay({ leftCurve, rightCurve, leftLabel, rightLabel, reba
     const leftData = dates.map((d) => leftMap.get(d) ?? null);
     const rightData = dates.map((d) => rightMap.get(d) ?? null);
 
-    const PRIMARY_COLOR = getComputedStyle(document.documentElement).getPropertyValue("--chart-compare-a").trim() || "#3b82f6";
-    const SECONDARY_COLOR = getComputedStyle(document.documentElement).getPropertyValue("--chart-compare-b").trim() || "#f59e0b";
+    const PRIMARY_COLOR = getComputedStyle(document.documentElement).getPropertyValue("--chart-compare-a").trim() || "#1555E0";
+    const SECONDARY_COLOR = getComputedStyle(document.documentElement).getPropertyValue("--chart-compare-b").trim() || "#B36205";
 
     chart.setOption({
       backgroundColor: "transparent",
@@ -325,56 +326,55 @@ export function Compare() {
   const hasData = Boolean(leftData || rightData);
 
   return (
-    <div className="mx-auto max-w-5xl p-8 space-y-6">
-      <h1 className="flex items-center gap-2 text-2xl font-semibold">
-        <GitCompare className="h-5 w-5" aria-hidden="true" /> {t("compare.title")}
-      </h1>
+    <Page width="narrow">
+      <PageHeader title={t("compare.title")} />
 
       {/* Selectors */}
-      <div className="flex gap-4 items-end rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-        <div className="flex-1">
-          <label className="text-xs text-muted-foreground block mb-1">{i18n.t("compare.baseline")}</label>
-          <select value={leftId} onChange={(e) => setLeftId(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border/60 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" title={leftRun?.prompt || leftId}>
-            <option value="">{i18n.t("compare.select")}</option>
-            {runs.map((r) => <option key={r.run_id} value={r.run_id}>{runLabel(r)} ({r.status})</option>)}
-          </select>
-        </div>
-        <button
-          type="button"
-          onClick={() => { setLeftId(rightId); setRightId(leftId); }}
-          title={i18n.t("compare.swapRuns")}
-          className="mb-1 shrink-0 rounded-md border border-border/60 p-2 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
-        >
-          <ArrowLeftRight className="h-4 w-4" aria-hidden="true" />
-          <span className="sr-only">{i18n.t("compare.swapRuns")}</span>
-        </button>
-        <div className="flex-1">
-          <label className="text-xs text-muted-foreground block mb-1">{i18n.t("compare.compare")}</label>
-          <select value={rightId} onChange={(e) => setRightId(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border/60 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" title={rightRun?.prompt || rightId}>
-            <option value="">{i18n.t("compare.select")}</option>
-            {runs.map((r) => <option key={r.run_id} value={r.run_id}>{runLabel(r)} ({r.status})</option>)}
-          </select>
-        </div>
-      </div>
+      <Card>
+        <CardBody className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-end">
+          <Field label={i18n.t("compare.baseline")} htmlFor="compare-baseline" className="min-w-0 flex-1">
+            <Select id="compare-baseline" value={leftId} onChange={(e) => setLeftId(e.target.value)} title={leftRun?.prompt || leftId}>
+              <option value="">{i18n.t("compare.select")}</option>
+              {runs.map((r) => <option key={r.run_id} value={r.run_id}>{runLabel(r)} ({r.status})</option>)}
+            </Select>
+          </Field>
+          <Button
+            size="icon"
+            onClick={() => { setLeftId(rightId); setRightId(leftId); }}
+            title={i18n.t("compare.swapRuns")}
+            className="self-center sm:self-auto"
+          >
+            <ArrowLeftRight className="h-4 w-4" aria-hidden="true" />
+            <span className="sr-only">{i18n.t("compare.swapRuns")}</span>
+          </Button>
+          <Field label={i18n.t("compare.compare")} htmlFor="compare-other" className="min-w-0 flex-1">
+            <Select id="compare-other" value={rightId} onChange={(e) => setRightId(e.target.value)} title={rightRun?.prompt || rightId}>
+              <option value="">{i18n.t("compare.select")}</option>
+              {runs.map((r) => <option key={r.run_id} value={r.run_id}>{runLabel(r)} ({r.status})</option>)}
+            </Select>
+          </Field>
+        </CardBody>
+      </Card>
 
-      {/* Loading state — show skeletons while a selected run's data is in flight */}
+      {/* Loading state - show skeletons while a selected run's data is in flight */}
       {loading && !hasData && (
         <div className="space-y-6">
-          <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-            <h2 className="text-sm font-semibold text-muted-foreground mb-2">{i18n.t("compare.equityDrawdown")}</h2>
-            <SkeletonChart height={320} />
-          </div>
-          <div className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
+          <Card>
+            <CardHeader title={i18n.t("compare.equityDrawdown")} />
+            <CardBody><SkeletonChart height={320} /></CardBody>
+          </Card>
+          <Card className="overflow-hidden">
             <SkeletonMetrics />
-          </div>
+          </Card>
         </div>
       )}
 
       {/* Equity curve overlay */}
       {(leftCurve.length > 0 || rightCurve.length > 0) && (
-        <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold text-muted-foreground">{i18n.t("compare.equityOverlay")}</h2>
+        <Card>
+          <CardHeader
+            title={i18n.t("compare.equityOverlay")}
+            actions={
             <div className="flex gap-1 text-xs" role="group">
               {[
                 { id: true, label: i18n.t("compare.rebasedMode") },
@@ -385,17 +385,19 @@ export function Compare() {
                   type="button"
                   onClick={() => setRebase(mode.id)}
                   className={cn(
-                    "rounded-full border px-2.5 py-1 transition-colors",
+                    "rounded-md border px-2.5 py-1 transition-colors",
                     rebase === mode.id
                       ? "border-primary/30 bg-primary/10 font-medium text-primary"
-                      : "border-border/60 text-muted-foreground hover:bg-muted/60",
+                      : "border-border text-muted-foreground hover:bg-muted",
                   )}
                 >
                   {mode.label}
                 </button>
               ))}
             </div>
-          </div>
+            }
+          />
+          <CardBody>
           <EquityChartOverlay
             leftCurve={leftCurve}
             rightCurve={rightCurve}
@@ -403,22 +405,22 @@ export function Compare() {
             rightLabel={rightRun ? truncatePrompt(rightRun.prompt, 20) || t("compare.compare") : t("compare.compare")}
             rebase={rebase}
           />
-        </div>
+          </CardBody>
+        </Card>
       )}
 
       {/* Metrics table */}
       {(leftData || rightData) && (
-        <div className="overflow-x-auto rounded-xl border border-border/60 bg-card shadow-sm">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/40 text-[11px] uppercase tracking-wide text-muted-foreground [&_th]:font-medium">
-                <th className="text-left px-4 py-2.5 font-medium">{i18n.t("compare.metric")}</th>
-                <th className="text-right px-4 py-2.5 font-medium">{i18n.t("compare.baselineCol")}</th>
-                <th className="text-right px-4 py-2.5 font-medium">{i18n.t("compare.compareCol")}</th>
-                <th className="text-right px-4 py-2.5 font-medium">{i18n.t("compare.delta")}</th>
+        <Table>
+            <THead>
+              <tr>
+                <TH>{i18n.t("compare.metric")}</TH>
+                <TH numeric>{i18n.t("compare.baselineCol")}</TH>
+                <TH numeric>{i18n.t("compare.compareCol")}</TH>
+                <TH numeric>{i18n.t("compare.delta")}</TH>
               </tr>
-            </thead>
-            <tbody>
+            </THead>
+            <TBody>
               {METRICS.map(({ key, label, type, higherIsBetter }) => {
                 const lv = resolveMetric(leftData, key);
                 const rv = resolveMetric(rightData, key);
@@ -433,9 +435,9 @@ export function Compare() {
                 const leftWins = diff.verdict === "worse";
                 const rightWins = diff.verdict === "better";
                 return (
-                  <tr key={key} className="border-b last:border-0 hover:bg-muted/40">
-                    <td className="px-4 py-2.5 font-medium">{label}</td>
-                    <td className="relative px-4 py-2.5 text-right font-mono tabular-nums">
+                  <TR key={key}>
+                    <TD className="font-medium">{label}</TD>
+                    <TD numeric className="relative">
                       {shareL > 0 && (
                         <span
                           aria-hidden="true"
@@ -444,8 +446,8 @@ export function Compare() {
                         />
                       )}
                       <span className={cn("relative", leftWins && "font-semibold")}>{fmt(lv, type)}</span>
-                    </td>
-                    <td className="relative px-4 py-2.5 text-right font-mono tabular-nums">
+                    </TD>
+                    <TD numeric className="relative">
                       {shareR > 0 && (
                         <span
                           aria-hidden="true"
@@ -454,8 +456,8 @@ export function Compare() {
                         />
                       )}
                       <span className={cn("relative", rightWins && "font-semibold")}>{fmt(rv, type)}</span>
-                    </td>
-                    <td className={cn("px-4 py-2.5 text-right font-mono tabular-nums font-semibold", diff.className)}>
+                    </TD>
+                    <TD numeric className={cn("font-semibold", diff.className)}>
                       {diff.verdict && (
                         <>
                           <span aria-hidden="true">{diff.glyph} </span>
@@ -466,21 +468,19 @@ export function Compare() {
                         </>
                       )}
                       {diffStr(lv, rv, type)}
-                    </td>
-                  </tr>
+                    </TD>
+                  </TR>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
+            </TBody>
+        </Table>
       )}
 
       {!hasData && !loading && (
-        <div className="text-center py-16 text-muted-foreground">
-          <GitCompare className="h-12 w-12 mx-auto mb-3 opacity-20" />
-          <p className="text-sm">{i18n.t("compare.selectTwoRuns")}</p>
-        </div>
+        <Card>
+          <EmptyState icon={GitCompare} title={i18n.t("compare.selectTwoRuns")} />
+        </Card>
       )}
-    </div>
+    </Page>
   );
 }

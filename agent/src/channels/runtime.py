@@ -33,7 +33,7 @@ class ChannelRuntimeConfig:
 
 
 class ChannelRuntime:
-    """Route inbound channel messages into Vibe-Trading sessions."""
+    """Route inbound channel messages into Vibe Crypto sessions."""
 
     def __init__(
         self,

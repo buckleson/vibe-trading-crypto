@@ -69,7 +69,7 @@ export const ConversationTimeline = memo(function ConversationTimeline({ message
             className={cn(
               "rounded-full transition-all shrink-0",
               active
-                ? "w-3 h-3 bg-primary shadow-sm shadow-primary/30"
+                ? "w-3 h-3 bg-primary"
                 : "w-2 h-2 bg-muted-foreground/25 hover:bg-muted-foreground/50"
             )}
             title={prompt}

@@ -96,8 +96,6 @@ def rest_store(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> ScheduledRese
 @pytest.fixture
 def client(rest_store: ScheduledResearchJobStore, monkeypatch: pytest.MonkeyPatch) -> TestClient:
     """Keyless dev-mode client whose peer host counts as loopback."""
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
-    monkeypatch.setattr(api_server, "_API_KEY", "")
     return TestClient(api_server.app, client=("127.0.0.1", 50000))
 
 
@@ -347,20 +345,17 @@ class TestRestAuth:
             ("post", f"/scheduled-runs/playbooks/{SAMPLE}"),
         ],
     )
-    def test_configured_key_rejects_uncredentialed_requests(
+    def test_non_local_client_is_rejected(
         self,
         method: str,
         path: str,
         rest_store: ScheduledResearchJobStore,
-        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        monkeypatch.setenv("API_AUTH_KEY", "secret")
-        monkeypatch.setattr(api_server, "_API_KEY", "secret")
-        keyed = TestClient(api_server.app)
+        remote = TestClient(api_server.app, client=("203.0.113.7", 50000))
 
-        response = keyed.request(method.upper(), path, json={})
+        response = remote.request(method.upper(), path, json={})
 
-        assert response.status_code in {401, 403}
+        assert response.status_code == 403
         assert rest_store.list_jobs() == []
 
     @pytest.mark.parametrize(
@@ -371,21 +366,16 @@ class TestRestAuth:
             ("post", f"/scheduled-runs/playbooks/{SAMPLE}", 201),
         ],
     )
-    def test_valid_bearer_is_accepted(
+    def test_local_client_is_accepted(
         self,
         method: str,
         path: str,
         expected: int,
         rest_store: ScheduledResearchJobStore,
-        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        monkeypatch.setenv("API_AUTH_KEY", "secret")
-        monkeypatch.setattr(api_server, "_API_KEY", "secret")
-        keyed = TestClient(api_server.app)
+        local = TestClient(api_server.app)
 
-        response = keyed.request(
-            method.upper(), path, json={}, headers={"Authorization": "Bearer secret"}
-        )
+        response = local.request(method.upper(), path, json={})
 
         assert response.status_code == expected
 

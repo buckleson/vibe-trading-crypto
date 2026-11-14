@@ -219,7 +219,7 @@ def _resolve_us_secid(code: str) -> str | None:
 
 
 def resolve_secid(symbol: str) -> str | None:
-    """Map a Vibe-Trading symbol to its Eastmoney secid.
+    """Map a Vibe Crypto symbol to its Eastmoney secid.
 
     Supported suffixes: ``.SH`` / ``.SZ`` / ``.BJ`` (A-share), ``.HK`` (Hong
     Kong, code zero-padded to five digits), ``.US`` (resolved via search and

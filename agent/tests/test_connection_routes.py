@@ -225,12 +225,14 @@ def test_ibkr_endpoint_rejects_remote_profiles_and_extra_settings(ibkr_endpoint_
     assert client.put("/api/connections/ibkr-paper/endpoint", json={"host": "localhost", "port": 4002, "readonly": False}).status_code == 422
 
 
-def test_ibkr_endpoint_requires_settings_write_auth(ibkr_endpoint_client, monkeypatch):
-    from src.api import security
-
+def test_ibkr_endpoint_requires_settings_write_auth(ibkr_endpoint_client):
     client, store = ibkr_endpoint_client
-    monkeypatch.setattr(security, "_configured_api_key", lambda: "test-settings-key")
-    assert client.put("/api/connections/ibkr-paper/endpoint", json={"host": "localhost", "port": 4002}).status_code == 401
+    response = client.put(
+        "/api/connections/ibkr-paper/endpoint",
+        json={"host": "localhost", "port": 4002},
+        headers={"Origin": "https://evil.example"},
+    )
+    assert response.status_code == 403
     assert store.get("ibkr-paper").endpoint is None
 
 

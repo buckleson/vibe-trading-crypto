@@ -1,7 +1,7 @@
 import i18n from '@/i18n';
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams, useNavigate, useSearchParams } from "react-router";
+import { Link, useParams, useNavigate, useSearchParams } from "react-router";
 import {
   AlertTriangle,
   ArrowDown,
@@ -23,6 +23,7 @@ import {
   List,
   LayoutDashboard,
   Loader2,
+  LineChart,
   PieChart,
   ShieldCheck,
   Sigma,
@@ -30,6 +31,7 @@ import {
   CircleSlash,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Badge, Button, Card, EmptyState, Page, PageHeader, Table, THead, TBody, TR, TH, TD, Tabs } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { api, type BacktestMetrics, type EquityPoint, type FactorReportPayload, type RebalanceNotesPayload, type RiskXRayPayload, type RunCard, type RunData, type ValidationData } from "@/lib/api";
 import {
@@ -223,26 +225,28 @@ export function RunDetail() {
 
   if (loading) {
     return (
-      <div className="p-8 space-y-4">
+      <Page width="wide">
         <Skeleton className="h-6 w-48" />
         <SkeletonMetrics />
         <SkeletonChart height={400} />
-      </div>
+      </Page>
     );
   }
   if (!run) return (
-    <div className="p-8 space-y-2">
-      <p className="text-red-500 font-medium">{i18n.t("runDetail.runNotFound")}</p>
-      <p className="text-sm text-muted-foreground">
-        {i18n.t("runDetail.runNotFoundDesc")}
-      </p>
-      <button
-        onClick={() => navigate(-1)}
-        className="text-sm text-primary hover:underline inline-flex items-center gap-1.5"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" /> {i18n.t("runDetail.goBack")}
-      </button>
-    </div>
+    <Page width="wide">
+      <Card>
+        <EmptyState
+          icon={XCircle}
+          title={i18n.t("runDetail.runNotFound")}
+          description={i18n.t("runDetail.runNotFoundDesc")}
+          action={
+            <Button onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-4 w-4" /> {i18n.t("runDetail.goBack")}
+            </Button>
+          }
+        />
+      </Card>
+    </Page>
   );
 
   const ok = run.status === "success";
@@ -337,106 +341,106 @@ export function RunDetail() {
     cancelBulkChartLoadRef.current = true;
   }
 
+  const visibleTabs = TABS.filter((tabItem) => !tabItem.hidden);
+  const description = [
+    reportIdentity.symbols.join(", "),
+    reportIdentity.startDate && reportIdentity.endDate ? `${reportIdentity.startDate} to ${reportIdentity.endDate}` : "",
+  ].filter(Boolean).join(" · ");
+  const canRunOnPaper = ok || (run.equity_curve?.length ?? 0) > 0;
+
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="border-b border-border/60 p-4 space-y-3">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-1 rounded-md hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground"
-            title={i18n.t("runDetail.goBack")}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
-          {ok ? (
-            <>
-              <CheckCircle2 className="h-5 w-5 text-success" aria-hidden="true" />
-              <span className="sr-only">{t("swarm.status.completed")}</span>
-            </>
-          ) : cancelled ? (
-            <>
-              <CircleSlash className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
-              <span className="sr-only">{t("swarm.status.cancelled")}</span>
-            </>
-          ) : (
-            <>
-              <XCircle className="h-5 w-5 text-danger" aria-hidden="true" />
-              <span className="sr-only">{t("swarm.status.failed")}</span>
-            </>
-          )}
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="truncate text-xl font-semibold tracking-tight">{reportIdentity.title}</h1>
-              {reportIdentity.strategyInferred && (
-                <span className="inline-flex items-center gap-1 rounded-full border border-[#ff8a3d]/30 bg-[#ff8a3d]/10 px-2 py-0.5 text-[11px] text-[#c25a14]">
-                  {t("runDashboard.strategyInferred")}
-                </span>
+    <Page width="wide">
+      <div>
+        <Button variant="ghost" size="sm" onClick={() => navigate(-1)} title={i18n.t("runDetail.goBack")} aria-label={i18n.t("runDetail.goBack")}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+      </div>
+      <PageHeader
+        title={reportIdentity.title}
+        description={
+          <>
+            {description && <span className="block">{description}</span>}
+            <span className="flex flex-wrap items-center gap-2">
+              {ok ? (
+                <>
+                  <CheckCircle2 className="h-4 w-4 text-success" aria-hidden="true" />
+                  <span className="sr-only">{t("swarm.status.completed")}</span>
+                </>
+              ) : cancelled ? (
+                <>
+                  <CircleSlash className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                  <span className="sr-only">{t("swarm.status.cancelled")}</span>
+                </>
+              ) : (
+                <>
+                  <XCircle className="h-4 w-4 text-danger" aria-hidden="true" />
+                  <span className="sr-only">{t("swarm.status.failed")}</span>
+                </>
               )}
-            </div>
-            <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">RUN {runId}</p>
-          </div>
-          {run.elapsed_seconds && <span className="text-xs text-muted-foreground">{run.elapsed_seconds.toFixed(1)}s</span>}
-        </div>
-        {run.prompt && (
-          <div>
-            <p className={cn("text-sm text-muted-foreground whitespace-pre-wrap", !promptExpanded && "line-clamp-3")}>
-              {run.prompt}
-            </p>
-            <button
-              type="button"
-              aria-expanded={promptExpanded}
-              onClick={() => setPromptExpanded((v) => !v)}
-              className="mt-1 text-xs text-primary hover:underline"
-            >
-              {promptExpanded ? t("runDetail.showLessPrompt") : t("runDetail.showFullPrompt")}
-            </button>
-          </div>
-        )}
-        {run.metrics && <MetricsCard metrics={run.metrics as Record<string, number>} />}
-
-        <div className="flex flex-wrap items-center gap-1">
-          <div role="tablist" className="flex flex-wrap items-center gap-1">
-            {TABS.filter(tabItem => !tabItem.hidden).map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                role="tab"
-                aria-selected={tab === id}
-                onClick={() => setTab(id)}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors",
-                  tab === id ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted/60"
-                )}
+              <span className="font-mono text-xs">Run {runId}</span>
+              {reportIdentity.strategyInferred && (
+                <Badge tone="info">{t("runDashboard.strategyInferred")}</Badge>
+              )}
+              {run.elapsed_seconds ? <span className="text-xs tabular-nums">{run.elapsed_seconds.toFixed(1)}s</span> : null}
+            </span>
+          </>
+        }
+        actions={
+          <>
+            {canRunOnPaper && runId && (
+              <Link
+                to={`/paper-trading?from_run=${encodeURIComponent(runId)}`}
+                className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors duration-150 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
-                <Icon className="h-3.5 w-3.5" aria-hidden="true" /> {label}
-              </button>
-            ))}
-          </div>
-
-          <div className="ml-auto flex flex-wrap gap-1">
+                <LineChart className="h-4 w-4" aria-hidden="true" />
+                {t("runDetail.runOnPaper", { defaultValue: "Run on paper" })}
+              </Link>
+            )}
             {allTrades.length > 0 && (
-              <button
+              <Button
                 onClick={() => downloadCsv(`trades_${runId}.csv`, buildTradesCsv(allTrades))}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs text-muted-foreground hover:bg-muted/60 transition-colors"
                 title={i18n.t("runDetail.downloadTradesCsv")}
               >
-                <Download className="h-3.5 w-3.5" /> {i18n.t("runDetail.downloadTradesCsv")}
-              </button>
+                <Download className="h-4 w-4" /> {i18n.t("runDetail.downloadTradesCsv")}
+              </Button>
             )}
             {run.metrics && (
-              <button
+              <Button
                 onClick={() => downloadCsv(`metrics_${runId}.csv`, buildMetricsCsv(run.metrics!))}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs text-muted-foreground hover:bg-muted/60 transition-colors"
                 title={i18n.t("runDetail.downloadMetricsCsv")}
               >
-                <Download className="h-3.5 w-3.5" /> {i18n.t("runDetail.downloadMetricsCsv")}
-              </button>
+                <Download className="h-4 w-4" /> {i18n.t("runDetail.downloadMetricsCsv")}
+              </Button>
             )}
-          </div>
+          </>
+        }
+      />
+      {run.prompt && (
+        <div>
+          <p className={cn("text-sm text-muted-foreground whitespace-pre-wrap", !promptExpanded && "line-clamp-3")}>
+            {run.prompt}
+          </p>
+          <button
+            type="button"
+            aria-expanded={promptExpanded}
+            onClick={() => setPromptExpanded((v) => !v)}
+            className="mt-1 text-[13px] text-primary hover:underline"
+          >
+            {promptExpanded ? t("runDetail.showLessPrompt") : t("runDetail.showFullPrompt")}
+          </button>
         </div>
-      </div>
+      )}
+      {run.metrics && <MetricsCard metrics={run.metrics as Record<string, number>} />}
 
-      <div className="flex-1 overflow-auto">
+      <Tabs
+        aria-label={i18n.t("runDetail.sections", { defaultValue: "Run sections" })}
+        tabs={visibleTabs.map(({ id, label }) => ({ id, label }))}
+        value={tab}
+        onChange={(id) => setTab(id as Tab)}
+        className="overflow-x-auto"
+      />
+
+      <div>
         <ErrorBoundary>
           {tab === "dashboard" && <div className="p-4"><StrategyResearchDashboard run={run} /></div>}
           {tab === "chart" && (
@@ -470,7 +474,7 @@ export function RunDetail() {
           {tab === "code" && <CodeTab code={code} />}
         </ErrorBoundary>
       </div>
-    </div>
+    </Page>
   );
 }
 
@@ -498,7 +502,7 @@ function RunCardTab({ card }: { card: RunCard }) {
       </div>
 
       {warnings.length > 0 && (
-        <section className="rounded-xl border border-warning/25 bg-warning/5 p-4 shadow-sm">
+        <section className="rounded-lg border border-warning/30 bg-warning/10 p-4">
           <div className="mb-2 flex items-center gap-2 text-sm font-medium text-warning">
             <AlertTriangle className="h-4 w-4" />
             {i18n.t("runDetail.warnings")}
@@ -546,10 +550,10 @@ function RunCardTab({ card }: { card: RunCard }) {
         {card.tool_traces?.length ? (
           <ol className="space-y-3">
             {card.tool_traces.map((trace, index) => (
-              <li key={`${index}-${trace.started_at}`} className="rounded-lg border border-border/60 p-3">
+              <li key={`${index}-${trace.started_at}`} className="rounded-lg border border-border p-3">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <span className="text-sm font-medium">{t(`runDetail.trust.tools.${trace.tool}`)}</span>
-                  <span className={cn("rounded-md px-2 py-1 text-xs", trace.status === "ok" ? "bg-success/10 text-success" : trace.status === "error" ? "bg-danger/10 text-danger" : "bg-muted text-muted-foreground")}>
+                  <span className={cn("rounded-sm px-1.5 py-0.5 text-xs", trace.status === "ok" ? "bg-success/10 text-success" : trace.status === "error" ? "bg-danger/10 text-danger" : "bg-muted text-muted-foreground")}>
                     {t(`runDetail.trust.status.${trace.status}`)}
                   </span>
                 </div>
@@ -570,7 +574,7 @@ function RunCardTab({ card }: { card: RunCard }) {
         {card.citations?.length ? (
           <ul className="space-y-3">
             {card.citations.map((citation, index) => (
-              <li key={`${index}-${citation.metric}`} className="rounded-lg border border-border/60 p-3">
+              <li key={`${index}-${citation.metric}`} className="rounded-lg border border-border p-3">
                 <dl className="grid gap-3 text-xs sm:grid-cols-2">
                   <div><dt className="text-muted-foreground">{t("runDetail.trust.metric")}</dt><dd className="mt-1 break-all font-mono">{citation.metric}</dd></div>
                   <div><dt className="text-muted-foreground">{t("runDetail.trust.artifact")}</dt><dd className="mt-1 break-all font-mono" dir="ltr">{citation.artifact_id}</dd></div>
@@ -587,24 +591,24 @@ function RunCardTab({ card }: { card: RunCard }) {
       <RunCardPanel title={i18n.t("runDetail.artifactChecksums")} icon={FileCheck2}>
         {artifacts.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b bg-muted/40 text-left text-[11px] uppercase tracking-wide text-muted-foreground [&_th]:font-medium">
-                  <th className="py-2 ps-4 pr-4">{i18n.t("runDetail.path")}</th>
-                  <th className="py-2 pr-4">{i18n.t("runDetail.size")}</th>
-                  <th className="py-2">{i18n.t("runDetail.sha256")}</th>
+            <Table>
+              <THead>
+                <tr>
+                  <TH className="ps-4">{i18n.t("runDetail.path")}</TH>
+                  <TH>{i18n.t("runDetail.size")}</TH>
+                  <TH>{i18n.t("runDetail.sha256")}</TH>
                 </tr>
-              </thead>
-              <tbody>
+              </THead>
+              <TBody>
                 {artifacts.map((artifact) => (
-                  <tr key={`${artifact.path}-${artifact.sha256}`} className="border-b last:border-0 hover:bg-muted/40">
-                    <td className="py-2 ps-4 pr-4 font-mono text-xs">{artifact.path}</td>
-                    <td className="py-2 pr-4 font-mono tabular-nums text-muted-foreground">{formatBytes(artifact.size_bytes)}</td>
-                    <td className="py-2 font-mono text-xs text-muted-foreground">{shortHash(artifact.sha256)}</td>
-                  </tr>
+                  <TR key={`${artifact.path}-${artifact.sha256}`}>
+                    <TD className="ps-4 font-mono text-xs">{artifact.path}</TD>
+                    <TD className="tabular-nums text-muted-foreground">{formatBytes(artifact.size_bytes)}</TD>
+                    <TD className="font-mono text-xs text-muted-foreground">{shortHash(artifact.sha256)}</TD>
+                  </TR>
                 ))}
-              </tbody>
-            </table>
+              </TBody>
+            </Table>
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">{i18n.t("runDetail.noArtifactChecksums")}</p>
@@ -640,22 +644,22 @@ function StudioTab({ xray, notes }: { xray?: RiskXRayPayload; notes?: RebalanceN
           </div>
           {weightEntries.length > 0 && (
             <div className="mt-3 overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/40 text-left text-[11px] uppercase tracking-wide text-muted-foreground [&_th]:font-medium">
-                    <th className="py-2 ps-4 pr-4">{i18n.t("runDetail.symbol")}</th>
-                    <th className="py-2 pr-4">{i18n.t("runDetail.weight")}</th>
+              <Table>
+                <THead>
+                  <tr>
+                    <TH className="ps-4">{i18n.t("runDetail.symbol")}</TH>
+                    <TH>{i18n.t("runDetail.weight")}</TH>
                   </tr>
-                </thead>
-                <tbody>
+                </THead>
+                <TBody>
                   {weightEntries.map(([sym, w]) => (
-                    <tr key={sym} className="border-b last:border-0 hover:bg-muted/40">
-                      <td className="py-1.5 ps-4 pr-4 font-mono text-xs">{sym}</td>
-                      <td className="py-1.5 pr-4 font-mono tabular-nums">{fmtPct(w)}</td>
-                    </tr>
+                    <TR key={sym}>
+                      <TD className="ps-4 font-mono text-xs">{sym}</TD>
+                      <TD className="tabular-nums">{fmtPct(w)}</TD>
+                    </TR>
                   ))}
-                </tbody>
-              </table>
+                </TBody>
+              </Table>
             </div>
           )}
           {(xray.warnings || []).length > 0 && (
@@ -676,26 +680,26 @@ function StudioTab({ xray, notes }: { xray?: RiskXRayPayload; notes?: RebalanceN
           </div>
           {rebalances.length > 0 && (
             <div className="mt-3 overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/40 text-left text-[11px] uppercase tracking-wide text-muted-foreground [&_th]:font-medium">
-                    <th className="py-2 ps-4 pr-4">{i18n.t("runDetail.date")}</th>
-                    <th className="py-2 pr-4">{i18n.t("runDetail.turnover")}</th>
-                    <th className="py-2 pr-4">{i18n.t("runDetail.entries")}</th>
-                    <th className="py-2">{i18n.t("runDetail.exits")}</th>
+              <Table>
+                <THead>
+                  <tr>
+                    <TH className="ps-4">{i18n.t("runDetail.date")}</TH>
+                    <TH>{i18n.t("runDetail.turnover")}</TH>
+                    <TH>{i18n.t("runDetail.entries")}</TH>
+                    <TH>{i18n.t("runDetail.exits")}</TH>
                   </tr>
-                </thead>
-                <tbody>
+                </THead>
+                <TBody>
                   {rebalances.map((r) => (
-                    <tr key={r.date} className="border-b last:border-0 hover:bg-muted/40">
-                      <td className="py-1.5 ps-4 pr-4 font-mono text-xs">{r.date}</td>
-                      <td className="py-1.5 pr-4 font-mono tabular-nums">{fmtPct(r.turnover)}</td>
-                      <td className="py-1.5 pr-4 text-xs">{(r.entries || []).map((e) => e.code).join(", ") || "-"}</td>
-                      <td className="py-1.5 text-xs">{(r.exits || []).map((e) => e.code).join(", ") || "-"}</td>
-                    </tr>
+                    <TR key={r.date}>
+                      <TD className="ps-4 font-mono text-xs">{r.date}</TD>
+                      <TD className="tabular-nums">{fmtPct(r.turnover)}</TD>
+                      <TD className="text-xs">{(r.entries || []).map((e) => e.code).join(", ") || "-"}</TD>
+                      <TD className="text-xs">{(r.exits || []).map((e) => e.code).join(", ") || "-"}</TD>
+                    </TR>
                   ))}
-                </tbody>
-              </table>
+                </TBody>
+              </Table>
             </div>
           )}
         </RunCardPanel>
@@ -860,17 +864,16 @@ function ChartTab({
 
   if (chartSymbols.length === 0 && entries.length === 0 && !hasEquity) {
     return (
-      <div className="p-8 text-center text-muted-foreground space-y-2">
-        <p className="text-sm">{i18n.t("runDetail.noChartData")}</p>
-        <p className="text-xs">{i18n.t("runDetail.noChartDataDesc")}</p>
-      </div>
+      <Card>
+        <EmptyState icon={BarChart3} title={i18n.t("runDetail.noChartData")} description={i18n.t("runDetail.noChartDataDesc")} />
+      </Card>
     );
   }
 
   return (
     <div className="p-4 space-y-4">
       {chartSymbols.length > 0 && (
-        <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+        <Card className="p-4">
           <div className="flex flex-wrap items-center gap-2">
             <label className="text-xs font-medium text-muted-foreground" htmlFor="chart-symbol-select">
               {i18n.t("runDetail.symbol")}
@@ -879,42 +882,38 @@ function ChartTab({
               id="chart-symbol-select"
               value={chartPickerSymbol}
               onChange={(event) => onPickSymbol(event.target.value)}
-              className="h-8 rounded-md border border-border/60 bg-background px-2 text-sm"
+              className="h-8 rounded-md border border-border bg-card px-2 text-[13px]"
             >
               {chartSymbols.map((symbol) => (
                 <option key={symbol} value={symbol}>{symbol}</option>
               ))}
             </select>
-            <button
+            <Button size="sm"
               onClick={() => onCurrentOnly(chartPickerSymbol)}
-              className="rounded-md border border-border/60 px-3 py-1.5 text-xs font-medium hover:bg-muted/60"
-              disabled={!chartPickerSymbol || !!loadingSymbols[chartPickerSymbol]}
+                            disabled={!chartPickerSymbol || !!loadingSymbols[chartPickerSymbol]}
             >
-              {loadingSymbols[chartPickerSymbol] ? <Loader2 className="mr-1 inline h-3.5 w-3.5 animate-spin" /> : null}
+              {loadingSymbols[chartPickerSymbol] ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               {i18n.t("runDetail.showOnly")}
-            </button>
-            <button
+            </Button>
+            <Button size="sm"
               onClick={() => onAddSymbol(chartPickerSymbol)}
-              className="rounded-md border border-border/60 px-3 py-1.5 text-xs font-medium hover:bg-muted/60"
-              disabled={!chartPickerSymbol || !!loadingSymbols[chartPickerSymbol]}
+                            disabled={!chartPickerSymbol || !!loadingSymbols[chartPickerSymbol]}
             >
               {i18n.t("runDetail.addSymbol")}
-            </button>
-            <button
+            </Button>
+            <Button size="sm"
               onClick={() => void onLoadAll()}
-              className="rounded-md border border-border/60 px-3 py-1.5 text-xs font-medium hover:bg-muted/60"
-              disabled={bulkLoading}
+                            disabled={bulkLoading}
             >
-              {bulkLoading ? <Loader2 className="mr-1 inline h-3.5 w-3.5 animate-spin" /> : null}
+              {bulkLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               {i18n.t("runDetail.loadAll")}
-            </button>
+            </Button>
             {bulkLoading && (
-              <button
+              <Button size="sm"
                 onClick={onCancelLoadAll}
-                className="rounded-md border border-border/60 px-3 py-1.5 text-xs font-medium hover:bg-muted/60"
-              >
+                              >
                 {i18n.t("runDetail.cancelLoad")}
-              </button>
+              </Button>
             )}
           </div>
           {selectedSymbols.length > 0 && (
@@ -923,7 +922,7 @@ function ChartTab({
                 <button
                   key={symbol}
                   onClick={() => onRemoveSymbol(symbol)}
-                  className="rounded-md bg-muted/40 px-2 py-1 text-xs hover:bg-muted/60"
+                  className="rounded-md bg-muted px-2 py-1 text-xs hover:bg-muted/70"
                 >
                   {symbol} x
                 </button>
@@ -936,17 +935,17 @@ function ChartTab({
                 <span>{i18n.t("runDetail.loadingCharts")}</span>
                 <span>{bulkProgress.done}/{bulkProgress.total}</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-muted">
+              <div className="h-0.5 overflow-hidden rounded-full bg-muted">
                 <div className="h-full bg-primary transition-all" style={{ width: `${progressPercent}%` }} />
               </div>
             </div>
           )}
-        </div>
+        </Card>
       )}
       {entries.length === 0 && (
-        <div className="rounded-xl border border-dashed border-border/60 bg-card p-5 text-center text-sm text-muted-foreground shadow-sm">
-          {Object.keys(loadingSymbols).length > 0 ? i18n.t("runDetail.loadingSelectedChart") : i18n.t("runDetail.pickSymbolToLoad")}
-        </div>
+        <Card>
+          <EmptyState icon={BarChart3} title={Object.keys(loadingSymbols).length > 0 ? i18n.t("runDetail.loadingSelectedChart") : i18n.t("runDetail.pickSymbolToLoad")} />
+        </Card>
       )}
       {entries.map(([sym, bars]) => (
         <div key={sym}>
@@ -1043,7 +1042,7 @@ function TradesTab({ run }: { run: RunData }) {
         {totalPnl != null && (
           <span className="inline-flex items-center gap-1">
             {i18n.t("runDetail.totalPnl")}
-            <span className={cn("font-mono font-medium tabular-nums", signedNumberClass(totalPnl))}>
+            <span className={cn("font-medium tabular-nums", signedNumberClass(totalPnl))}>
               {formatSigned(totalPnl)}
             </span>
           </span>
@@ -1056,10 +1055,10 @@ function TradesTab({ run }: { run: RunData }) {
                 type="button"
                 onClick={() => { setSideFilter(chip.id); setVisibleCount(TRADES_PAGE_SIZE); }}
                 className={cn(
-                  "rounded-full border px-2.5 py-1 transition-colors",
+                  "rounded-md border px-2.5 py-1 transition-colors",
                   sideFilter === chip.id
                     ? "border-primary/30 bg-primary/10 font-medium text-primary"
-                    : "border-border/60 hover:bg-muted/60",
+                    : "border-border hover:bg-muted",
                 )}
               >
                 {chip.label}
@@ -1070,7 +1069,7 @@ function TradesTab({ run }: { run: RunData }) {
             <select
               value={symbolFilter}
               onChange={(event) => { setSymbolFilter(event.target.value); setVisibleCount(TRADES_PAGE_SIZE); }}
-              className="h-7 rounded-md border border-border/60 bg-background px-2 text-xs"
+              className="h-8 rounded-md border border-border bg-card px-2 text-[13px]"
               aria-label={i18n.t("runDetail.symbol")}
             >
               <option value="">{i18n.t("runDetail.allSymbols")}</option>
@@ -1082,83 +1081,79 @@ function TradesTab({ run }: { run: RunData }) {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-border/60 bg-card shadow-sm">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b bg-muted/40 text-left text-[11px] uppercase tracking-wide text-muted-foreground [&_th]:font-medium">
-              <th className="py-2 ps-4 pr-4" aria-sort={sortDesc ? "descending" : "ascending"}>
+      <div>
+        <Table>
+          <THead>
+            <tr>
+              <TH className="ps-4" aria-sort={sortDesc ? "descending" : "ascending"}>
                 <button
                   type="button"
                   onClick={() => { setSortDesc((desc) => !desc); setVisibleCount(TRADES_PAGE_SIZE); }}
-                  className="inline-flex items-center gap-1 uppercase hover:text-foreground"
+                  className="inline-flex items-center gap-1 hover:text-foreground"
                 >
                   {i18n.t("runDetail.time")}
                   {sortDesc
-                    ? <ArrowDown className="h-3 w-3" aria-hidden="true" />
-                    : <ArrowUp className="h-3 w-3" aria-hidden="true" />}
+                    ? <ArrowDown className="h-4 w-4" aria-hidden="true" />
+                    : <ArrowUp className="h-4 w-4" aria-hidden="true" />}
                 </button>
-              </th>
-              <th className="py-2 pr-4">{i18n.t("runDetail.code2")}</th>
-              <th className="py-2 pr-4">{i18n.t("runDetail.side")}</th>
-              <th className="py-2 pr-4 text-right">{i18n.t("runDetail.price")}</th>
-              <th className="py-2 pr-4 text-right">{i18n.t("runDetail.qty")}</th>
-              {hasPnl && <th className="py-2 pr-4 text-right">{i18n.t("runDetail.pnl")}</th>}
-              {hasReturnPct && <th className="py-2 pr-4 text-right">{i18n.t("runDetail.returnPct")}</th>}
-              {hasHoldingDays && <th className="py-2 pr-4 text-right">{i18n.t("runDetail.holdingDays")}</th>}
-              <th className="py-2">{i18n.t("runDetail.reason")}</th>
+              </TH>
+              <TH>{i18n.t("runDetail.code2")}</TH>
+              <TH>{i18n.t("runDetail.side")}</TH>
+              <TH className="text-right">{i18n.t("runDetail.price")}</TH>
+              <TH className="text-right">{i18n.t("runDetail.qty")}</TH>
+              {hasPnl && <TH className="text-right">{i18n.t("runDetail.pnl")}</TH>}
+              {hasReturnPct && <TH className="text-right">{i18n.t("runDetail.returnPct")}</TH>}
+              {hasHoldingDays && <TH className="text-right">{i18n.t("runDetail.holdingDays")}</TH>}
+              <TH>{i18n.t("runDetail.reason")}</TH>
             </tr>
-          </thead>
-          <tbody>
+          </THead>
+          <TBody>
             {visible.map((tr, i) => {
               const side = normalizeSide(tr.side);
               const pnl = parseTradeNumber(tr.pnl);
               const returnPct = parseTradeNumber(tr.return_pct);
               return (
-                <tr key={i} className={cn("border-b last:border-0 hover:bg-muted/40", i % 2 === 1 && "bg-muted/10")}>
-                  <td className="py-2 ps-4 pr-4 font-mono text-xs">{tradeTime(tr)}</td>
-                  <td className="py-2 pr-4 font-mono text-xs">{tr.code}</td>
-                  <td className="py-2 pr-4">
+                <TR key={i}>
+                  <TD className="ps-4 font-mono text-xs">{tradeTime(tr)}</TD>
+                  <TD className="font-mono text-xs">{tr.code}</TD>
+                  <TD>
                     <span className={cn(
-                      "inline-block rounded-full px-2 py-0.5 text-xs font-medium",
+                      "inline-block rounded-sm px-1.5 py-0.5 text-xs font-medium",
                       side === "BUY" && "bg-success/10 text-success",
                       side === "SELL" && "bg-danger/10 text-danger",
                       side === "" && "bg-muted text-muted-foreground",
                     )}>
                       {side === "BUY" ? i18n.t("runDetail.sideBuy") : side === "SELL" ? i18n.t("runDetail.sideSell") : tr.side}
                     </span>
-                  </td>
-                  <td className="py-2 pr-4 text-right font-mono tabular-nums">{tr.price}</td>
-                  <td className="py-2 pr-4 text-right font-mono tabular-nums">{tr.qty}</td>
+                  </TD>
+                  <TD className="text-right tabular-nums">{tr.price}</TD>
+                  <TD className="text-right tabular-nums">{tr.qty}</TD>
                   {hasPnl && (
-                    <td className={cn("py-2 pr-4 text-right font-mono tabular-nums", signedNumberClass(pnl))}>
-                      {pnl != null ? formatSigned(pnl) : "—"}
-                    </td>
+                    <TD className={cn("py-2 pr-4 text-right font-mono tabular-nums", signedNumberClass(pnl))}>
+                      {pnl != null ? formatSigned(pnl) : "-"}
+                    </TD>
                   )}
                   {hasReturnPct && (
-                    <td className={cn("py-2 pr-4 text-right font-mono tabular-nums", signedNumberClass(returnPct))}>
-                      {returnPct != null ? formatSigned(returnPct, "%") : "—"}
-                    </td>
+                    <TD className={cn("py-2 pr-4 text-right font-mono tabular-nums", signedNumberClass(returnPct))}>
+                      {returnPct != null ? formatSigned(returnPct, "%") : "-"}
+                    </TD>
                   )}
                   {hasHoldingDays && (
-                    <td className="py-2 pr-4 text-right font-mono tabular-nums text-muted-foreground">{tr.holding_days ?? "—"}</td>
+                    <TD className="text-right tabular-nums text-muted-foreground">{tr.holding_days ?? "-"}</TD>
                   )}
-                  <td className="py-2 text-xs text-muted-foreground">{tr.reason}</td>
-                </tr>
+                  <TD className="text-xs text-muted-foreground">{tr.reason}</TD>
+                </TR>
               );
             })}
-          </tbody>
-        </table>
+          </TBody>
+        </Table>
       </div>
 
       {remaining > 0 && (
         <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={() => setVisibleCount((count) => count + TRADES_PAGE_SIZE)}
-            className="rounded-full border border-border/60 px-4 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
-          >
+          <Button onClick={() => setVisibleCount((count) => count + TRADES_PAGE_SIZE)}>
             {i18n.t("runDetail.showMore", { count: Math.min(remaining, TRADES_PAGE_SIZE) })}
-          </button>
+          </Button>
         </div>
       )}
     </div>
@@ -1168,7 +1163,7 @@ function TradesTab({ run }: { run: RunData }) {
 function CodeTab({ code }: { code: Record<string, string> }) {
   const files = Object.entries(code);
   const [active, setActive] = useState(files[0]?.[0] || "");
-  if (files.length === 0) return <div className="p-8 text-muted-foreground text-sm">{i18n.t("runDetail.noCodeFiles")}</div>;
+  if (files.length === 0) return <Card><EmptyState icon={Code2} title={i18n.t("runDetail.noCodeFiles")} /></Card>;
 
   const activeCode = code[active] || "";
   const lineCount = activeCode ? activeCode.split("\n").length : 0;
@@ -1180,31 +1175,27 @@ function CodeTab({ code }: { code: Record<string, string> }) {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center gap-2 p-2 border-b border-border/60">
+    <Card className="flex flex-col overflow-hidden">
+      <div className="flex items-center gap-2 p-2 border-b border-border">
         <div className="flex min-w-0 flex-wrap gap-1">
           {files.map(([name]) => (
-            <button key={name} onClick={() => setActive(name)} className={cn("px-3 py-1 rounded text-xs font-mono", active === name ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/60")}>{name}</button>
+            <button key={name} onClick={() => setActive(name)} className={cn("px-3 py-1 rounded-md text-[13px] font-mono", active === name ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted")}>{name}</button>
           ))}
         </div>
         <div className="ms-auto flex shrink-0 items-center gap-2">
-          <span className="text-[10px] tabular-nums text-muted-foreground">
+          <span className="text-xs tabular-nums text-muted-foreground">
             {i18n.t("runDetail.codeLines", { count: lineCount })}
           </span>
-          <button
-            type="button"
-            onClick={copyActive}
-            className="flex items-center gap-1 rounded-md border border-border/60 px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
-          >
-            <Copy className="h-3 w-3" /> {i18n.t("runDetail.copyCode")}
-          </button>
+          <Button size="sm" onClick={copyActive}>
+            <Copy className="h-4 w-4" /> {i18n.t("runDetail.copyCode")}
+          </Button>
         </div>
       </div>
-      <div className="flex-1 overflow-auto p-3 text-xs leading-relaxed bg-muted/20 [&_pre]:m-0 [&_pre]:bg-transparent [&_code]:text-xs">
+      <div className="max-h-[70vh] overflow-auto p-3 text-xs leading-relaxed bg-muted/50 [&_pre]:m-0 [&_pre]:bg-transparent [&_code]:text-xs">
         <ReactMarkdown rehypePlugins={rehypePlugins}>
           {`\`\`\`python\n${activeCode}\n\`\`\``}
         </ReactMarkdown>
       </div>
-    </div>
+    </Card>
   );
 }

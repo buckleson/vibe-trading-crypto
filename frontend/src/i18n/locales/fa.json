@@ -87,7 +87,7 @@
     "collapse": "جمع‌کردن",
     "expand": "بازکردن",
     "skipToMain": "پرش به محتوای اصلی",
-    "sidebar": "نوار کناری Vibe-Trading",
+    "sidebar": "نوار کناری Vibe Crypto",
     "mainNavigation": "ناوبری اصلی",
     "about": "درباره",
     "sessionsLoadFailed": "گفتگوها بارگذاری نمی‌شوند.",
@@ -571,7 +571,7 @@
     "clearApiKey": "پاک‌کردن کلید API ذخیره‌شده",
     "channels": {
       "title": "کانال‌های IM",
-      "description": "آداپتورهای چت را به همان ران‌تایم نشست Vibe-Trading که Web UI و CLI استفاده می‌کنند متصل کنید.",
+      "description": "آداپتورهای چت را به همان ران‌تایم نشست Vibe Crypto که Web UI و CLI استفاده می‌کنند متصل کنید.",
       "runtime": "ران‌تایم",
       "running": "در حال اجرا",
       "stopped": "متوقف",
@@ -1084,7 +1084,7 @@
           "step3": "اعتبارنامه‌های IMAP و SMTP بالا را وارد کنید، نشانی فرستنده را تعیین و نشانی خودتان را به فرستندگان مجاز اضافه کنید.",
           "step4": "آزمون اتصال را بزنید؛ ورود IMAP، پوشه صندوق و ورود SMTP بررسی می‌شوند.",
           "step5": "گزینه رضایت داده شده را بزنید و کانال را فعال کنید؛ پاسخ خودکار فقط به فرستندگانی می‌رسد که ایمیلشان از بررسی DKIM/SPF عبور کند.",
-          "docsLabel": "باز کردن مستندات Vibe-Trading"
+          "docsLabel": "باز کردن مستندات Vibe Crypto"
         },
         "websocket": {
           "title": "راهنمای تنظیم WebSocket",
@@ -1094,12 +1094,12 @@
           "step3": "کلاینت‌ها را با ws://host:port/path?client_id=...&token=... متصل کنید.",
           "step4": "ذخیره هنگام اجرای کانال، سرور را درجا جایگزین می‌کند؛ کلاینت‌ها (از جمله گفتگوی این رابط وب) کوتاه‌مدت قطع و دوباره متصل می‌شوند.",
           "step5": "آزمون اتصال را بزنید؛ گواهی و کلید SSL و امکان استفاده از نشانی، محلی بررسی می‌شوند.",
-          "docsLabel": "باز کردن مستندات Vibe-Trading"
+          "docsLabel": "باز کردن مستندات Vibe Crypto"
         },
         "feishu": {
           "title": "راه‌اندازی ربات Feishu / Lark",
           "intro": "ربات‌های Feishu با اتصال پایدار WebSocket کار می‌کنند و IP عمومی یا نشانی webhook لازم ندارند.",
-          "step1": "در پلتفرم باز Feishu ‏(open.feishu.cn) یک Custom App بسازید، یا با vibe-trading channels login feishu در ترمینال اسکن و ایجاد کنید تا App ID و App Secret خودکار ذخیره شوند.",
+          "step1": "در پلتفرم باز Feishu ‏(open.feishu.cn) یک Custom App بسازید، یا با vibe-crypto channels login feishu در ترمینال اسکن و ایجاد کنید تا App ID و App Secret خودکار ذخیره شوند.",
           "step2": "قابلیت Bot را به برنامه اضافه کنید.",
           "step3": "در Event Subscription دریافت پیام (im.message.receive_v1) را انتخاب و حالت Long Connection را فعال کنید.",
           "step4": "App ID و App Secret را از Credentials & Basic Info کپی و در فیلدهای بالا وارد کنید.",
@@ -1939,7 +1939,7 @@
     "unknown": "نامشخص",
     "justNow": "همین حالا",
     "loadingInstructions": "در حال بارگذاری دستورالعمل‌های مجوز کانکتور…",
-    "fallbackInstruction": "اجرای `vibe-trading connector list`، انتخاب پروفایل کارگزار، سپس اجرای `vibe-trading connector authorize <profile>` از نشست دسکتاپی که اتصال کارگزار را نگه می‌دارد.",
+    "fallbackInstruction": "اجرای `vibe-crypto connector list`، انتخاب پروفایل کارگزار، سپس اجرای `vibe-crypto connector authorize <profile>` از نشست دسکتاپی که اتصال کارگزار را نگه می‌دارد.",
     "secondsAgo": "{{n}} ثانیه پیش",
     "minutesAgo": "{{n}} دقیقه پیش",
     "hoursAgo": "{{n}} ساعت پیش",

@@ -188,7 +188,7 @@ def _require_mt5() -> ModuleType:
     except ImportError as exc:
         raise MT5DependencyError(
             "MetaTrader5 is not installed (Windows-only). Install the extra with "
-            '`pip install "vibe-trading-ai[mt5]"` and run a local MT5 terminal.'
+            '`pip install "vibe-crypto[mt5]"` and run a local MT5 terminal.'
         ) from exc
     return MetaTrader5
 

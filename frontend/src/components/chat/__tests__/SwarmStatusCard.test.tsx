@@ -91,7 +91,8 @@ describe("SwarmStatusCard", () => {
     expect(html).toContain(
       "animate-[pulse-slide_2s_ease-in-out_infinite]",
     );
-    expect(html.match(/animate-pulse/g)).toHaveLength(2);
+    expect(html).not.toContain("animate-pulse");
+    expect(html.match(/animate-spin/g)).toHaveLength(2);
     expect(html).toMatch(
       /<progress class="sr-only" aria-label="[^"]+"><\/progress>/,
     );
@@ -125,7 +126,7 @@ describe("SwarmStatusCard", () => {
       />,
     );
 
-    expect(html).toContain("Completed — details unavailable");
+    expect(html).toContain("Completed - details unavailable");
     expect(html).not.toContain("Assembling team");
     expect(html).not.toContain("Preparing layers");
     expect(html).not.toContain("The team is spinning up");

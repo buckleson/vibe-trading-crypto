@@ -1,6 +1,6 @@
 """Standalone WebSocket channel probe — local validation, no remote endpoint.
 
-WebSocket is a *server* channel: vibe-trading listens and clients connect, so
+WebSocket is a *server* channel: Vibe Crypto listens and clients connect, so
 there are no remote credentials to validate against a token endpoint (cf.
 :mod:`src.channels.token_probe`). Instead this probe checks the two things
 that make :meth:`WebSocketChannel.start` fail in practice:

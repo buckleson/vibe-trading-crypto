@@ -97,8 +97,8 @@ def test_banner_renders_large_logo_and_metadata() -> None:
     print_banner(console, model="test-model", skills=1, tools=2, sessions=0, version="9.9.9")
     out = console.export_text()
 
-    assert "__      ___ _" in out
-    assert "vibe-trading v9.9.9  ·  cli  ·  test-model" in out
+    assert "Vibe Crypto" in out
+    assert "vibe-crypto v9.9.9  ·  cli  ·  test-model" in out
 
 
 def test_transcript_helpers_render_prompt_recap_and_elapsed() -> None:

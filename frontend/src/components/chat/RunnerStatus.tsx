@@ -27,7 +27,7 @@ interface Props {
   /** Shared `GET /live/status` snapshot, polled once by the parent (Agent.tsx).
    * `null` until the first poll resolves. */
   status: LiveStatus | null;
-  /** True when the status endpoint is not wired on this backend (404/501) — hide. */
+  /** True when the status endpoint is not wired on this backend (404/501) - hide. */
   unavailable?: boolean;
   /** When true, every broker's halted banner reflects the global kill switch. */
   halted?: boolean;
@@ -36,7 +36,7 @@ interface Props {
 }
 
 function formatUsd(value: number | undefined): string {
-  if (value == null || !Number.isFinite(value)) return "—";
+  if (value == null || !Number.isFinite(value)) return "-";
   return `$${value.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 }
 
@@ -55,7 +55,7 @@ function formatRelative(value: string | number | null | undefined): string {
 }
 
 function formatCountdown(iso: string | undefined): { label: string; expired: boolean; soon: boolean } {
-  if (!iso) return { label: "—", expired: false, soon: false };
+  if (!iso) return { label: "-", expired: false, soon: false };
   const target = new Date(iso).getTime();
   if (!Number.isFinite(target)) return { label: i18n.t("runnerStatus.unknown"), expired: false, soon: false };
   const deltaSec = Math.round((target - Date.now()) / 1000);
@@ -185,17 +185,17 @@ function BrokerRow({
         <div className="flex min-w-0 items-center gap-1.5">
           <span className="truncate text-xs font-semibold capitalize text-foreground">{brokerKey}</span>
           {oauthAuthorized ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+            <span className="inline-flex items-center gap-1 rounded-sm bg-success/10 px-1.5 py-0.5 text-xs font-medium text-success">
               <ShieldCheck className="h-2.5 w-2.5" />
               {i18n.t("runnerStatus.authorized")}
             </span>
           ) : sdkReady ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+            <span className="inline-flex items-center gap-1 rounded-sm bg-success/10 px-1.5 py-0.5 text-xs font-medium text-success">
               <CircleDot className="h-2.5 w-2.5" />
               {i18n.t("runnerStatus.sdkConnected")}
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+            <span className="inline-flex items-center gap-1 rounded-sm bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
               <CircleSlash className="h-2.5 w-2.5" />
               {i18n.t("runnerStatus.notConnected")}
             </span>
@@ -203,47 +203,47 @@ function BrokerRow({
         </div>
       </div>
 
-      {/* OAuth on-ramp for mandate live brokers only — SDK key brokers use file/env credentials. */}
+      {/* OAuth on-ramp for mandate live brokers only - SDK key brokers use file/env credentials. */}
       {showOAuthOnRamp ? (
         <div className="grid gap-1.5 rounded-md border border-dashed border-primary/30 bg-primary/5 p-2">
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-primary">
-            <PlugZap className="h-3 w-3 shrink-0" />
+          <div className="flex items-center gap-1.5 text-xs font-medium text-primary">
+            <PlugZap className="h-4 w-4 shrink-0" />
             {i18n.t("runnerStatus.connectProfile")}
           </div>
-          <p className="text-[10px] leading-relaxed text-muted-foreground">
+          <p className="text-xs leading-relaxed text-muted-foreground">
             {authorizeInstruction}
           </p>
           {authorizeNote && (
-            <p className="text-[10px] leading-relaxed text-muted-foreground">
+            <p className="text-xs leading-relaxed text-muted-foreground">
               {authorizeNote}
             </p>
           )}
         </div>
       ) : isSdkBroker(auth) && !operational ? (
         <div className="grid gap-1.5 rounded-md border border-dashed border-border/60 bg-muted/30 p-2">
-          <p className="text-[10px] leading-relaxed text-muted-foreground">
+          <p className="text-xs leading-relaxed text-muted-foreground">
             {sdkDiagnosticMessage(auth)}
           </p>
         </div>
       ) : operational ? (
         <>
           {sdkReady && auth.readonly === true ? (
-            <p className="text-[10px] leading-relaxed text-muted-foreground">
+            <p className="text-xs leading-relaxed text-muted-foreground">
               {i18n.t("runnerStatus.sdkReadOnlyNote")}
             </p>
           ) : null}
           <div className="grid grid-cols-2 gap-2">
             <div className="rounded-md border bg-background/60 p-2">
-              <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                <CircleDot className={["h-2.5 w-2.5", runnerAlive ? "text-emerald-500" : "text-muted-foreground"].join(" ")} />
+              <div className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                <CircleDot className={["h-2.5 w-2.5", runnerAlive ? "text-success" : "text-muted-foreground"].join(" ")} />
                 {i18n.t("runnerStatus.runner")}
               </div>
-              <div className={["mt-0.5 text-xs font-semibold", runnerAlive ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"].join(" ")}>
+              <div className={["mt-0.5 text-xs font-semibold", runnerAlive ? "text-success" : "text-muted-foreground"].join(" ")}>
                 {runnerAlive ? i18n.t("runnerStatus.runnerRunning") : i18n.t("runnerStatus.runnerStopped")}
               </div>
             </div>
             <div className="rounded-md border bg-background/60 p-2">
-              <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <div className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
                 <Activity className="h-2.5 w-2.5" />
                 {i18n.t("runnerStatus.lastTick")}
               </div>
@@ -256,18 +256,18 @@ function BrokerRow({
           {mandate ? (
             <div className="rounded-md border bg-background/60 p-2">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                <div className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
                   <ShieldCheck className="h-2.5 w-2.5" />
                   {i18n.t("runnerStatus.activeMandate")}
                 </div>
                 {mandate.expires_at && (
                   <span
                     className={[
-                      "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium",
+                      "inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-xs font-medium",
                       countdown.expired
                         ? "bg-destructive/10 text-destructive"
                         : countdown.soon
-                          ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                          ? "bg-warning/10 text-warning"
                           : "bg-muted text-muted-foreground",
                     ].join(" ")}
                     title={i18n.t("runnerStatus.expiresAt", { time: new Date(mandate.expires_at).toLocaleString() })}
@@ -277,24 +277,24 @@ function BrokerRow({
                   </span>
                 )}
               </div>
-              <div className="mt-0.5 font-mono text-[11px] text-foreground">
+              <div className="mt-0.5 font-mono text-xs text-foreground">
                 {summarizeLimits(mandate.limits) || i18n.t("runnerStatus.limitsUnavailable")}
               </div>
             </div>
           ) : (
-            <div className="rounded-md border border-dashed bg-background/40 p-2 text-[10px] text-muted-foreground">
+            <div className="rounded-md border border-dashed bg-background/40 p-2 text-xs text-muted-foreground">
               {i18n.t("runnerStatus.noActiveMandate")}
             </div>
           )}
 
           <div className="flex items-center justify-between gap-2">
             {halted ? (
-              <span className="inline-flex items-center gap-1 text-[10px] font-medium text-destructive">
-                <OctagonX className="h-3 w-3" />
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-destructive">
+                <OctagonX className="h-4 w-4" />
                 {i18n.t("runnerStatus.haltedControlsDisabled")}
               </span>
             ) : (
-              <span className="text-[10px] text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 {runnerAlive ? i18n.t("runnerStatus.runtimeActive") : i18n.t("runnerStatus.idle")}
               </span>
             )}
@@ -303,14 +303,14 @@ function BrokerRow({
               onClick={toggleRunner}
               disabled={busy || (!runnerAlive && (halted || !mandate || countdown.expired || !!broker.decision_budget?.error))}
               className={[
-                "inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-medium transition-colors disabled:opacity-40",
+                "inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-xs font-medium transition-colors disabled:opacity-40",
                 runnerAlive
                   ? "border-destructive/40 text-destructive hover:bg-destructive/10"
                   : "border-primary/40 text-primary hover:bg-primary/10",
               ].join(" ")}
               title={runnerAlive ? i18n.t("runnerStatus.stopRunnerTitle") : i18n.t("runnerStatus.startRunnerTitle")}
             >
-              {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Power className="h-3 w-3" />}
+              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Power className="h-4 w-4" />}
               {runnerAlive ? i18n.t("runnerStatus.stopRunner") : i18n.t("runnerStatus.startRunner")}
             </button>
           </div>
@@ -371,31 +371,31 @@ export const RunnerStatus = memo(function RunnerStatus({ status, unavailable, ha
         aria-label={i18n.t("runnerStatus.connectorRuntime")}
         aria-expanded={open}
       >
-        <Activity className="h-3 w-3 shrink-0" />
+        <Activity className="h-4 w-4 shrink-0" />
         <span className="shrink-0">{i18n.t("runnerStatus.connectorRuntime")}</span>
         <span className="truncate text-muted-foreground">
           {authorizedCount > 0 ? i18n.t("runnerStatus.connected", { count: authorizedCount }) : i18n.t("runnerStatus.noConnector")}
         </span>
         {anyRunning && !isHalted && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+          <span className="inline-flex items-center gap-1 rounded-sm bg-success/10 px-1.5 py-0.5 text-xs font-medium text-success">
             <CircleDot className="h-2.5 w-2.5" />
             {i18n.t("runnerStatus.running")}
           </span>
         )}
         {isHalted && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium text-destructive">
+          <span className="inline-flex items-center gap-1 rounded-sm bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
             <OctagonX className="h-2.5 w-2.5" />
             {i18n.t("runnerStatus.halted")}
           </span>
         )}
-        <ChevronDown className={["h-3 w-3 shrink-0 transition-transform", open ? "rotate-180" : ""].join(" ")} aria-hidden="true" />
+        <ChevronDown className={["h-4 w-4 shrink-0 transition-transform", open ? "rotate-180" : ""].join(" ")} aria-hidden="true" />
       </button>
 
       {open && (
         <div
           role="region"
           aria-label={i18n.t("runnerStatus.configuredProfiles")}
-          className="grid max-h-[min(70vh,36rem)] gap-2 overflow-y-auto rounded-xl border border-primary/20 bg-background/95 p-3 shadow-sm"
+          className="grid max-h-[min(70vh,36rem)] gap-2 overflow-y-auto rounded-lg border border-border bg-card p-3"
         >
           {visibleBrokers.map((broker) => (
             <BrokerRow key={broker.auth.broker} broker={broker} halted={isHalted || broker.halted} onRefresh={onRefresh} />

@@ -225,7 +225,7 @@ def fetch_market_data(
     metadata including ``volume_unit`` — the unit of the ``volume`` column as
     declared by the serving loader for that market (``"lots"`` = board lots of
     100 shares, ``"shares"`` = single shares, ``None`` = undeclared). Volume
-    units are source- and market-dependent (HKUDS/Vibe-Trading#1062), so
+    units are source- and market-dependent (upstream#1062), so
     consumers must read this field instead of assuming a unit.
     """
     from backtest.engines._market_hooks import _detect_market

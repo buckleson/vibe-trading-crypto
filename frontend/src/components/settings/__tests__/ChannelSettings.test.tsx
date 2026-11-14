@@ -724,14 +724,14 @@ describe("ChannelSettings config panel", () => {
       channels: {
         dingtalk: dingtalkEntry({
           sdk_available: false,
-          install_hint: "pip install 'vibe-trading-ai[dingtalk]'",
+          install_hint: "pip install 'vibe-crypto[dingtalk]'",
         }),
       },
     }));
     await renderExpanded();
 
     // The same hint also renders in the status row's recovery column.
-    expect(screen.getAllByText(/pip install 'vibe-trading-ai\[dingtalk\]'/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/pip install 'vibe-crypto\[dingtalk\]'/).length).toBeGreaterThan(0);
   });
 
   it("toggles the DingTalk setup guide with its steps and external link", async () => {
@@ -842,8 +842,8 @@ describe("ChannelSettings config panel", () => {
     expect(screen.getByText(/create an app password/)).toBeInTheDocument();
     expect(screen.getByText(/it probes the IMAP login, the mailbox folder, and the SMTP login/)).toBeInTheDocument();
     expect(screen.getByText(/Tick Consent granted, then enable the channel/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Open the Vibe-Trading docs" }))
-      .toHaveAttribute("href", "https://vibetrading.wiki/docs/");
+    expect(screen.getByRole("link", { name: "Open the Vibe Crypto docs" }))
+      .toHaveAttribute("href", "https://github.com/buckleson/vibe-trading-crypto#readme");
 
     fireEvent.click(guideToggle);
     expect(guideToggle).toHaveAttribute("aria-expanded", "false");
@@ -889,8 +889,8 @@ describe("ChannelSettings config panel", () => {
     expect(screen.getByText(/ws:\/\/host:port\/path\?client_id=\.\.\.&token=\.\.\./)).toBeInTheDocument();
     expect(screen.getByText(/hot-swaps the server/)).toBeInTheDocument();
     expect(screen.getByText(/validates the SSL certificate\/key material/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Open the Vibe-Trading docs" }))
-      .toHaveAttribute("href", "https://vibetrading.wiki/docs/");
+    expect(screen.getByRole("link", { name: "Open the Vibe Crypto docs" }))
+      .toHaveAttribute("href", "https://github.com/buckleson/vibe-trading-crypto#readme");
 
     fireEvent.click(guideToggle);
     expect(guideToggle).toHaveAttribute("aria-expanded", "false");

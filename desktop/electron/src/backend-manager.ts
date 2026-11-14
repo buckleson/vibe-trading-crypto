@@ -18,7 +18,6 @@ type BackendManagerOptions = {
   resourcesPath: string;
   allowSourceDiscovery: boolean;
   logDirectory: string;
-  apiAuthKey: string;
   messages: DesktopMessages;
   credentialEnvironment?: NodeJS.ProcessEnv;
   shutdownEvidenceTimeoutMilliseconds?: number;
@@ -108,7 +107,6 @@ export class BackendManager {
     const childEnvironment: NodeJS.ProcessEnv = {
       ...process.env,
       ...this.options.credentialEnvironment,
-      API_AUTH_KEY: this.options.apiAuthKey,
       VIBE_TRADING_DESKTOP_SECURE_CREDENTIALS: "1",
       PYTHONUTF8: "1",
       PYTHONUNBUFFERED: "1",
@@ -121,6 +119,8 @@ export class BackendManager {
       ).toString("base64url"),
       VIBE_TRADING_DESKTOP_BACKEND_CWD: path.dirname(executable),
     };
+    // Vibe Crypto has no app login (ADR 0002); an inherited key must never matter.
+    delete childEnvironment.API_AUTH_KEY;
     if (existsSync(gtkBin)) {
       childEnvironment.PATH = `${gtkBin}${path.delimiter}${process.env.PATH ?? ""}`;
       childEnvironment.WEASYPRINT_DLL_DIRECTORIES = gtkBin;
@@ -172,7 +172,6 @@ export class BackendManager {
       try {
         await fetch(new URL("system/shutdown", target.baseUrl), {
           method: "POST",
-          headers: { Authorization: `Bearer ${this.options.apiAuthKey}` },
           signal: AbortSignal.timeout(2_000),
         });
       } catch (error) {
@@ -271,7 +270,6 @@ export class BackendManager {
       }
       try {
         const response = await fetch(new URL("health", this.baseUrl), {
-          headers: { Authorization: `Bearer ${this.options.apiAuthKey}` },
           signal: AbortSignal.timeout(2_000),
         });
         if (response.ok) return;
@@ -305,7 +303,7 @@ export class BackendManager {
 
 }
 
-const sourceProjectName = "vibe-trading-ai";
+const sourceProjectName = "vibe-crypto";
 
 export function resolveBackend(options: BackendResolutionOptions): ResolvedBackend | undefined {
   const configured = options.executableOverride;

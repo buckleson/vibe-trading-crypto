@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import pytest
 
-from src.api.security import LOOPBACK_SUBJECT, SHARED_KEY_SUBJECT
+from src.api.security import LOOPBACK_SUBJECT
+
+SHARED_KEY_SUBJECT = "shared-key-holder"  # model-level fixture value only
 from src.session.models import (
     ATTRIBUTABLE_AUTH_METHODS,
     AuthMethod,
@@ -163,56 +165,32 @@ def test_unknown_owner_and_unattributable_owner_are_different_states():
 # --- the auth surface returns one ---
 
 
-def test_validate_api_auth_returns_a_shared_key_principal(monkeypatch):
+def test_local_guard_returns_a_loopback_principal(monkeypatch):
     from src.api import security
 
-    monkeypatch.setattr(security, "_configured_api_key", lambda: "secret-key")
-
-    class _Cred:
-        credentials = "secret-key"
-
-    class _Req:
-        method = "GET"
-        headers: dict[str, str] = {}
-
-        class client:  # noqa: N801
-            host = "127.0.0.1"
-
-    principal = security._validate_api_auth(request=_Req(), cred=_Cred())
-    assert principal.auth_method is AuthMethod.SHARED_KEY
-    assert principal.subject == SHARED_KEY_SUBJECT
-    assert principal.attributable is False
-
-
-def test_validate_api_auth_returns_a_loopback_principal_when_no_key(monkeypatch):
-    from src.api import security
-
-    monkeypatch.setattr(security, "_configured_api_key", lambda: "")
     monkeypatch.setattr(security, "_is_local_client", lambda request: True)
 
     class _Req:
         method = "GET"
         headers: dict[str, str] = {}
 
-    principal = security._validate_api_auth(request=_Req(), cred=None)
+    principal = security._require_local_request(_Req())
     assert principal.auth_method is AuthMethod.LOOPBACK_TRUST
+    assert principal.subject == LOOPBACK_SUBJECT
     assert principal.attributable is False
 
 
-def test_a_bad_credential_still_raises_and_returns_no_principal(monkeypatch):
+def test_local_guard_refuses_a_non_local_peer(monkeypatch):
     from fastapi import HTTPException
 
     from src.api import security
 
-    monkeypatch.setattr(security, "_configured_api_key", lambda: "secret-key")
-
-    class _Cred:
-        credentials = "wrong"
+    monkeypatch.setattr(security, "_is_local_client", lambda request: False)
 
     class _Req:
         method = "GET"
         headers: dict[str, str] = {}
 
     with pytest.raises(HTTPException) as excinfo:
-        security._validate_api_auth(request=_Req(), cred=_Cred())
-    assert excinfo.value.status_code == 401
+        security._require_local_request(_Req())
+    assert excinfo.value.status_code == 403

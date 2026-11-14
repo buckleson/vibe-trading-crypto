@@ -30,12 +30,6 @@ def _client() -> TestClient:
     return TestClient(api_server.app, client=("127.0.0.1", 50000))
 
 
-@pytest.fixture(autouse=True)
-def _dev_mode_auth(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("API_AUTH_KEY", raising=False)
-    monkeypatch.setattr(api_server, "_API_KEY", "")
-
-
 def _long_call_body(**over: Any) -> dict[str, Any]:
     body: dict[str, Any] = {
         "legs": [{"option_type": "call", "strike": 100.0, "qty": 1}],

@@ -51,7 +51,7 @@ def test_oauth_config_round_trip_snake_and_camel() -> None:
         {
             "type": "oauth",
             "scopes": ["trading.read"],
-            "client_name": "Vibe-Trading",
+            "client_name": "Vibe Crypto",
             "cache_dir": "~/.vibe-trading/live/robinhood/oauth",
             "callback_port": 8765,
             "client_id": "client-id",
@@ -63,7 +63,7 @@ def test_oauth_config_round_trip_snake_and_camel() -> None:
         {
             "type": "oauth",
             "scopes": ["trading.read"],
-            "clientName": "Vibe-Trading",
+            "clientName": "Vibe Crypto",
             "cacheDir": "~/.vibe-trading/live/robinhood/oauth",
             "callbackPort": 8765,
             "clientId": "client-id",
@@ -72,7 +72,7 @@ def test_oauth_config_round_trip_snake_and_camel() -> None:
         }
     )
     assert snake == camel
-    assert snake.client_name == "Vibe-Trading"
+    assert snake.client_name == "Vibe Crypto"
     assert snake.callback_port == 8765
     assert snake.client_id == "client-id"
     assert snake.client_secret == "client-secret"
@@ -244,7 +244,7 @@ def test_build_client_yields_oauth_streamable_transport() -> None:
             "auth": {
                 "type": "oauth",
                 "scopes": ["trading.read"],
-                "client_name": "Vibe-Trading",
+                "client_name": "Vibe Crypto",
                 "callback_port": 8765,
                 "client_id": "client-id",
                 "client_secret": "client-secret",
@@ -258,7 +258,7 @@ def test_build_client_yields_oauth_streamable_transport() -> None:
     assert isinstance(transport.auth, OAuth)
     # Scopes / name / port flow through from config to the OAuth provider.
     assert transport.auth._scopes == ["trading.read"]
-    assert transport.auth._client_name == "Vibe-Trading"
+    assert transport.auth._client_name == "Vibe Crypto"
     assert transport.auth._callback_port == 8765
     assert transport.auth._client_id == "client-id"
     assert transport.auth._client_secret == "client-secret"

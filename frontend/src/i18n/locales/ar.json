@@ -81,7 +81,7 @@
     "collapse": "طي",
     "expand": "توسيع",
     "skipToMain": "تخطَّ إلى المحتوى الرئيسي",
-    "sidebar": "الشريط الجانبي لـ Vibe-Trading",
+    "sidebar": "الشريط الجانبي لـ Vibe Crypto",
     "mainNavigation": "التنقل الرئيسي",
     "about": "حول",
     "sessionsLoadFailed": "تعذر تحميل المحادثات.",
@@ -565,7 +565,7 @@
     "clearApiKey": "مسح مفتاح API المحفوظ",
     "channels": {
       "title": "قنوات IM",
-      "description": "صل محولات الدردشة بنفس وقت تشغيل جلسات Vibe-Trading المستخدم في Web UI و CLI.",
+      "description": "صل محولات الدردشة بنفس وقت تشغيل جلسات Vibe Crypto المستخدم في Web UI و CLI.",
       "runtime": "وقت التشغيل",
       "running": "قيد التشغيل",
       "stopped": "متوقف",
@@ -1078,7 +1078,7 @@
           "step3": "املأ بيانات اعتماد IMAP وSMTP أعلاه، واضبط عنوان المرسل، وأضف عنوانك إلى «المرسلون المسموحون».",
           "step4": "انقر «اختبار الاتصال»؛ فهو يتحقق من تسجيل الدخول إلى IMAP ومن مجلد البريد ومن تسجيل الدخول إلى SMTP.",
           "step5": "حدّد «الموافقة ممنوحة» ثم فعّل القناة؛ عندها تصل الردود التلقائية إلى المرسلين الذين يجتازون فحصي DKIM/SPF.",
-          "docsLabel": "افتح وثائق Vibe-Trading"
+          "docsLabel": "افتح وثائق Vibe Crypto"
         },
         "websocket": {
           "title": "دليل إعداد WebSocket",
@@ -1088,12 +1088,12 @@
           "step3": "يتصل العملاء عبر ws://host:port/path?client_id=...&token=...",
           "step4": "الحفظ أثناء تشغيل القناة يستبدل الخادم فوريًا: ينقطع العملاء المتصلون (بما في ذلك محادثة واجهة الويب هذه) لحظيًا ثم يعيدون الاتصال تلقائيًا.",
           "step5": "انقر «اختبار الاتصال»؛ فهو يتحقق محليًا من مادة شهادة/مفتاح SSL ومن توفر العنوان.",
-          "docsLabel": "افتح وثائق Vibe-Trading"
+          "docsLabel": "افتح وثائق Vibe Crypto"
         },
         "feishu": {
           "title": "إعداد بوت Feishu / Lark",
           "intro": "يستخدم بوت Feishu الاتصال الدائم عبر WebSocket، لذا لا حاجة إلى عنوان IP عام أو رابط ويب هوك.",
-          "step1": "أنشئ تطبيقًا مخصصًا في منصة Feishu للمطورين (open.feishu.cn)، أو أنشئه بالمسح الضوئي من الطرفية عبر الأمر vibe-trading channels login feishu حيث يُحفظ معرّف التطبيق والسر تلقائيًا.",
+          "step1": "أنشئ تطبيقًا مخصصًا في منصة Feishu للمطورين (open.feishu.cn)، أو أنشئه بالمسح الضوئي من الطرفية عبر الأمر vibe-crypto channels login feishu حيث يُحفظ معرّف التطبيق والسر تلقائيًا.",
           "step2": "أضف ميزة البوت إلى التطبيق.",
           "step3": "في الاشتراك في الأحداث، اشترك في «استقبال الرسائل im.message.receive_v1» واختر وضع الاتصال الدائم.",
           "step4": "انسخ معرّف التطبيق (App ID) وسر التطبيق (App Secret) من صفحة «بيانات الاعتماد والمعلومات الأساسية» والصقهما في الحقلين أعلاه.",
@@ -1933,7 +1933,7 @@
     "unknown": "غير معروف",
     "justNow": "الآن",
     "loadingInstructions": "جارٍ تحميل تعليمات تفويض الموصل...",
-    "fallbackInstruction": "شغّل `vibe-trading connector list` لاختيار ملف تعريف الوسيط، ثم شغّل `vibe-trading connector authorize <الملف>` من جلسة سطح المكتب التي ستحتفظ باتصال الوسيط.",
+    "fallbackInstruction": "شغّل `vibe-crypto connector list` لاختيار ملف تعريف الوسيط، ثم شغّل `vibe-crypto connector authorize <الملف>` من جلسة سطح المكتب التي ستحتفظ باتصال الوسيط.",
     "secondsAgo": "قبل {{n}} ث",
     "minutesAgo": "قبل {{n}} د",
     "hoursAgo": "قبل {{n}} س",

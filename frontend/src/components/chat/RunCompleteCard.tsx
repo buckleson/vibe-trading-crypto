@@ -3,6 +3,7 @@ import { lazy, memo, Suspense, useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { LayoutDashboard, Code2, FileText, Loader2 } from "lucide-react";
 import { api } from "@/lib/api";
+import { Button, Card, CardBody } from "@/components/ui";
 import { AgentAvatar } from "./AgentAvatar";
 import { MetricsCard } from "./MetricsCard";
 import { PineScriptViewer } from "./PineScriptViewer";
@@ -15,7 +16,7 @@ const MiniEquityChart = lazy(() =>
 );
 
 function MiniEquityChartSkeleton() {
-  return <div className="h-20 rounded-lg bg-muted/40 animate-pulse" />;
+  return <div className="h-20 rounded-lg bg-muted" />;
 }
 
 interface Props {
@@ -88,7 +89,8 @@ export const RunCompleteCard = memo(function RunCompleteCard({ msg }: Props) {
   return (
     <div className="flex gap-3">
       <AgentAvatar />
-      <div className="flex-1 min-w-0 space-y-2">
+      <Card className="flex-1 min-w-0">
+        <CardBody className="space-y-3">
         {msg.metrics && Object.keys(msg.metrics).length > 0 && (
           <MetricsCard metrics={msg.metrics} compact />
         )}
@@ -99,42 +101,39 @@ export const RunCompleteCard = memo(function RunCompleteCard({ msg }: Props) {
             <MiniEquityChart data={curve} height={80} />
           </Suspense>
         ) : null}
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           {msg.runId && (
             <Link
               to={`/runs/${encodeURIComponent(msg.runId)}?view=dashboard`}
-              className="text-sm text-primary hover:underline inline-flex items-center gap-1.5 font-medium"
+              className="inline-flex h-8 items-center justify-center gap-2 rounded-md bg-primary px-3 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
-              <LayoutDashboard className="h-3.5 w-3.5" />
+              <LayoutDashboard className="h-4 w-4" />
               {t("runComplete.fullReport")}
             </Link>
           )}
           {pineExists && (
-            <button
-              onClick={handlePineClick}
-              disabled={pineLoading}
-              className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1.5 font-medium disabled:opacity-50"
-            >
-              {pineLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Code2 className="h-3.5 w-3.5" />}
+            <Button size="sm" onClick={handlePineClick} disabled={pineLoading}>
+              {pineLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Code2 className="h-4 w-4" />}
               Pine Script
-            </button>
+            </Button>
           )}
           {msg.shadowId && (
             <a
               href={`/shadow-reports/${encodeURIComponent(msg.shadowId)}?format=html`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-teal-600 dark:text-teal-400 hover:underline inline-flex items-center gap-1.5 font-medium"
+              className="inline-flex h-8 items-center justify-center gap-2 rounded-md border border-border bg-card px-3 text-[13px] font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
-              <FileText className="h-3.5 w-3.5" />
+              <FileText className="h-4 w-4" />
               Shadow Report
             </a>
           )}
         </div>
+        </CardBody>
         {showPine && pineCode && (
           <PineScriptViewer code={pineCode} onClose={() => setShowPine(false)} />
         )}
-      </div>
+      </Card>
     </div>
   );
 });

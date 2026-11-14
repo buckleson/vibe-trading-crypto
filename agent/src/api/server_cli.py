@@ -4,7 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 from fastapi import FastAPI
 from src.api.security import (
-    _is_loopback_bind_host, _configured_api_key, install_access_log_redaction_filter,
+    _is_loopback_bind_host, install_access_log_redaction_filter,
 )
 
 
@@ -15,7 +15,7 @@ def serve(app: FastAPI, argv: list[str] | None, *, repo_root: Path) -> int:
     import uvicorn
     from src.api.spa import SPAStaticFiles
 
-    parser = argparse.ArgumentParser(description="Vibe-Trading Server")
+    parser = argparse.ArgumentParser(description="Vibe Crypto Server")
     parser.add_argument("--port", type=int, default=8000, help="Listen port (default 8000)")
     parser.add_argument("--host", default="127.0.0.1", help="Bind address")
     parser.add_argument("--dev", action="store_true", help="Dev mode: spawn Vite on :5173")
@@ -24,11 +24,10 @@ def serve(app: FastAPI, argv: list[str] | None, *, repo_root: Path) -> int:
     except SystemExit as exc:
         return int(exc.code) if isinstance(exc.code, int) else 2
 
-    if not _is_loopback_bind_host(args.host) and not _configured_api_key():
+    if not _is_loopback_bind_host(args.host):
         print(
-            f"[warn] Binding to {args.host} without API_AUTH_KEY set. "
-            f"Remote requests are rejected by the loopback peer-IP check, "
-            f"but consider using --host 127.0.0.1 for local-only access."
+            f"[warn] Binding to {args.host}: Vibe Crypto rejects requests that "
+            f"do not come from this computer. Use --host 127.0.0.1."
         )
 
     frontend_dist = repo_root / "frontend" / "dist"
@@ -55,7 +54,7 @@ def serve(app: FastAPI, argv: list[str] | None, *, repo_root: Path) -> int:
         print("[warn] Run: cd frontend && npm run build")
 
     print("=" * 50)
-    print("  Vibe-Trading Server")
+    print("  Vibe Crypto Server")
     print(f"  http://127.0.0.1:{args.port}")
     print("=" * 50)
 

@@ -145,7 +145,7 @@ final test period.
   exposure before/after. Then use pca_factors on my factor panels and report
   retained variance. Do not invent missing inputs or infer profitability."
 - **CLI prompt file**: put that request and the indexed JSON panels in
-  `request.txt`, then run `vibe-trading run --prompt-file request.txt`.
+  `request.txt`, then run `vibe-crypto run --prompt-file request.txt`.
 - **REST chat**: send the same prompt as `content` to the authenticated
   `POST /sessions/{session_id}/messages` route of an existing session. This
   starts the ordinary agent run; it is not a synchronous transform endpoint.

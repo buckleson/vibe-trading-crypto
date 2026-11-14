@@ -2,15 +2,15 @@
 
 ## 🔌 MCP Plugin
 
-Vibe-Trading exposes 83 MCP tools for any MCP-compatible client. Runs as a stdio subprocess — no server setup needed. Core research tools work with zero API keys for HK/US/crypto; trading connector tools use the selected connector profile, and `run_swarm` needs an LLM key.
+Vibe Crypto exposes 83 MCP tools for any MCP-compatible client. Runs as a stdio subprocess — no server setup needed. Core research tools work with zero API keys for HK/US/crypto; trading connector tools use the selected connector profile, and `run_swarm` needs an LLM key.
 
 **Environment variables:** the client spawns the server itself, so a shell `export` never reaches it — set them in the client's `env` block. Generated backtest code is sandboxed to the allowed run roots, so writing results into a workspace of your own needs `VIBE_TRADING_ALLOWED_RUN_ROOTS`:
 
 ```json
 {
   "mcpServers": {
-    "vibe-trading": {
-      "command": "vibe-trading-mcp",
+    "vibe-crypto": {
+      "command": "vibe-crypto-mcp",
       "env": { "VIBE_TRADING_ALLOWED_RUN_ROOTS": "C:\\Users\\me\\research" }
     }
   }
@@ -25,8 +25,8 @@ Add to `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "vibe-trading": {
-      "command": "vibe-trading-mcp"
+    "vibe-crypto": {
+      "command": "vibe-crypto-mcp"
     }
   }
 }
@@ -41,8 +41,8 @@ Add to `~/.openclaw/config.yaml`:
 
 ```yaml
 skills:
-  - name: vibe-trading
-    command: vibe-trading-mcp
+  - name: vibe-crypto
+    command: vibe-crypto-mcp
 ```
 
 For a first research-only smoke test, confirm tool discovery and run a market
@@ -57,9 +57,9 @@ profile. `run_swarm` requires an LLM key.
 <summary><b>Cursor / Windsurf / other MCP clients</b></summary>
 
 ```bash
-vibe-trading-mcp                   # stdio (default)
-vibe-trading-mcp --transport http  # Streamable HTTP (current MCP spec default) at http://127.0.0.1:8900/mcp
-vibe-trading-mcp --transport sse   # legacy SSE (deprecated) for older clients
+vibe-crypto-mcp                   # stdio (default)
+vibe-crypto-mcp --transport http  # Streamable HTTP (current MCP spec default) at http://127.0.0.1:8900/mcp
+vibe-crypto-mcp --transport sse   # legacy SSE (deprecated) for older clients
 ```
 
 For HTTP clients (QwenPaw, and any client that negotiates by POSTing an
@@ -109,7 +109,7 @@ only the ddgs engine list.
 <summary><b>Install from ClawHub (one command)</b></summary>
 
 ```bash
-npx clawhub@latest install vibe-trading --force
+npx clawhub@latest install vibe-crypto --force
 ```
 
 > `--force` is required because the skill references external APIs, which triggers VirusTotal's automated scan. The code is fully open-source and safe to inspect.
@@ -138,22 +138,22 @@ To use with OpenSpace, add both MCP servers to your agent config:
         "OPENSPACE_WORKSPACE": "/path/to/OpenSpace"
       }
     },
-    "vibe-trading": {
-      "command": "vibe-trading-mcp"
+    "vibe-crypto": {
+      "command": "vibe-crypto-mcp"
     }
   }
 }
 ```
 
-OpenSpace will auto-discover all 89 skills, enabling auto-fix, auto-improve, and community sharing. Search for Vibe-Trading skills via `search_skills("finance backtest")` in any OpenSpace-connected agent.
+OpenSpace will auto-discover all 89 skills, enabling auto-fix, auto-improve, and community sharing. Search for Vibe Crypto skills via `search_skills("finance backtest")` in any OpenSpace-connected agent.
 
 </details>
 
 ## 🔌 Loading Tools from External MCP Servers (MCP Client Mode)
 
 > **This is the opposite direction from the MCP Plugin above.**
-> The MCP Plugin lets *other* agents call Vibe-Trading tools.
-> This section lets the *built-in* Vibe-Trading agent call tools from *your* external MCP servers.
+> The MCP Plugin lets *other* agents call Vibe Crypto tools.
+> This section lets the *built-in* Vibe Crypto agent call tools from *your* external MCP servers.
 
 ### Quick start
 
@@ -173,12 +173,12 @@ Create `~/.vibe-trading/agent.json`:
 Run any CLI command — tools from ordinary external servers are automatically injected into the agent's registry after local tools:
 
 ```bash
-vibe-trading run "use my-server to do X"
+vibe-crypto run "use my-server to do X"
 ```
 
 ### Official IBKR MCP read-only probe
 
-Vibe-Trading can connect directly to Interactive Brokers' official remote MCP
+Vibe Crypto can connect directly to Interactive Brokers' official remote MCP
 endpoint in read-only mode. Add this to `~/.vibe-trading/agent.json`:
 
 ```json
@@ -190,7 +190,7 @@ endpoint in read-only mode. Add this to `~/.vibe-trading/agent.json`:
       "auth": {
         "type": "oauth",
         "scopes": ["mcp.read"],
-        "clientName": "Vibe-Trading",
+        "clientName": "Vibe Crypto",
         "cacheDir": "~/.vibe-trading/live/ibkr/oauth"
       },
       "enabledTools": ["*"]
@@ -202,13 +202,13 @@ endpoint in read-only mode. Add this to `~/.vibe-trading/agent.json`:
 Then start the browser OAuth flow:
 
 ```bash
-vibe-trading connector authorize ibkr-live-official-mcp-readonly
+vibe-crypto connector authorize ibkr-live-official-mcp-readonly
 ```
 
 The wildcard is accepted only for IBKR's `mcp.read` probe. Authorizing this
 profile confirms access to IBKR's official read scope; generic `trading_account`
 and `trading_positions` calls stay disabled until IBKR publishes stable read
-tool names that Vibe-Trading can map safely. A config that adds `mcp.write` must
+tool names that Vibe Crypto can map safely. A config that adds `mcp.write` must
 pin an explicit tool allowlist and still passes through the live order guard.
 
 If IBKR issues a pre-registered OAuth client, add `clientId` and `clientSecret`

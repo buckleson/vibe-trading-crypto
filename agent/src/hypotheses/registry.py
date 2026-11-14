@@ -91,7 +91,7 @@ class Hypothesis:
         universe: Target universe, market, or asset set.
         signal_definition: Signal logic in plain text.
         data_sources: Data sources expected or used.
-        skills: Relevant Vibe-Trading skills.
+        skills: Relevant Vibe Crypto skills.
         run_cards: Linked backtest/run-card artifacts.
         invalidation_notes: Notes describing rejection or invalidation logic.
         created_at: UTC creation timestamp.
@@ -176,7 +176,7 @@ class HypothesisRegistry:
             universe: Target market or asset universe.
             signal_definition: Signal logic.
             data_sources: Source names.
-            skills: Related Vibe-Trading skills.
+            skills: Related Vibe Crypto skills.
             invalidation_notes: Initial invalidation notes.
 
         Returns:

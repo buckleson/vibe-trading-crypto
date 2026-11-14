@@ -46,14 +46,14 @@ function liveActionStyle(kind: string): { icon: typeof Activity; tone: string } 
   switch (kind) {
     case "order_rejected":
     case "breach":
-      return { icon: Ban, tone: "border-amber-500/40 bg-amber-500/5 text-amber-600 dark:text-amber-400" };
+      return { icon: Ban, tone: "border-warning/40 bg-warning/5 text-warning" };
     case "halt_tripped":
       return { icon: OctagonX, tone: "border-destructive/40 bg-destructive/5 text-destructive" };
     case "mandate_committed":
     case "halt_cleared":
-      return { icon: CheckCircle2, tone: "border-emerald-500/40 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400" };
+      return { icon: CheckCircle2, tone: "border-success/40 bg-success/5 text-success" };
     default:
-      return { icon: Activity, tone: "border-sky-500/40 bg-sky-500/5 text-sky-600 dark:text-sky-400" };
+      return { icon: Activity, tone: "border-info/40 bg-info/5 text-info" };
   }
 }
 
@@ -69,17 +69,17 @@ export const LiveActionChip = memo(function LiveActionChip({ action }: { action:
       <AgentAvatar />
       <div className="flex-1 min-w-0">
         <div className={["inline-flex max-w-full flex-wrap items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs", tone].join(" ")}>
-          <Icon className="h-3 w-3 shrink-0" />
-          <span className="shrink-0 font-medium uppercase tracking-wide text-[10px]">{t("agent.runtimeBadge")}</span>
+          <Icon className="h-4 w-4 shrink-0" />
+          <span className="shrink-0 font-medium text-xs">{t("agent.runtimeBadge")}</span>
           <span className="shrink-0 font-medium">{liveActionLabel(action)}</span>
           {action.intent_normalized && (
             <span className="truncate text-foreground/80">· {action.intent_normalized}</span>
           )}
           {action.outcome && (
-            <span className="shrink-0 font-mono text-[10px] text-muted-foreground">· {action.outcome}</span>
+            <span className="shrink-0 font-mono text-xs text-muted-foreground">· {action.outcome}</span>
           )}
           {action.remote_tool && (
-            <span className="shrink-0 font-mono text-[10px] text-muted-foreground">· {action.remote_tool}</span>
+            <span className="shrink-0 font-mono text-xs text-muted-foreground">· {action.remote_tool}</span>
           )}
           {action.error && <span className="truncate text-destructive">· {action.error}</span>}
         </div>
@@ -283,7 +283,7 @@ export function LiveRuntimeControl() {
       {runtime.liveIsHalted ? (
         <>
           <span className="inline-flex items-center gap-1.5 rounded-lg bg-destructive/10 px-2.5 py-1 text-xs font-medium text-destructive">
-            <OctagonX className="h-3 w-3" />
+            <OctagonX className="h-4 w-4" />
             {t("agent.connectorHalted")}
           </span>
           <button
@@ -294,8 +294,8 @@ export function LiveRuntimeControl() {
             title={t("agent.resumeConnectorTitle")}
           >
             {runtime.resuming
-              ? <Loader2 className="h-3 w-3 animate-spin" />
-              : <RotateCcw className="h-3 w-3" />}
+              ? <Loader2 className="h-4 w-4 animate-spin" />
+              : <RotateCcw className="h-4 w-4" />}
             {t("agent.resumeConnector")}
           </button>
         </>
@@ -308,8 +308,8 @@ export function LiveRuntimeControl() {
           title={t("agent.haltConnectorTitle")}
         >
           {runtime.halting
-            ? <Loader2 className="h-3 w-3 animate-spin" />
-            : <OctagonX className="h-3 w-3" />}
+            ? <Loader2 className="h-4 w-4 animate-spin" />
+            : <OctagonX className="h-4 w-4" />}
           {t("agent.haltConnector")}
         </button>
       )}

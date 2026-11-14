@@ -179,7 +179,7 @@ nothing about out-of-sample behaviour.
 - **Agent / Web / REST / MCP**: `quantlib_call` with `module="combination"`,
   `function="combine_factors"`.
 - **CLI prompt file**: request the same call in `request.txt` and run
-  `vibe-trading run --prompt-file request.txt`.
+  `vibe-crypto run --prompt-file request.txt`.
 
 JSON envelope example:
 

@@ -1,6 +1,6 @@
 # Pixel Office
 
-The `/pixel-office` page, `vibe-trading office` CLI and `pixel_office` agent tool
+The `/pixel-office` page, `vibe-crypto office` CLI and `pixel_office` agent tool
 share a manual research-task board. Assigning a task does not launch an agent or
 place an order. Organizational ranks grant no trading permissions. Completion
 requires an explicit result; recorded results are not an execution audit.
@@ -10,11 +10,11 @@ State is stored transactionally in `pixel-office.sqlite3` under the runtime root
 real work. Separate CLI processes and the Web API see the same state.
 
 ```bash
-vibe-trading office list
-vibe-trading office task --id morning-brief --title "Morning research brief" --description "Summarize today's sources and risks"
-vibe-trading office assign --task-id morning-brief --agent-id research-analyst
-vibe-trading office complete --task-id morning-brief --result "Reviewed the brief; findings are in the research session."
-vibe-trading office rank --agent-id research-analyst --rank Senior
+vibe-crypto office list
+vibe-crypto office task --id morning-brief --title "Morning research brief" --description "Summarize today's sources and risks"
+vibe-crypto office assign --task-id morning-brief --agent-id research-analyst
+vibe-crypto office complete --task-id morning-brief --result "Reviewed the brief; findings are in the research session."
+vibe-crypto office rank --agent-id research-analyst --rank Senior
 ```
 
 For an isolated board, pass `--storage /absolute/path/office.sqlite3` before or

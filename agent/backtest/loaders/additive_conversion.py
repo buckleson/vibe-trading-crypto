@@ -3,7 +3,7 @@
 A-share forward-adjusted prices from Tencent, Eastmoney and AKShare are
 dividend-ADDITIVE: between corporate actions ``qfq - raw`` is a constant
 offset, and each down-step at an ex-date is the cash dividend per share
-(HKUDS/Vibe-Trading#1541). A return computed on those levels is not a total
+(upstream#1541). A return computed on those levels is not a total
 return (the owner measured 600519.SH 2019 buy-and-hold at +184.07% additive
 against +100.43% multiplicative), and old levels can even go negative.
 

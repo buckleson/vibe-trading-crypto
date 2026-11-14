@@ -1,5 +1,11 @@
 # Changelog
 
+## Vibe Crypto (unreleased)
+
+- Forked from HKUDS/Vibe-Trading at 283e300 and rebranded to Vibe Crypto (see docs/vibe-crypto/ADR/0001-rebrand.md).
+
+## Upstream Vibe-Trading history
+
 All notable changes to Vibe-Trading are documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 

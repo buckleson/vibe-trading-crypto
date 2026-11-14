@@ -16,7 +16,7 @@ def install_metadata(tmp_path, monkeypatch):
     def install(direct_url: dict) -> None:
         metadata = tmp_path / "vibe_trading_ai-0.1.dist-info"
         metadata.mkdir(exist_ok=True)
-        (metadata / "METADATA").write_text("Name: vibe-trading-ai\nVersion: 0.1\n")
+        (metadata / "METADATA").write_text("Name: vibe-crypto\nVersion: 0.1\n")
         (metadata / "direct_url.json").write_text(json.dumps(direct_url))
         monkeypatch.setattr(update, "distribution", lambda _: Distribution.at(metadata))
 
