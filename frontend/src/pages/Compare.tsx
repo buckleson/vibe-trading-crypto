@@ -20,7 +20,7 @@ interface MetricDef {
 
 function fmt(v: unknown, type: "pct" | "num" | "int" | "days" = "num"): string {
   const n = Number(v);
-  if (!Number.isFinite(n)) return "\u2014";
+  if (!Number.isFinite(n)) return "-";
   if (type === "pct") return (n * 100).toFixed(2) + "%";
   if (type === "int") return n.toFixed(0);
   if (type === "days") return n.toFixed(1);
@@ -51,7 +51,7 @@ function diffClass(a: unknown, b: unknown, higherIsBetter: boolean): DiffPresent
 
 function diffStr(a: unknown, b: unknown, type: "pct" | "num" | "int" | "days"): string {
   const na = Number(a), nb = Number(b);
-  if (!Number.isFinite(na) || !Number.isFinite(nb)) return "\u2014";
+  if (!Number.isFinite(na) || !Number.isFinite(nb)) return "-";
   const d = nb - na;
   return (d > 0 ? "+" : "") + fmt(d, type);
 }

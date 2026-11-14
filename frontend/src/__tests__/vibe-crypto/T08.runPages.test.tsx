@@ -226,8 +226,11 @@ describe("T08 RunDetail: header, metrics and tabs", () => {
     mockRun({ status: "success", run_id: "m1", metrics: { total_return: 0.25, annual_return: -0.1 } } as Partial<RunData>);
     renderRun("/runs/m1");
     await screen.findByRole("link", { name: "Run on paper" });
-    expect(screen.getByText("25.00%").closest("p")).toHaveClass("text-success");
-    expect(screen.getByText("-10.00%").closest("p")).toHaveClass("text-danger");
+    // MetricsCard prefixes a glyph and an sr-only verdict, so match on the <p> text.
+    const valueP = (txt: string) =>
+      screen.getAllByText((_c, el) => el?.tagName === "P" && (el.textContent ?? "").includes(txt))[0];
+    expect(valueP("+25.00%")).toHaveClass("text-success", "tabular-nums");
+    expect(valueP("-10.00%")).toHaveClass("text-danger", "tabular-nums");
   });
 
   it("tabs live in a labelled tablist and hide sections without data", async () => {
@@ -372,7 +375,7 @@ describe("T08 Compare page", () => {
 });
 
 describe("T08 Reports page", () => {
-  beforeEach(() => apiMock.listRuns.mockReset());
+  beforeEach(() => { apiMock.listRuns.mockReset(); });
 
   const REPORTS = [
     { run_id: "up", status: "success", created_at: "2026-06-04T00:00:00Z", prompt: "Up", codes: ["BTC-USDT"], total_return: 0.12, sharpe: 1.8, start_date: "2024-01-01", end_date: "2024-12-31" },
@@ -398,9 +401,9 @@ describe("T08 Reports page", () => {
   it("status Badges, unknown date fallback and no-prompt copy", async () => {
     apiMock.listRuns.mockResolvedValue(REPORTS);
     render(<Reports />, { wrapper: MemoryRouter });
-    await screen.findByRole("table");
-    expect(screen.getAllByText("success").length).toBeGreaterThan(0);
-    expect(screen.getByText("failed")).toBeInTheDocument();
+    const table = await screen.findByRole("table");
+    expect(within(table).getAllByText("success").length).toBe(2);
+    expect(within(table).getByText("failed")).toBeInTheDocument();
     expect(screen.getByText("not-a-date")).toBeInTheDocument();
     expect(screen.getByText("No prompt recorded.")).toBeInTheDocument();
     expect(screen.getByText(/2024-01-01\s+to\s+2024-12-31/)).toBeInTheDocument();
@@ -445,7 +448,7 @@ describe("T08 Reports page", () => {
   });
 
   it("load error shows the warning card, not the empty state", async () => {
-    apiMock.listRuns.mockRejectedValue(new Error("boom"));
+    apiMock.listRuns.mockImplementation(() => Promise.reject(new Error("boom")));
     render(<Reports />, { wrapper: MemoryRouter });
     expect(await screen.findByText("Report library unavailable")).toBeInTheDocument();
     expect(screen.getByText("boom")).toBeInTheDocument();

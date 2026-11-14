@@ -185,7 +185,7 @@ export function PaperRunDetail({ runId, onRun, onDeleted }: {
 
       <Card>
         <CardBody className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
-          <Stat label={t("paper.equity", { defaultValue: "Equity" })} value={s ? formatNumber(s.equity) : "n/a"} />
+          <Stat label={t("paper.equity", { defaultValue: "Equity" })} value={<span className="text-[32px] font-semibold tabular-nums">{s ? formatNumber(s.equity) : "n/a"}</span>} />
           <Stat label={t("paper.pnl", { defaultValue: "P&L" })} value={s ? formatSigned(s.pnl) : "n/a"} tone={tone(s?.pnl)} />
           <Stat label={t("paper.return", { defaultValue: "Return" })} value={s ? formatPercent(s.total_return, true) : "n/a"} tone={tone(s?.total_return)} />
           <Stat label={t("paper.maxDrawdown", { defaultValue: "Max drawdown" })} value={s ? formatPercent(s.max_drawdown) : "n/a"} />
